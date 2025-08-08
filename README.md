@@ -15,3 +15,26 @@ Expected deliveries:
  test directory: Minimum 5 test cases that can test all the features you are implementing.
  makefile: File that contains recipe for compiling your lex/flex file into the executable
  run.sh: script file, which will take your executable as input and run over all the test cases in the test directory.
+
+ parts to be implemented:-
+
+ basic:-
+ All arithmetic and logical operator
+if-else
+for loop
+while loop
+do while loop
+switch cases
+array (integer and char)
+pointers
+structure
+printf and scanf
+function call with arguments
+goto, break and continue
+static keywords
+
+advanced:-
+
+ funtion call with variable arguments 
+ typedef 
+ enum union
