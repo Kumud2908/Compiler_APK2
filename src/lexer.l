@@ -12,6 +12,10 @@ void print_token(const char *token, const char *lexeme) {
 %%
 [ \t]+                  ; // Ignore spaces/tabs
 \n                      { line_num++; }
+"//".*                  { print_token("COMMENT", yytext); }
+
+
+
 
 "if"                    { print_token("IF_KEYWORD", yytext); }
 "else"                  { print_token("ELSE_KEYWORD", yytext); }

@@ -38,3 +38,7 @@ advanced:-
  funtion call with variable arguments 
  typedef 
  enum union
+
+
+ ** we are not adding multi line comments
+ 
