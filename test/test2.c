@@ -1,18 +1,29 @@
-// Test Case 2: typedef, enum, union, struct declarations and usage.
-typedef int myint;
+// Test Case 2: Arrays (int/char), pointers, structure, printf/scanf, function call with arguments
 
-enum Color { RED, GREEN, BLUE };
+#include <stdio.h>
 
-union Data {
-    int i;
-    char c;
+struct Student {
+    char name[20];
+    int age;
 };
 
-struct Point { myint x; myint y; };
+void displayStudent(struct Student s) {
+    printf("Name: %s, Age: %d\n", s.name, s.age);
+}
 
-int foo() {
-    struct Point p;
-    p.x = 1;
-    p.y = 2;
-    return p.x + p.y;
+int main() {
+    int arr[3] = {1, 2, 3};
+    char str[6] = "Hello";
+
+    int *p = arr; // pointer
+    printf("First element via pointer: %d\n", *p);
+
+    struct Student stu = {"Alice", 20};
+    displayStudent(stu);
+
+    printf("Enter student age: ");
+    scanf("%d", &stu.age);
+    printf("Updated Age: %d\n", stu.age);
+
+    return 0;
 }

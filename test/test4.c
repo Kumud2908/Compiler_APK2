@@ -1,14 +1,25 @@
-// Test Case 4: Arrays, pointers, function calls, and basic arithmetic operations.
-int sum(int arr[], int n) {
-    int s = 0;
-    for (int i = 0; i < n; i++) s = s + arr[i];
-    return s;
-}
+// Test Case 4: Enum, Union
+
+#include <stdio.h>
+
+enum Days { MON, TUE, WED, THU, FRI, SAT, SUN };
+
+union Data {
+    int i;
+    float f;
+    char str[20];
+};
 
 int main() {
-    int a[3] = {1,2,3};
-    int *p = a;
-    int result = sum(a, 3);
-    printf("%d", result);
+    enum Days today = WED;
+    printf("Today is day number: %d\n", today);
+
+    union Data data;
+    data.i = 10;
+    printf("Integer: %d\n", data.i);
+
+    data.f = 220.5;
+    printf("Float: %.2f\n", data.f);
+
     return 0;
 }

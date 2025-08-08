@@ -1,8 +1,14 @@
-// Test Case 5: If the input program has a lexical error, then report all the lexical errors in your input program
+// Test Case 5: Lexical error detection (invalid symbols, malformed identifiers)
+
+#include <stdio.h>
 
 int main() {
-    int 123abc = 5; // Invalid identifier
-    floatt y = 3.14; // Misspelled keyword
-    @z = 10; // Invalid symbol
+    int a = 5;
+    int 9invalidVar = 10;  // Invalid identifier (starts with number)
+    float b = 3.14$;       // Invalid character '$'
+    char c = '@';          // '@' may be unknown in your lexer rules
+
+    printf("Values: %d %f %c\n", a, b, c);
+
     return 0;
 }

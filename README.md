@@ -76,9 +76,7 @@ Your lexical analyzer must recognize tokens for:
 
 ---
 
-## Example Output
-
-Input:
+### Input:
 if (a > 5) {
 printf("Hello");
 }
