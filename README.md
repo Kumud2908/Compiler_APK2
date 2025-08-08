@@ -1,44 +1,101 @@
-Instructions
-Write a lexical analyzer that will tokenize your source language into lexemes. You can use lex, flex if your implementation language is C/C++. Please use PLY if your implementation language is python.
+# Lexical Analyzer Project Specification
 
-Expected output: 
-If the input program contains all the valid tokens, print a table with two columns, token and lexeme. For example, please see the table below.
+## Objective
+Create a lexical analyzer that tokenizes a given source program into lexemes and their corresponding tokens.
 
-Lexeme	Token
-if	keyword
-foo	identifier
+---
 
-If the input program has a lexical error, then report all the lexical errors in your input program.
+## Implementation Options
+- C / C++ → Use lex or flex
+- Python → Use PLY (Python Lex-Yacc)
 
-Expected deliveries:
- src directory: This will contain your lex/flex/python file, which can tokenize your source language.
- test directory: Minimum 5 test cases that can test all the features you are implementing.
- makefile: File that contains recipe for compiling your lex/flex file into the executable
- run.sh: script file, which will take your executable as input and run over all the test cases in the test directory.
+---
 
- parts to be implemented:-
+## Expected Output
 
- basic:-
- All arithmetic and logical operator
-if-else
-for loop
-while loop
-do while loop
-switch cases
-array (integer and char)
-pointers
-structure
-printf and scanf
-function call with arguments
-goto, break and continue
-static keywords
+### ✅ Valid Program
+If the source program contains only valid tokens, print a table with two columns:
 
-advanced:-
+Lexeme   | Token
+---------|---------
+if       | keyword
+foo      | identifier
 
- funtion call with variable arguments 
- typedef 
- enum union
+### ❌ Invalid Program
+If the program contains lexical errors, report ALL the lexical errors found in the input program.
 
+---
 
- ** we are not adding multi line comments
- 
+## Directory Structure
+project/
+│
+├── src/           # Contains your .l/.lex/.py lexical analyzer source file
+│
+├── test/          # Contains at least 5 test cases (covering all features)
+│
+├── Makefile       # Recipe to compile the lex/flex code into an executable
+│
+└── run.sh         # Script to run the analyzer on all test cases
+
+---
+
+## Features to Implement
+
+### Basic Features
+Your lexical analyzer must recognize tokens for:
+- Arithmetic operators: +, -, *, /, %
+- Logical operators: &&, ||, !
+- Control flow keywords:
+  - if, else
+  - for, while, do while
+  - switch, case
+- Data structures:
+  - Arrays (int arr[], char arr[])
+  - Pointers (int *ptr)
+  - Structures (struct)
+- Input/Output: printf, scanf
+- Function calls with arguments
+- Branching/Loop control:
+  - goto
+  - break, continue
+- Storage class specifier:
+  - static
+
+### Advanced Features (Optional Bonus)
+- Function calls with variable arguments (e.g., printf("...", var1, var2, ...))
+- typedef
+- enum
+- union
+
+---
+
+## Notes
+- Multiline comments (/* ... */) are NOT required.
+- Test cases must ensure comprehensive coverage of all features.
+- Lexical errors must be detected and reported without halting after the first error.
+
+---
+
+## Example Output
+
+Input:
+if (a > 5) {
+printf("Hello");
+}
+
+### Output:
+Lexeme   | Token
+---------|---------
+if       | keyword
+(        | lparen
+a        | identifier
+>        | operator
+5        | number
+)        | rparen
+{        | lbrace
+printf   | function
+(        | lparen
+"Hello"  | string
+)        | rparen
+;        | semicolon
+}        | rbrace
