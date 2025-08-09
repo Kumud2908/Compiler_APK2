@@ -49,6 +49,9 @@ void print_token(const char *token, const char *lexeme) {
 "double"                { print_token("TYPE_DOUBLE", yytext); }
 "void"                  { print_token("TYPE_VOID", yytext); }
 "bool"                  { print_token("TYPE_BOOL", yytext); }
+"unsigned"              { print_token("TYPE_UNSIGNED", yytext); }
+"long"                  { print_token("TYPE_LONG", yytext); }
+"short"                 { print_token("TYPE_SHORT", yytext); }
 
 "return"                { print_token("RETURN_KEYWORD", yytext); }
 
