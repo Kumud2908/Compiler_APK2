@@ -1,6 +1,7 @@
 // Test Case 1: All arithmetic/logical operators, if-else, for, while, do-while, switch, goto, break, continue, static keyword
 
 #include <stdio.h>
+using namespace std;
 
 static int counter = 0;
 

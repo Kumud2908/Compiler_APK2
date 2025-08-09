@@ -15,7 +15,12 @@ void print_token(const char *token, const char *lexeme) {
 "//".*                  { print_token("COMMENT", yytext); }
 
 
+"#include"[ \t]*"<"[^>]+">"   { print_token("SYSTEM_LIBRARY", yytext); }
+"#include"[ \t]*\"[^\"]+\"    { print_token("USER_LIBRARY", yytext); }
 
+"using"[ \t]+"namespace"[ \t]+[a-zA-Z_][a-zA-Z0-9_]*[ \t]*";" {
+    print_token("USING_NAMESPACE", yytext);
+}
 
 "if"                    { print_token("IF_KEYWORD", yytext); }
 "else"                  { print_token("ELSE_KEYWORD", yytext); }
