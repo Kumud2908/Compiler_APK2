@@ -18,7 +18,7 @@ void print_token(const char *token, const char *lexeme) {
 "#include"[ \t]*"<"[^>]+">"   { print_token("SYSTEM_LIBRARY", yytext); }
 "#include"[ \t]*\"[^\"]+\"    { print_token("USER_LIBRARY", yytext); }
 
-"using"[ \t]+"namespace"[ \t]+[a-zA-Z_][a-zA-Z0-9_]*[ \t]*";" {
+"using"[ \t]+"namespace"[ \t]+[a-zA-Z_][a-zA-Z0-9_][ \t]";" {
     print_token("USING_NAMESPACE", yytext);
 }
 
@@ -62,7 +62,6 @@ void print_token(const char *token, const char *lexeme) {
 "&&"                    { print_token("LOGICAL_AND", yytext); }
 "\|\|"                  { print_token("LOGICAL_OR", yytext); }
 "!"                     { print_token("LOGICAL_NOT", yytext); }
-
 
 "\+\+"                  { print_token("INCREMENT_OP", yytext); }
 "--"                    { print_token("DECREMENT_OP", yytext); }

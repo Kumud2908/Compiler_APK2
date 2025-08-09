@@ -4,7 +4,7 @@
 
 int main() {
     int a = 5;
-    int 9invalidVar = 10;  // Invalid identifier (starts with number)
+    int 9i^validVar = 10;  // Invalid identifier (starts with number)
     float b = 3.14$;       // Invalid character '$'
     char c = '@';          // '@' may be unknown in your lexer rules
 
