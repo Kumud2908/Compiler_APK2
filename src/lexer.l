@@ -63,6 +63,15 @@ void print_token(const char *token, const char *lexeme) {
 "\|\|"                  { print_token("LOGICAL_OR", yytext); }
 "!"                     { print_token("LOGICAL_NOT", yytext); }
 
+
+"\+\+"                  { print_token("INCREMENT_OP", yytext); }
+"--"                    { print_token("DECREMENT_OP", yytext); }
+"\+="                   { print_token("PLUS_ASSIGN", yytext); }
+"-="                    { print_token("MINUS_ASSIGN", yytext); }
+"\*="                   { print_token("MULT_ASSIGN", yytext); }
+"/="                    { print_token("DIV_ASSIGN", yytext); }
+"%="                    { print_token("MOD_ASSIGN", yytext); }
+
 "+"                     { print_token("PLUS_OP", yytext); }
 "-"                     { print_token("MINUS_OP", yytext); }
 "*"                     { print_token("MULT_OP", yytext); }
