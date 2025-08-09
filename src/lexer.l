@@ -73,6 +73,7 @@ void print_token(const char *token, const char *lexeme) {
 ">"                     { print_token("GT_OP", yytext); }
 
 "&"                     { print_token("ADDRESS_OP", yytext); }
+"\.\.\."                { print_token("ELLIPSIS_OP", yytext); } 
 "\."                    { print_token("DOT_OP", yytext); }
 "->"                    { print_token("ARROW_OP", yytext); }
 ","                     { print_token("COMMA", yytext); }
@@ -91,6 +92,8 @@ void print_token(const char *token, const char *lexeme) {
 \'([^\\\']|\\.)\'       { print_token("CHAR_LITERAL", yytext); }
 
 [a-zA-Z_][a-zA-Z0-9_]*  { print_token("IDENTIFIER", yytext); }
+
+
 
 .                       { print_token("UNKNOWN", yytext); }
 %%
