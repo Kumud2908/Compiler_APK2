@@ -38,7 +38,7 @@ SymbolTable* symbol_table = NULL;
 
 /* AST helper functions */
 ASTNode* create_node(const char* name, const char* lexeme = "") {
-    return new ASTNode(name, lexeme);
+    return new ASTNode(name, lexeme, yylineno);
 }
 
 void push_node(ASTNode* node) {
