@@ -3,20 +3,12 @@
 #include <fstream>
 using namespace std;
 
-
- void ASTNode::addChild(ASTNode* child) {
-        if (child) {
-          
-            child->parent = this;  
-            children.push_back(child);
-          
-        }
+void ASTNode::addChild(ASTNode* child) {
+    if (child) {
+        child->parent = this;  
+        children.push_back(child);
     }
-// Add a child by name only (no lexeme)
-/*void ASTNode::addChild(const std::string &childName) {
-    ASTNode* child = new ASTNode(childName);
-    children.push_back(child);
-}*/
+}
 
 // Add a child by name + lexeme (for operators / identifiers)
 void ASTNode::addChild(const std::string &childName, const std::string &childLexeme) {
@@ -24,12 +16,19 @@ void ASTNode::addChild(const std::string &childName, const std::string &childLex
     children.push_back(child);
 }
 
-// Recursively print the AST
+// FIX THIS METHOD - remove the & from line parameter
+void ASTNode::addChild(const std::string &childName, const std::string &childLexeme, int line) {  // REMOVE &
+    ASTNode* child = new ASTNode(childName, childLexeme, line);
+    children.push_back(child);
+}
+
+// Recursively print the AST - UPDATE to show line numbers
 void ASTNode::printTree(int depth, string prefix) {
     for (int i = 0; i < depth; i++) cout << "  ";
     cout << prefix << name;
     if (lexeme != "default") cout << " : " << lexeme;
     if (type != "default") cout << " [" << type << "]";
+    if (line_number > 0) cout << " (line " << line_number << ")";  // ADD THIS LINE
     cout << endl;
 
     for (auto child : children) {
@@ -37,12 +36,13 @@ void ASTNode::printTree(int depth, string prefix) {
     }
 }
 
-// Generate DOT format for Graphviz
+// Generate DOT format for Graphviz - UPDATE to show line numbers
 void ASTNode::generateDOT(ofstream& out, int& nodeId) {
     int currentId = nodeId++;
     out << "  node" << currentId << " [label=\"" << name;
     if (lexeme != "default") out << "\\n" << lexeme;
     if (type != "default") out << "\\n[" << type << "]";
+    if (line_number > 0) out << "\\nline " << line_number;  // ADD THIS LINE
     out << "\"];" << endl;
 
     for (auto child : children) {
@@ -52,7 +52,7 @@ void ASTNode::generateDOT(ofstream& out, int& nodeId) {
     }
 }
 
-// Type helper stubs
+// Type helper stubs (no changes needed here)
 void setDeclarationType(ASTNode* node, const std::string &type) {
     if (node) node->setType(type);
 }
@@ -76,4 +76,3 @@ std::string setAbstractDeclaratorType(ASTNode* node, const std::string &type) {
     if (node) node->setType(type);
     return type;
 }
-
