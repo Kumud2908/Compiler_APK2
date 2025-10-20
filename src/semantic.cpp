@@ -30,11 +30,21 @@ void SemanticAnalyzer::check_identifier_usage(ASTNode* node) {
     if (node->parent && (node->parent->name == "DirectDeclarator" || 
                          node->parent->name == "StructDeclarator" ||
                          node->parent->name == "ParameterDeclaration"||
-			 node->parent->name == "EnumSpecifier")) {
+			 node->parent->name == "EnumSpecifier"||
+			 node->parent->name == "MemberAccess")) {
         return;
     }
     
     Symbol* symbol = symbol_table->find_symbol(identifier);
+
+    if (symbol) {
+        std::cout << "[Identifier] '" << identifier << "' found: " 
+                  << symbol->get_full_type() << " (scope: " << symbol->scope_level 
+                  << ", type: " << symbol->symbol_type << ")" << std::endl;
+    } else {
+        std::cout << "[Identifier] '" << identifier << "' NOT FOUND in symbol table" << std::endl;
+    }
+
     if (!symbol) {
         reportError("Undeclared identifier: '" + identifier + "'", node);
     }
@@ -127,7 +137,21 @@ void SemanticAnalyzer::traverse(ASTNode* node) {
         return;
     }
     else if (node->name == "StructOrUnionSpecifier") {
-        process_struct_or_union(node);
+        bool is_top_level = true;
+        ASTNode* parent = node->parent;
+        while (parent) {
+            if (parent->name == "StructDeclaration") {
+                is_top_level = false;  // This is a type reference in member declaration
+                break;
+            }
+            parent = parent->parent;
+        }
+        
+        if (is_top_level) {
+            process_struct_or_union(node);
+        }
+        // If nested, skip processing - it's just a type reference
+        return;
     }
     else if (node->name == "EnumSpecifier") {
         process_enum(node);
@@ -162,6 +186,9 @@ void SemanticAnalyzer::traverse(ASTNode* node) {
     }
     else if (node->name == "Identifier" || node->name == "IDENTIFIER") {
         check_identifier_usage(node);
+    }
+    else if (node->name == "MemberAccess") {  // ADD THIS LINE
+        check_member_access(node);            // ADD THIS LINE
     }
 
     // Normal traversal for other nodes
@@ -422,80 +449,125 @@ void SemanticAnalyzer::process_struct_or_union(ASTNode* node) {
     
     std::string specifier_type = "struct"; // default
     std::string type_name = "anonymous";
-    
+    bool has_members = false;
+
+    // Check if this is a complete definition (has members) or forward declaration
     for (size_t i = 0; i < node->children.size(); i++) {
         ASTNode* child = node->children[i];
         if (!child) continue;
         
         if (child->name == "StructOrUnion") {
-            specifier_type = child->lexeme; // "struct" or "union"
+            specifier_type = child->lexeme;
         }
         else if ((child->name == "Identifier" || child->name == "IDENTIFIER") && 
                 !child->lexeme.empty() && child->lexeme != "default") {
             type_name = child->lexeme;
-            break;
+        }
+        else if (child->name == "StructDeclarationList") {
+            has_members = true;  // This is a complete definition
         }
     }
     
     std::string symbol_type = (specifier_type == "union") ? "union" : "struct";
-    Symbol* type_sym = new Symbol(type_name, symbol_type, symbol_type, 
-                                 symbol_table->get_current_scope_level(), node->line_number);
     
-    // ADD STRUCT TO SYMBOL TABLE FIRST so is_valid_type can find it
-    if (!symbol_table->add_symbol(type_sym)) {
-        // If already exists, find the existing symbol
-        Symbol* existing = symbol_table->find_symbol(type_name);
-        if (existing && existing->symbol_type == symbol_type) {
-            delete type_sym;
-            type_sym = existing;
+    // Check if this struct already exists
+    Symbol* existing = symbol_table->find_symbol(type_name);
+    Symbol* type_sym = nullptr;
+
+    if (existing && existing->symbol_type == symbol_type) {
+        // Struct already exists
+        if (has_members) {
+            // This is a definition - complete the existing struct
+            if (existing->is_complete) {
+                reportError(symbol_type + " '" + type_name + "' already defined", node);
+                return;
+            }
+            type_sym = existing;  // Use existing symbol to complete it
+            std::cout << "[Info] Completing " << symbol_type << " '" << type_name << "'" << std::endl;
         } else {
-            reportError(symbol_type + " '" + type_name + "' already declared as different kind", node);
+            // This is another forward declaration - ignore
+            std::cout << "[Info] " << symbol_type << " '" << type_name << "' already declared" << std::endl;
+            return;
+        }
+    } else {
+        // Create new symbol
+        type_sym = new Symbol(type_name, symbol_type, symbol_type, 
+                             symbol_table->get_current_scope_level(), node->line_number);
+        type_sym->is_complete = has_members;  // ← FIX: Complete only if it has members
+        
+        if (!symbol_table->add_symbol(type_sym)) {
+            reportError("Cannot add " + symbol_type + " '" + type_name + "' to symbol table", node);
             delete type_sym;
             return;
         }
     }
-    
-    // PROCESS MEMBERS
-    for (size_t i = 0; i < node->children.size(); i++) {
-        ASTNode* child = node->children[i];
-        if (!child) continue;
-        
-        if (child->name == "StructDeclarationList") {
-            for (size_t j = 0; j < child->children.size(); j++) {
-                ASTNode* struct_decl = child->children[j];
-                if (!struct_decl || struct_decl->name != "StructDeclaration") continue;
-                
-                // Extract base type for all members in this declaration
-                std::string member_base_type = "int";
-                for (size_t k = 0; k < struct_decl->children.size(); k++) {
-                    ASTNode* decl_child = struct_decl->children[k];
-                    if (!decl_child) continue;
+
+    // PROCESS MEMBERS only if this is a complete definition
+    if (has_members) {
+        for (size_t i = 0; i < node->children.size(); i++) {
+            ASTNode* child = node->children[i];
+            if (!child) continue;
+            
+            if (child->name == "StructDeclarationList") {
+                for (size_t j = 0; j < child->children.size(); j++) {
+                    ASTNode* struct_decl = child->children[j];
+                    if (!struct_decl || struct_decl->name != "StructDeclaration") continue;
                     
-                    if (decl_child->name == "TypeSpecifier") {
-                        member_base_type = extract_base_type_from_node(decl_child);
-                        break;
-                    }
-                }
-                
-                // Process each member in StructDeclaratorList
-                for (size_t k = 0; k < struct_decl->children.size(); k++) {
-                    ASTNode* decl_child = struct_decl->children[k];
-                    if (!decl_child || decl_child->name != "StructDeclaratorList") continue;
-                    
-                    for (size_t m = 0; m < decl_child->children.size(); m++) {
-                        ASTNode* member_decl = decl_child->children[m];
-                        if (!member_decl) continue;
+                    // Extract base type for all members in this declaration
+                    std::string member_base_type = "int";
+                    for (size_t k = 0; k < struct_decl->children.size(); k++) {
+                        ASTNode* decl_child = struct_decl->children[k];
+                        if (!decl_child) continue;
                         
-                        process_struct_member(member_decl, member_base_type, type_sym, specifier_type);
+                        if (decl_child->name == "TypeSpecifier") {
+                            member_base_type = extract_base_type_from_node(decl_child);
+                            break;
+                        }
+                        else if (decl_child->name == "StructOrUnionSpecifier") {
+                            // Handle struct/union types in member declarations
+                            std::string spec_type = "struct";
+                            std::string t_name = "anonymous";
+                            
+                            for (size_t m = 0; m < decl_child->children.size(); m++) {
+                                ASTNode* spec_child = decl_child->children[m];
+                                if (!spec_child) continue;
+                                
+                                if (spec_child->name == "StructOrUnion") {
+                                    spec_type = spec_child->lexeme;
+                                }
+                                else if ((spec_child->name == "Identifier" || spec_child->name == "IDENTIFIER") && 
+                                        !spec_child->lexeme.empty() && spec_child->lexeme != "default") {
+                                    t_name = spec_child->lexeme;
+                                }
+                            }
+                            member_base_type = spec_type + " " + t_name;
+                            break;
+                        }
+                    }
+                    
+                    // Process each member in StructDeclaratorList
+                    for (size_t k = 0; k < struct_decl->children.size(); k++) {
+                        ASTNode* decl_child = struct_decl->children[k];
+                        if (!decl_child || decl_child->name != "StructDeclaratorList") continue;
+                        
+                        for (size_t m = 0; m < decl_child->children.size(); m++) {
+                            ASTNode* member_decl = decl_child->children[m];
+                            if (!member_decl) continue;
+                            
+                            process_struct_member(member_decl, member_base_type, type_sym, specifier_type);
+                        }
                     }
                 }
             }
         }
+        
+        type_sym->is_complete = true;  // Mark as complete after processing members
+        std::cout << "[" << specifier_type << " " << type_name << "] Completed with " 
+                  << type_sym->members.size() << " members" << std::endl;
+    } else {
+        // Forward declaration - symbol is already created with is_complete = false
+        std::cout << "[" << specifier_type << " " << type_name << "] Forward declared" << std::endl;
     }
-    
-    type_sym->is_complete = true;
-    std::cout << "[" << specifier_type << " " << type_name << "] Completed with " 
-              << type_sym->members.size() << " members" << std::endl;
 }
 
 // NEW METHOD: Process individual struct members with enhanced type extraction
@@ -1191,4 +1263,39 @@ void SemanticAnalyzer::extract_array_dimensions(ASTNode* array_declarator, Symbo
     // Reverse dimensions because they're stored outermost first in AST
     // but we want innermost first for type representation
     std::reverse(symbol->array_dimensions.begin(), symbol->array_dimensions.end());
+}
+void SemanticAnalyzer::check_member_access(ASTNode* node) {
+    if (!node || node->name != "MemberAccess") return;
+    if (node->children.size() < 2) return;
+    
+    ASTNode* struct_node = node->children[0];  // p
+    ASTNode* member_node = node->children[1];  // x
+    
+    if (!struct_node || !member_node) return;
+    
+    // Find the struct variable
+    Symbol* struct_var = symbol_table->find_symbol(struct_node->lexeme);
+    if (!struct_var) return;
+    
+    // Get struct type name and clean it
+    std::string struct_type_name = struct_var->base_type;
+    std::string clean_struct_name = struct_type_name;
+    if (struct_type_name.find("struct ") == 0) {
+        clean_struct_name = struct_type_name.substr(7);
+    } else if (struct_type_name.find("union ") == 0) {
+        clean_struct_name = struct_type_name.substr(6);
+    }
+    
+    // Find the struct type definition
+    Symbol* struct_type = symbol_table->find_symbol(clean_struct_name);
+    if (!struct_type || !struct_type->is_complete) return;
+    
+    // Check if member exists
+    std::string member_name = member_node->lexeme;
+    for (auto member : struct_type->members) {
+        if (member->name == member_name) {
+            std::cout << "[Member Access] " << struct_node->lexeme << "." << member_name << std::endl;
+            return;
+        }
+    }
 }

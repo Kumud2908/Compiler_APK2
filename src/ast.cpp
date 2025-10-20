@@ -13,12 +13,14 @@ void ASTNode::addChild(ASTNode* child) {
 // Add a child by name + lexeme (for operators / identifiers)
 void ASTNode::addChild(const std::string &childName, const std::string &childLexeme) {
     ASTNode* child = new ASTNode(childName, childLexeme);
+    child->parent = this; 
     children.push_back(child);
 }
 
 // FIX THIS METHOD - remove the & from line parameter
 void ASTNode::addChild(const std::string &childName, const std::string &childLexeme, int line) {  // REMOVE &
     ASTNode* child = new ASTNode(childName, childLexeme, line);
+    child->parent = this; 
     children.push_back(child);
 }
 

@@ -39,6 +39,7 @@ private:
     void process_parameter(ASTNode* param_decl, Symbol* func_sym);
     
     void check_identifier_usage(ASTNode* node);
+    void check_member_access(ASTNode* node);
     bool is_valid_type(const std::string& type);
     
     // ADDED THESE 2 METHODS:
