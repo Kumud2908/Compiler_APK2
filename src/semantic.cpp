@@ -1,95 +1,20 @@
+
+// ============================================================================
+// semantic.cpp - Complete implementation
+// ============================================================================
+
 #include "semantic.h"
 #include <iostream>
-#include <algorithm>  
-
+#include <sstream>
+#include <algorithm>
 
 SemanticAnalyzer::SemanticAnalyzer(SymbolTable* table) 
-    : symbol_table(table), in_function_params(false), error_count(0) {
+    : symbol_table(table), in_function_params(false), 
+      loop_depth(0), switch_depth(0), has_default_in_switch(false),
+      error_count(0), warning_count(0) {
     if (!symbol_table) {
         std::cerr << "ERROR: SymbolTable is null!" << std::endl;
     }
-}
-
-void SemanticAnalyzer::reportError(const std::string& message, ASTNode* node) {
-    error_count++;
-    
-    if (node && node->line_number > 0) {
-        std::cout << "Line " << node->line_number << ": SEMANTIC ERROR: " << message << std::endl;
-    } else {
-        std::cout << "SEMANTIC ERROR: " << message << std::endl;
-    }
-}
-
-void SemanticAnalyzer::check_identifier_usage(ASTNode* node) {
-    if (!node || (node->name != "Identifier" && node->name != "IDENTIFIER")) return;
-    
-    std::string identifier = node->lexeme;
-    if (identifier.empty() || identifier == "default") return;
-    
-    // Skip if we're in a declaration context
-    if (node->parent && (node->parent->name == "DirectDeclarator" || 
-                         node->parent->name == "StructDeclarator" ||
-                         node->parent->name == "ParameterDeclaration"||
-			 node->parent->name == "EnumSpecifier"||
-			 node->parent->name == "MemberAccess")) {
-        return;
-    }
-    
-    Symbol* symbol = symbol_table->find_symbol(identifier);
-
-    if (symbol) {
-        std::cout << "[Identifier] '" << identifier << "' found: " 
-                  << symbol->get_full_type() << " (scope: " << symbol->scope_level 
-                  << ", type: " << symbol->symbol_type << ")" << std::endl;
-    } else {
-        std::cout << "[Identifier] '" << identifier << "' NOT FOUND in symbol table" << std::endl;
-    }
-
-    if (!symbol) {
-        reportError("Undeclared identifier: '" + identifier + "'", node);
-    }
-}
-
-bool SemanticAnalyzer::is_valid_type(const std::string& type) {
-    // Basic built-in types
-    if (type == "int" || type == "char" || type == "float" || type == "double" || 
-        type == "void" || type == "short" || type == "long" || type == "signed" || 
-        type == "unsigned" || type == "bool") {
-        return true;
-    }
-    
-    // Check if it's a struct/enum that we've seen (just the name)
-    Symbol* type_symbol = symbol_table->find_symbol(type);
-    if (type_symbol && (type_symbol->symbol_type == "struct" || 
-                        type_symbol->symbol_type == "union" || 
-                        type_symbol->symbol_type == "enum")) {
-        return true;
-    }
-    
-    // Check for struct/union types like "struct Point" 
-    if (type.find("struct ") == 0) {
-        std::string type_name = type.substr(7); // Remove "struct "
-        Symbol* struct_symbol = symbol_table->find_symbol(type_name);
-        if (struct_symbol && struct_symbol->symbol_type == "struct") {
-            return true;
-        }
-        // Also allow if we haven't seen it yet (forward declaration)
-        return true;
-    }
-    else if (type.find("union ") == 0) {
-        std::string type_name = type.substr(6); // Remove "union "
-        Symbol* union_symbol = symbol_table->find_symbol(type_name);
-        if (union_symbol && union_symbol->symbol_type == "union") {
-            return true;
-        }
-        // Also allow if we haven't seen it yet (forward declaration)
-        return true;
-    }
-    else if (type.find("enum ") == 0) {
-        return true; // Allow enum types
-    }
-    
-    return false;
 }
 
 void SemanticAnalyzer::analyze(ASTNode* root) {
@@ -97,134 +22,667 @@ void SemanticAnalyzer::analyze(ASTNode* root) {
         std::cerr << "WARNING: analyze() called with null root" << std::endl;
         return;
     }
-    if (!symbol_table) {
-        std::cerr << "ERROR: Cannot analyze - symbol_table is null" << std::endl;
-        return;
-    }
     
-    std::cout << "=== SEMANTIC ANALYSIS STARTED ===" << std::endl;
-    error_count = 0;
+    std::cout << "\n=== SEMANTIC ANALYSIS STARTED ===" << std::endl;
     traverse(root);
-    std::cout << "=== SEMANTIC ANALYSIS COMPLETED ===" << std::endl;
     
-    if (error_count > 0) {
-        std::cout << "Found " << error_count << " semantic error(s)" << std::endl;
-    } else {
-        std::cout << "No semantic errors found" << std::endl;
+    // Post-analysis checks
+    // Check for unused labels (goto targets)
+    for (const auto& label : used_labels) {
+        if (declared_labels.find(label.first) == declared_labels.end()) {
+            report_error("Label '" + label.first + "' used but not declared");
+        }
     }
+    
+    // Check for declared but unused labels (warning)
+    for (const auto& label : declared_labels) {
+        if (used_labels.find(label.first) == used_labels.end()) {
+            report_warning("Label '" + label.first + "' declared but never used");
+        }
+    }
+    
+    std::cout << "=== SEMANTIC ANALYSIS COMPLETED ===" << std::endl;
+    print_summary();
 }
 
 void SemanticAnalyzer::traverse(ASTNode* node) {
     if (!node || node->processed) return;
-
-    std::cout << "TRAVERSE: " << node->name;
-    if (!node->lexeme.empty() && node->lexeme != "default") {
-        std::cout << " '" << node->lexeme << "'";
-    }
-    std::cout << " at line " << node->line_number << std::endl;
-
     node->processed = true;
 
-    if (node->name == "Declaration") {
-        if (is_function_declaration(node)) {
-            process_function_declaration(node);  // Handle function declarations
+    // ========== CRITICAL SEMANTIC CHECKS ==========
+    
+    // 1. CHECK UNDECLARED IDENTIFIERS
+    if (node->name == "Identifier" && !in_function_params) {
+        check_undeclared_identifier(node);
+    }
+    
+    // 2. CHECK BREAK/CONTINUE VALIDITY
+    if (node->name == "BreakStatement" || node->name == "ContinueStatement") {
+        check_break_continue(node);
+    }
+    
+    // 3. CHECK CASE/DEFAULT STATEMENTS
+    if (node->name == "CaseStatement") {
+        check_case_statement(node);
+    }
+    if (node->name == "DefaultStatement") {
+        if (switch_depth == 0) {
+            report_error("'default' statement outside switch", node);
+        } else if (has_default_in_switch) {
+            report_error("Duplicate 'default' statement in switch", node);
         } else {
-            process_declaration(node);           // Handle variable declarations
+            has_default_in_switch = true;
         }
+    }
+    
+    // 4. CHECK GOTO STATEMENTS
+    if (node->name == "GotoStatement") {
+        check_goto_statement(node);
+    }
+    
+    // 5. CHECK LABELED STATEMENTS
+    if (node->name == "LabeledStatement") {
+        check_label_statement(node);
+    }
+    
+    // 6. CHECK FUNCTION CALLS
+    if (node->name == "FunctionCall") {
+        check_function_call(node);
+    }
+    
+    // 7. CHECK ASSIGNMENTS
+    if (node->name == "AssignmentExpression") {
+        check_assignment(node);
+    }
+    
+    // 8. CHECK BINARY OPERATIONS
+    if (node->name == "AdditiveExpression" || node->name == "MultiplicativeExpression" ||
+        node->name == "RelationalExpression" || node->name == "EqualityExpression" ||
+        node->name == "LogicalAndExpression" || node->name == "LogicalOrExpression") {
+        check_binary_operation(node);
+    }
+    
+    // 9. CHECK UNARY OPERATIONS
+    if (node->name == "UnaryExpression") {
+        check_unary_operation(node);
+    }
+    
+    // 10. CHECK RETURN STATEMENTS
+    if (node->name == "ReturnStatement") {
+        check_return_statement(node);
+    }
+    
+    // 11. CHECK ARRAY ACCESS
+    if (node->name == "ArraySubscript") {
+        check_array_access(node);
+    }
+    
+    // 12. CHECK MEMBER ACCESS
+    if (node->name == "MemberAccess") {
+        check_member_access(node);
+    }
+    
+    // 13. CHECK CAST EXPRESSIONS
+    if (node->name == "CastExpression") {
+        check_cast_validity(node);
+    }
+    
+    // 14. CHECK IF CONDITIONS
+    if (node->name == "IfStatement") {
+        if (node->children.size() > 0) {
+            check_if_condition(node->children[0]);
+        }
+    }
+    
+    // 15. CHECK SWITCH STATEMENTS
+    if (node->name == "SwitchStatement") {
+        check_switch_statement(node);
+    }
+    
+    // Track loop depth
+    if (node->name == "WhileStatement" || node->name == "DoWhileStatement" || 
+        node->name == "ForStatement") {
+        loop_depth++;
+        if (node->children.size() > 0) {
+            check_loop_condition(node->children[0]);
+        }
+    }
+    
+    // Track switch depth
+    if (node->name == "SwitchStatement") {
+        switch_depth++;
+        case_values_in_switch.clear();
+        has_default_in_switch = false;
+    }
+
+    // ========== EXISTING PROCESSING ==========
+    if (node->name == "Declaration") {
+        process_declaration(node);
     }
     else if (node->name == "FunctionDefinition") {
         process_function(node);
         return;
     }
     else if (node->name == "StructOrUnionSpecifier") {
-        bool is_top_level = true;
-        ASTNode* parent = node->parent;
-        while (parent) {
-            if (parent->name == "StructDeclaration") {
-                is_top_level = false;  // This is a type reference in member declaration
-                break;
-            }
-            parent = parent->parent;
-        }
-        
-        if (is_top_level) {
-            process_struct_or_union(node);
-        }
-        // If nested, skip processing - it's just a type reference
-        return;
+        process_struct(node);
     }
     else if (node->name == "EnumSpecifier") {
         process_enum(node);
-	
     }
     else if (node->name == "CompoundStatement") {
-        // Check if this is directly under a FunctionDefinition
         bool is_function_body = (node->parent && node->parent->name == "FunctionDefinition");
         
         if (!is_function_body) {
-            // Normal block - create scope
-            int old_scope = symbol_table->get_current_scope_level();
             symbol_table->enter_scope();
-            std::cout << "[Scope " << old_scope << "->" << symbol_table->get_current_scope_level() 
-                      << "] Entering block at line " << node->line_number << std::endl;
-            
             for (size_t i = 0; i < node->children.size(); i++) {
                 if (node->children[i]) traverse(node->children[i]);
             }
-            
-            std::cout << "[Scope " << symbol_table->get_current_scope_level() << "->" << old_scope 
-                      << "] Exiting block" << std::endl;
             symbol_table->exit_scope();
-            return;
-        } else {
-            // Function body - no extra scope, just traverse children
-            for (size_t i = 0; i < node->children.size(); i++) {
-                if (node->children[i]) traverse(node->children[i]);
-            }
             return;
         }
     }
-    else if (node->name == "Identifier" || node->name == "IDENTIFIER") {
-        check_identifier_usage(node);
-    }
-    else if (node->name == "MemberAccess") {  // ADD THIS LINE
-        check_member_access(node);            // ADD THIS LINE
-    }
 
-    // Normal traversal for other nodes
+    // Traverse children
     for (size_t i = 0; i < node->children.size(); i++) {
         if (node->children[i]) traverse(node->children[i]);
     }
+    
+    // Exit tracking
+    if (node->name == "WhileStatement" || node->name == "DoWhileStatement" || 
+        node->name == "ForStatement") {
+        loop_depth--;
+    }
+    
+    if (node->name == "SwitchStatement") {
+        switch_depth--;
+    }
 }
+
+// ============================================================================
+// SEMANTIC CHECK IMPLEMENTATIONS
+// ============================================================================
+
+void SemanticAnalyzer::check_undeclared_identifier(ASTNode* node) {
+    if (!node || node->lexeme.empty()) return;
+    
+    Symbol* sym = symbol_table->lookup(node->lexeme);
+    if (!sym) {
+        report_error("Undeclared identifier '" + node->lexeme + "'", node);
+    }
+}
+
+void SemanticAnalyzer::check_function_call(ASTNode* node) {
+    if (!node || node->children.empty()) return;
+    
+    ASTNode* func_id = node->children[0];
+    if (!func_id || func_id->name != "Identifier") return;
+    
+    std::string func_name = func_id->lexeme;
+    
+    // Check if function exists
+    Symbol* func_sym = symbol_table->lookup(func_name);
+    if (!func_sym) {
+        report_error("Undeclared function '" + func_name + "'", node);
+        return;
+    }
+    
+    if (func_sym->kind != "function") {
+        report_error("'" + func_name + "' is not a function", node);
+        return;
+    }
+    
+    // Check for recursion
+    if (!current_function_name.empty()) {
+        if (func_name == current_function_name) {
+            std::cout << "[RECURSION DETECTED] Function '" << func_name 
+                      << "' calls itself (direct recursion)" << std::endl;
+            recursive_functions.insert(func_name);
+        }
+        
+        // Check for indirect recursion
+        if (functions_in_call_chain.find(func_name) != functions_in_call_chain.end()) {
+            std::cout << "[RECURSION DETECTED] Indirect recursion involving '" 
+                      << func_name << "'" << std::endl;
+            recursive_functions.insert(func_name);
+        }
+    }
+    
+    // TODO: Check argument count and types (requires storing function signatures)
+}
+
+void SemanticAnalyzer::check_assignment(ASTNode* node) {
+    if (!node || node->children.size() < 2) return;
+    
+    std::string lhs_type = get_expression_type(node->children[0]);
+    std::string rhs_type = get_expression_type(node->children[1]);
+    
+    if (lhs_type == "unknown" || rhs_type == "unknown") return;
+    
+    // Check pointer level compatibility
+    int lhs_ptr_level = get_pointer_level(lhs_type);
+    int rhs_ptr_level = get_pointer_level(rhs_type);
+    
+    if (lhs_ptr_level != rhs_ptr_level) {
+        report_error("Pointer level mismatch in assignment: cannot assign '" + 
+                    rhs_type + "' to '" + lhs_type + "'", node);
+        return;
+    }
+    
+    if (!types_compatible(lhs_type, rhs_type)) {
+        report_warning("Implicit type conversion in assignment: '" + 
+                      rhs_type + "' to '" + lhs_type + "'", node);
+    }
+}
+
+void SemanticAnalyzer::check_binary_operation(ASTNode* node) {
+    if (!node || node->children.size() < 2) return;
+    
+    std::string left_type = get_expression_type(node->children[0]);
+    std::string right_type = get_expression_type(node->children[1]);
+    
+    if (left_type == "unknown" || right_type == "unknown") return;
+    
+    // Check division by zero for constant expressions
+    if (node->name == "MultiplicativeExpression" && node->lexeme == "/") {
+        check_division_by_zero(node);
+    }
+    
+    // Check modulo operations
+    if (node->name == "MultiplicativeExpression" && node->lexeme == "%") {
+        check_modulo_operation(node);
+    }
+    
+    // Check pointer arithmetic
+    if (is_pointer_type(left_type) || is_pointer_type(right_type)) {
+        if (node->name == "AdditiveExpression") {
+            // pointer + int or pointer - int is OK
+            // pointer - pointer is OK
+            if (is_pointer_type(left_type) && is_pointer_type(right_type)) {
+                if (node->lexeme != "-") {
+                    report_error("Invalid pointer arithmetic: can only subtract pointers", node);
+                }
+            } else if (is_pointer_type(right_type) && node->lexeme == "+") {
+                // int + pointer is OK
+            } else if (!is_integer_type(right_type) && !is_pointer_type(right_type)) {
+                report_error("Invalid pointer arithmetic: can only add/subtract integers", node);
+            }
+        } else {
+            report_error("Invalid operation on pointer type", node);
+        }
+    }
+    
+    // Check if operands are numeric for arithmetic operations
+    if (node->name == "AdditiveExpression" || node->name == "MultiplicativeExpression") {
+        if (!is_numeric_type(left_type) && !is_pointer_type(left_type)) {
+            report_error("Arithmetic operation requires numeric type, got '" + left_type + "'", node);
+        }
+        if (!is_numeric_type(right_type) && !is_pointer_type(right_type)) {
+            report_error("Arithmetic operation requires numeric type, got '" + right_type + "'", node);
+        }
+    }
+}
+
+void SemanticAnalyzer::check_unary_operation(ASTNode* node) {
+    if (!node || node->children.empty()) return;
+    
+    std::string operand_type = get_expression_type(node->children[0]);
+    std::string op = node->lexeme;
+    
+    if (op == "*") {
+        // Dereference - must be pointer
+        if (!is_pointer_type(operand_type)) {
+            report_error("Cannot dereference non-pointer type '" + operand_type + "'", node);
+        }
+    } else if (op == "&") {
+        // Address-of - operand must be lvalue
+        // TODO: Check if operand is lvalue
+    } else if (op == "++" || op == "--") {
+        // Increment/decrement - must be numeric or pointer
+        if (!is_numeric_type(operand_type) && !is_pointer_type(operand_type)) {
+            report_error("Increment/decrement requires numeric or pointer type", node);
+        }
+    }
+}
+
+void SemanticAnalyzer::check_return_statement(ASTNode* node) {
+    if (current_function_return_type.empty()) {
+        report_error("Return statement outside function", node);
+        return;
+    }
+    
+    function_has_return[current_function_name] = true;
+    
+    bool has_value = node->children.size() > 0;
+    
+    if (current_function_return_type == "void" && has_value) {
+        report_error("Void function '" + current_function_name + 
+                    "' should not return a value", node);
+    } else if (current_function_return_type != "void" && !has_value) {
+        report_warning("Non-void function '" + current_function_name + 
+                      "' should return a value", node);
+    } else if (has_value) {
+        std::string return_type = get_expression_type(node->children[0]);
+        if (!types_compatible(current_function_return_type, return_type)) {
+            report_warning("Return type mismatch: expected '" + 
+                          current_function_return_type + "', got '" + return_type + "'", node);
+        }
+    }
+}
+
+void SemanticAnalyzer::check_array_access(ASTNode* node) {
+    if (!node || node->children.size() < 2) return;
+    
+    // Get array name
+    std::string array_name;
+    ASTNode* array_node = node->children[0];
+    if (array_node->name == "Identifier") {
+        array_name = array_node->lexeme;
+    }
+    
+    // Check if index is integer type
+    std::string index_type = get_expression_type(node->children[1]);
+    if (!is_integer_type(index_type)) {
+        report_error("Array subscript must be integer type, got '" + index_type + "'", node);
+    }
+    
+    // Check array dimensions
+    if (!array_name.empty() && array_dimensions.find(array_name) != array_dimensions.end()) {
+        // Count access dimensions
+        int access_dims = 1;
+        ASTNode* parent = node->parent;
+        while (parent && parent->name == "ArraySubscript") {
+            access_dims++;
+            parent = parent->parent;
+        }
+        check_array_dimensions(array_name, access_dims, node);
+    }
+    
+    // TODO: Bounds checking for constant indices
+}
+
+void SemanticAnalyzer::check_array_dimensions(const std::string& array_name, 
+                                               int access_dims, ASTNode* node) {
+    auto it = array_dimensions.find(array_name);
+    if (it == array_dimensions.end()) return;
+    
+    int declared_dims = it->second.size();
+    if (access_dims > declared_dims) {
+        report_error("Too many array subscripts for '" + array_name + 
+                    "': array has " + std::to_string(declared_dims) + 
+                    " dimension(s), accessing with " + std::to_string(access_dims), node);
+    }
+}
+
+void SemanticAnalyzer::check_member_access(ASTNode* node) {
+    if (!node || node->children.size() < 2) return;
+    
+    std::string object_type = get_expression_type(node->children[0]);
+    std::string member_name = node->children[1]->lexeme;
+    
+    // Check if object is struct/union/class
+    Symbol* type_sym = symbol_table->lookup(object_type);
+    if (!type_sym || (type_sym->kind != "struct" && type_sym->kind != "class")) {
+        report_error("Member access requires struct/union/class type", node);
+        return;
+    }
+    
+    // TODO: Check if member exists in struct/class
+    // Requires storing struct/class member information
+}
+
+void SemanticAnalyzer::check_break_continue(ASTNode* node) {
+    if (loop_depth == 0 && switch_depth == 0) {
+        report_error("'" + node->name + "' statement not within loop or switch", node);
+    } else if (node->name == "ContinueStatement" && loop_depth == 0) {
+        report_error("'continue' statement not within loop", node);
+    }
+}
+
+void SemanticAnalyzer::check_goto_statement(ASTNode* node) {
+    if (!node || node->lexeme.empty()) return;
+    used_labels[node->lexeme] = true;
+}
+
+void SemanticAnalyzer::check_label_statement(ASTNode* node) {
+    if (!node || node->lexeme.empty()) return;
+    
+    if (declared_labels.find(node->lexeme) != declared_labels.end()) {
+        report_error("Duplicate label '" + node->lexeme + "'", node);
+    } else {
+        declared_labels[node->lexeme] = true;
+    }
+}
+
+void SemanticAnalyzer::check_case_statement(ASTNode* node) {
+    if (switch_depth == 0) {
+        report_error("'case' statement outside switch", node);
+        return;
+    }
+    
+    if (node->children.size() > 0) {
+        // Check for duplicate case values (only for constants)
+        ASTNode* case_expr = node->children[0];
+        if (case_expr->name == "Constant") {
+            std::string case_value = case_expr->lexeme;
+            if (case_values_in_switch.find(case_value) != case_values_in_switch.end()) {
+                report_error("Duplicate case value '" + case_value + "' in switch", node);
+            } else {
+                case_values_in_switch.insert(case_value);
+            }
+        }
+    }
+}
+
+void SemanticAnalyzer::check_switch_statement(ASTNode* node) {
+    if (!node || node->children.empty()) return;
+    
+    std::string switch_expr_type = get_expression_type(node->children[0]);
+    if (!is_integer_type(switch_expr_type)) {
+        report_warning("Switch expression should be integer type, got '" + 
+                      switch_expr_type + "'", node);
+    }
+}
+
+void SemanticAnalyzer::check_loop_condition(ASTNode* node) {
+    if (!node) return;
+    
+    std::string cond_type = get_expression_type(node);
+    // Condition should be boolean or numeric
+    if (cond_type != "unknown" && !is_numeric_type(cond_type) && cond_type != "bool") {
+        report_warning("Loop condition should be boolean or numeric type", node);
+    }
+}
+
+void SemanticAnalyzer::check_if_condition(ASTNode* node) {
+    if (!node) return;
+    
+    std::string cond_type = get_expression_type(node);
+    if (cond_type != "unknown" && !is_numeric_type(cond_type) && cond_type != "bool") {
+        report_warning("Condition should be boolean or numeric type", node);
+    }
+}
+
+void SemanticAnalyzer::check_division_by_zero(ASTNode* node) {
+    if (!node || node->children.size() < 2) return;
+    
+    ASTNode* divisor = node->children[1];
+    if (divisor->name == "Constant" && divisor->lexeme == "0") {
+        report_error("Division by zero", node);
+    }
+}
+
+void SemanticAnalyzer::check_modulo_operation(ASTNode* node) {
+    if (!node || node->children.size() < 2) return;
+    
+    std::string left_type = get_expression_type(node->children[0]);
+    std::string right_type = get_expression_type(node->children[1]);
+    
+    if (!is_integer_type(left_type) || !is_integer_type(right_type)) {
+        report_error("Modulo operation requires integer operands", node);
+    }
+    
+    ASTNode* divisor = node->children[1];
+    if (divisor->name == "Constant" && divisor->lexeme == "0") {
+        report_error("Modulo by zero", node);
+    }
+}
+
+void SemanticAnalyzer::check_cast_validity(ASTNode* node) {
+    if (!node || node->children.size() < 2) return;
+    
+    // Get target type from TypeName node
+    // Get source type from expression
+    // Check if cast is valid
+    // TODO: Implement cast validity checking
+}
+
+// ============================================================================
+// TYPE CHECKING HELPERS
+// ============================================================================
+
+std::string SemanticAnalyzer::get_expression_type(ASTNode* expr) {
+    if (!expr) return "unknown";
+    
+    if (expr->name == "Identifier") {
+        return get_identifier_type(expr->lexeme);
+    }
+    
+    if (expr->name == "Constant") {
+        if (expr->lexeme.find('.') != std::string::npos || 
+            expr->lexeme.find('f') != std::string::npos) {
+            return "float";
+        }
+        if (expr->lexeme == "true" || expr->lexeme == "false") {
+            return "bool";
+        }
+        return "int";
+    }
+    
+    if (expr->name == "StringLiteral") {
+        return "char*";
+    }
+    
+    // Binary operations
+    if (expr->name == "AdditiveExpression" || expr->name == "MultiplicativeExpression") {
+        std::string left_type = get_expression_type(expr->children[0]);
+        std::string right_type = get_expression_type(expr->children[1]);
+        
+        // Result type promotion
+        if (left_type == "float" || right_type == "float") return "float";
+        if (left_type == "double" || right_type == "double") return "double";
+        return "int";
+    }
+    
+    // Relational/Equality operations return bool
+    if (expr->name == "RelationalExpression" || expr->name == "EqualityExpression" ||
+        expr->name == "LogicalAndExpression" || expr->name == "LogicalOrExpression") {
+        return "bool";
+    }
+    
+    // Unary operations
+    if (expr->name == "UnaryExpression") {
+        if (expr->lexeme == "*") {
+            // Dereference - remove one pointer level
+            std::string operand_type = get_expression_type(expr->children[0]);
+            if (operand_type.find('*') != std::string::npos) {
+                return operand_type.substr(0, operand_type.length() - 1);
+            }
+        } else if (expr->lexeme == "&") {
+            // Address-of - add one pointer level
+            std::string operand_type = get_expression_type(expr->children[0]);
+            return operand_type + "*";
+        }
+        return get_expression_type(expr->children[0]);
+    }
+    
+    // Function call
+    if (expr->name == "FunctionCall" && expr->children.size() > 0) {
+        std::string func_name = expr->children[0]->lexeme;
+        Symbol* func_sym = symbol_table->lookup(func_name);
+        if (func_sym) {
+            return func_sym->symbol_type;
+        }
+    }
+    
+    // Array subscript
+    if (expr->name == "ArraySubscript" && expr->children.size() > 0) {
+        return get_expression_type(expr->children[0]);
+    }
+    
+    return "unknown";
+}
+
+std::string SemanticAnalyzer::get_identifier_type(const std::string& name) {
+    Symbol* sym = symbol_table->lookup(name);
+    return sym ? sym->symbol_type : "unknown";
+}
+
+int SemanticAnalyzer::get_pointer_level(const std::string& type) {
+    return std::count(type.begin(), type.end(), '*');
+}
+
+bool SemanticAnalyzer::types_compatible(const std::string& type1, const std::string& type2) {
+    if (type1 == type2) return true;
+    
+    // Check pointer levels
+    if (get_pointer_level(type1) != get_pointer_level(type2)) {
+        return false;
+    }
+    
+    // Allow implicit numeric conversions
+    if (is_numeric_type(type1) && is_numeric_type(type2)) {
+        return true;
+    }
+    
+    return false;
+}
+
+bool SemanticAnalyzer::is_numeric_type(const std::string& type) {
+    std::string base_type = type;
+    // Remove pointer indicators
+    size_t star_pos = type.find('*');
+    if (star_pos != std::string::npos) {
+        base_type = type.substr(0, star_pos);
+    }
+    
+    return base_type == "int" || base_type == "float" || base_type == "double" ||
+           base_type == "long" || base_type == "short" || base_type == "char";
+}
+
+bool SemanticAnalyzer::is_integer_type(const std::string& type) {
+    std::string base_type = type;
+    size_t star_pos = type.find('*');
+    if (star_pos != std::string::npos) {
+        base_type = type.substr(0, star_pos);
+    }
+    
+    return base_type == "int" || base_type == "long" || base_type == "short" || 
+           base_type == "char" || base_type == "unsigned" || base_type == "signed";
+}
+
+bool SemanticAnalyzer::is_pointer_type(const std::string& type) {
+    return type.find('*') != std::string::npos;
+}
+
+// ============================================================================
+// EXISTING METHODS (from your original code)
+// ============================================================================
 
 void SemanticAnalyzer::process_declaration(ASTNode* node) {
     if (!node) return;
     
     std::string base_type = "int";
-    bool type_found = false;
     
-    // Extract base type
     for (size_t i = 0; i < node->children.size(); i++) {
         ASTNode* child = node->children[i];
         if (!child) continue;
         
         if (child->name == "DeclarationSpecifiers") {
             base_type = extract_base_type(child);
-            type_found = true;
-            
-            if (!is_valid_type(base_type)) {
-                reportError("Unknown type: '" + base_type + "'", child);
-            }
             break;
         }
     }
     
-    if (!type_found) {
-        reportError("Declaration missing type specifier", node);
-        return;
-    }
-    
-    // Look for variable declarators
     for (size_t i = 0; i < node->children.size(); i++) {
         ASTNode* child = node->children[i];
         if (!child) continue;
@@ -239,9 +697,7 @@ void SemanticAnalyzer::process_declaration(ASTNode* node) {
                         ASTNode* decl = init_decl->children[k];
                         if (!decl) continue;
                         
-                        // ADD FunctionDeclarator to handle function pointers
-                        if (decl->name == "DirectDeclarator" || decl->name == "ArrayDeclarator" || 
-                            decl->name == "Declarator" || decl->name == "FunctionDeclarator") {
+                        if (decl->name == "Declarator" || decl->name == "DirectDeclarator") {
                             process_variable(decl, base_type);
                         }
                     }
@@ -256,88 +712,72 @@ void SemanticAnalyzer::process_function(ASTNode* node) {
     
     std::string func_name = "unknown";
     std::string return_type = "int";
-    bool return_type_found = false;
     
-    // Extract return type and function name
     for (size_t i = 0; i < node->children.size(); i++) {
         ASTNode* child = node->children[i];
         if (!child) continue;
         
         if (child->name == "DeclarationSpecifiers") {
             return_type = extract_base_type(child);
-            return_type_found = true;
-            
-            if (!is_valid_type(return_type)) {
-                reportError("Invalid return type: '" + return_type + "'", child);
-            }
         }
         else if (child->name == "Declarator" || child->name == "FunctionDeclarator") {
             func_name = extract_function_name(child);
         }
     }
     
-    if (!return_type_found) {
-        reportError("Function missing return type", node);
-    }
-    
-    if (func_name == "unknown") {
-        reportError("Function has no name", node);
-        return;
-    }
-    
     std::cout << "[Scope " << symbol_table->get_current_scope_level() 
-              << "] Found function at line " << node->line_number
-              << ": " << func_name << " : " << return_type << std::endl;
+              << "] Found function: " << func_name << " : " << return_type << std::endl;
     
-    // Check if function already exists
-    Symbol* existing = symbol_table->find_symbol(func_name);
-    Symbol* func_sym;
-    
-    if (existing && existing->symbol_type == "function") {
-        // Function already declared - use existing symbol
-        std::cout << "[Info] Function '" << func_name << "' definition found for declaration" << std::endl;
-        func_sym = existing;
-    } else {
-        // Create new function symbol
-        func_sym = new Symbol(func_name, "function", return_type, 
-                             symbol_table->get_current_scope_level(), node->line_number);
-        
-        // Add to CURRENT scope (should be global)
-        if (!symbol_table->add_symbol(func_sym)) {
-            reportError("Failed to add function '" + func_name + "' to symbol table", node);
-            delete func_sym;
-            return;
-        }
+    // Check for redeclaration
+    Symbol* existing = symbol_table->lookup_current_scope(func_name);
+    if (existing) {
+        report_error("Redeclaration of function '" + func_name + "'", node);
     }
     
-    // NOW enter function scope for parameters
-    symbol_table->enter_scope();
-    std::cout << "[Scope " << symbol_table->get_current_scope_level() - 1 << "->" 
-              << symbol_table->get_current_scope_level() << "] Entering function scope for " << func_name << std::endl;
+    Symbol* func_sym = new Symbol(func_name, "function", return_type, 
+                                 symbol_table->get_current_scope_level(), 0);
+    symbol_table->add_symbol(func_sym);
     
-    // Process parameters AND store them in function symbol
+    // Set function context
+    current_function_name = func_name;
+    current_function_return_type = return_type;
+    function_has_return[func_name] = false;
+    functions_in_call_chain.insert(func_name);
+    
+    symbol_table->enter_scope();
+    
+    in_function_params = true;
     for (size_t i = 0; i < node->children.size(); i++) {
         ASTNode* child = node->children[i];
         if (!child) continue;
         
         if (child->name == "Declarator" || child->name == "FunctionDeclarator") {
-            process_function_parameters(child, func_sym);
+            process_function_parameters(child);
         }
     }
+    in_function_params = false;
     
-    // Process function body in the SAME scope
     for (size_t i = 0; i < node->children.size(); i++) {
         ASTNode* child = node->children[i];
         if (!child) continue;
         
         if (child->name == "CompoundStatement") {
-            traverse(child);  // Body shares scope with parameters
+            traverse(child);
         }
     }
     
-    std::cout << "[Scope " << symbol_table->get_current_scope_level() << "->" 
-              << symbol_table->get_current_scope_level() - 1 << "] Exiting function scope for " << func_name << std::endl;
+    // Check if non-void function has return
+    if (return_type != "void" && !function_has_return[func_name]) {
+        report_warning("Non-void function '" + func_name + 
+                      "' may not return a value in all paths", node);
+    }
+    
     symbol_table->exit_scope();
+    
+    // Clear function context
+    functions_in_call_chain.erase(func_name);
+    current_function_name = "";
+    current_function_return_type = "";
 }
 
 void SemanticAnalyzer::process_function_parameters(ASTNode* declarator) {
@@ -376,356 +816,6 @@ void SemanticAnalyzer::process_function_parameters(ASTNode* declarator) {
     }
 }
 
-void SemanticAnalyzer::process_function_parameters(ASTNode* declarator, Symbol* func_sym) {
-    if (!declarator) return;
-    
-    for (size_t i = 0; i < declarator->children.size(); i++) {
-        ASTNode* child = declarator->children[i];
-        if (!child) continue;
-        
-        if (child->name == "DirectDeclarator") {
-            process_function_parameters(child, func_sym);
-        }
-        else if (child->name == "ParameterList") {
-            for (size_t j = 0; j < child->children.size(); j++) {
-                ASTNode* param = child->children[j];
-                if (param && param->name == "ParameterDeclaration") {
-                    process_parameter(param, func_sym);
-                }
-            }
-        }
-        else if (child->name == "ParameterTypeList") {
-            for (size_t j = 0; j < child->children.size(); j++) {
-                ASTNode* param_list = child->children[j];
-                if (!param_list) continue;
-                
-                if (param_list->name == "ParameterList") {
-                    for (size_t k = 0; k < param_list->children.size(); k++) {
-                        ASTNode* param = param_list->children[k];
-                        if (param && param->name == "ParameterDeclaration") {
-                            process_parameter(param, func_sym);
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-std::string SemanticAnalyzer::extract_function_name(ASTNode* declarator) {
-    if (!declarator) return "unknown";
-    
-    // Check current node first
-    if (!declarator->lexeme.empty() && declarator->lexeme != "default") {
-        return declarator->lexeme;
-    }
-    
-    // Look for DirectDeclarator with lexeme
-    for (size_t i = 0; i < declarator->children.size(); i++) {
-        ASTNode* child = declarator->children[i];
-        if (!child) continue;
-        
-        if (child->name == "DirectDeclarator") {
-            if (!child->lexeme.empty() && child->lexeme != "default") {
-                return child->lexeme;
-            }
-            
-            // Search recursively in DirectDeclarator's children
-            for (size_t j = 0; j < child->children.size(); j++) {
-                ASTNode* grandchild = child->children[j];
-                if (!grandchild) continue;
-                
-                if (!grandchild->lexeme.empty() && grandchild->lexeme != "default") {
-                    return grandchild->lexeme;
-                }
-            }
-        }
-    }
-    return "unknown";
-}
-
-void SemanticAnalyzer::process_struct_or_union(ASTNode* node) {
-    if (!node || !symbol_table) return;
-    
-    std::string specifier_type = "struct"; // default
-    std::string type_name = "anonymous";
-    bool has_members = false;
-
-    // Check if this is a complete definition (has members) or forward declaration
-    for (size_t i = 0; i < node->children.size(); i++) {
-        ASTNode* child = node->children[i];
-        if (!child) continue;
-        
-        if (child->name == "StructOrUnion") {
-            specifier_type = child->lexeme;
-        }
-        else if ((child->name == "Identifier" || child->name == "IDENTIFIER") && 
-                !child->lexeme.empty() && child->lexeme != "default") {
-            type_name = child->lexeme;
-        }
-        else if (child->name == "StructDeclarationList") {
-            has_members = true;  // This is a complete definition
-        }
-    }
-    
-    std::string symbol_type = (specifier_type == "union") ? "union" : "struct";
-    
-    // Check if this struct already exists
-    Symbol* existing = symbol_table->find_symbol(type_name);
-    Symbol* type_sym = nullptr;
-
-    if (existing && existing->symbol_type == symbol_type) {
-        // Struct already exists
-        if (has_members) {
-            // This is a definition - complete the existing struct
-            if (existing->is_complete) {
-                reportError(symbol_type + " '" + type_name + "' already defined", node);
-                return;
-            }
-            type_sym = existing;  // Use existing symbol to complete it
-            std::cout << "[Info] Completing " << symbol_type << " '" << type_name << "'" << std::endl;
-        } else {
-            // This is another forward declaration - ignore
-            std::cout << "[Info] " << symbol_type << " '" << type_name << "' already declared" << std::endl;
-            return;
-        }
-    } else {
-        // Create new symbol
-        type_sym = new Symbol(type_name, symbol_type, symbol_type, 
-                             symbol_table->get_current_scope_level(), node->line_number);
-        type_sym->is_complete = has_members;  // ← FIX: Complete only if it has members
-        
-        if (!symbol_table->add_symbol(type_sym)) {
-            reportError("Cannot add " + symbol_type + " '" + type_name + "' to symbol table", node);
-            delete type_sym;
-            return;
-        }
-    }
-
-    // PROCESS MEMBERS only if this is a complete definition
-    if (has_members) {
-        for (size_t i = 0; i < node->children.size(); i++) {
-            ASTNode* child = node->children[i];
-            if (!child) continue;
-            
-            if (child->name == "StructDeclarationList") {
-                for (size_t j = 0; j < child->children.size(); j++) {
-                    ASTNode* struct_decl = child->children[j];
-                    if (!struct_decl || struct_decl->name != "StructDeclaration") continue;
-                    
-                    // Extract base type for all members in this declaration
-                    std::string member_base_type = "int";
-                    for (size_t k = 0; k < struct_decl->children.size(); k++) {
-                        ASTNode* decl_child = struct_decl->children[k];
-                        if (!decl_child) continue;
-                        
-                        if (decl_child->name == "TypeSpecifier") {
-                            member_base_type = extract_base_type_from_node(decl_child);
-                            break;
-                        }
-                        else if (decl_child->name == "StructOrUnionSpecifier") {
-                            // Handle struct/union types in member declarations
-                            std::string spec_type = "struct";
-                            std::string t_name = "anonymous";
-                            
-                            for (size_t m = 0; m < decl_child->children.size(); m++) {
-                                ASTNode* spec_child = decl_child->children[m];
-                                if (!spec_child) continue;
-                                
-                                if (spec_child->name == "StructOrUnion") {
-                                    spec_type = spec_child->lexeme;
-                                }
-                                else if ((spec_child->name == "Identifier" || spec_child->name == "IDENTIFIER") && 
-                                        !spec_child->lexeme.empty() && spec_child->lexeme != "default") {
-                                    t_name = spec_child->lexeme;
-                                }
-                            }
-                            member_base_type = spec_type + " " + t_name;
-                            break;
-                        }
-                    }
-                    
-                    // Process each member in StructDeclaratorList
-                    for (size_t k = 0; k < struct_decl->children.size(); k++) {
-                        ASTNode* decl_child = struct_decl->children[k];
-                        if (!decl_child || decl_child->name != "StructDeclaratorList") continue;
-                        
-                        for (size_t m = 0; m < decl_child->children.size(); m++) {
-                            ASTNode* member_decl = decl_child->children[m];
-                            if (!member_decl) continue;
-                            
-                            process_struct_member(member_decl, member_base_type, type_sym, specifier_type);
-                        }
-                    }
-                }
-            }
-        }
-        
-        type_sym->is_complete = true;  // Mark as complete after processing members
-        std::cout << "[" << specifier_type << " " << type_name << "] Completed with " 
-                  << type_sym->members.size() << " members" << std::endl;
-    } else {
-        // Forward declaration - symbol is already created with is_complete = false
-        std::cout << "[" << specifier_type << " " << type_name << "] Forward declared" << std::endl;
-    }
-}
-
-// NEW METHOD: Process individual struct members with enhanced type extraction
-void SemanticAnalyzer::process_struct_member(ASTNode* member_decl, const std::string& base_type, 
-                                           Symbol* struct_sym, const std::string& struct_type) {
-    if (!member_decl || !struct_sym) return;
-    
-    std::string member_name = extract_declarator_name(member_decl);
-    if (member_name == "unknown") return;
-    
-    // Create member symbol with basic type
-    Symbol* member_sym = new Symbol(member_name, "member", base_type,
-                                   struct_sym->scope_level, 0);
-    
-    // Extract enhanced type information (pointers, arrays, etc.)
-    extract_type_info(member_decl, member_sym);
-    
-    struct_sym->add_member(member_sym);
-    std::cout << "[" << struct_type << " " << struct_sym->name << "] Added member: " 
-              << member_name << " : " << member_sym->get_full_type() << std::endl;
-}
-
-
-void SemanticAnalyzer::process_enum(ASTNode* node) {
-    std::cout << "DEBUG: process_enum ENTERED for node at line " << node->line_number << std::endl;
-    
-    if (!node || !symbol_table) {
-        std::cout << "DEBUG: process_enum - null node or symbol_table" << std::endl;
-        return;
-    }
-    
-    
-    std::cout << "DEBUG: process_enum CONTINUING..." << std::endl;
-    
-    std::cout << "DEBUG: Processing EnumSpecifier at line " << node->line_number << std::endl;
-    
-    std::string enum_name = "anonymous";
-    std::vector<std::pair<std::string, int>> enumerators;
-    int next_value = 0;
-    
-    // The node IS the EnumSpecifier, so look directly in its children
-    std::cout << "DEBUG: EnumSpecifier has " << node->children.size() << " children:" << std::endl;
-    for (size_t i = 0; i < node->children.size(); i++) {
-        ASTNode* child = node->children[i];
-        if (!child) continue;
-        
-        std::cout << "DEBUG:   Child " << i << ": " << child->name << " lexeme='" << child->lexeme << "'" << std::endl;
-        
-        if ((child->name == "Identifier" || child->name == "IDENTIFIER") && 
-            !child->lexeme.empty() && child->lexeme != "default") {
-            enum_name = child->lexeme;
-            std::cout << "DEBUG:   Found enum name: " << enum_name << std::endl;
-        }
-        else if (child->name == "EnumeratorList") {
-            std::cout << "DEBUG:   Found EnumeratorList, extracting..." << std::endl;
-            enumerators = extract_enumerators(child, next_value);
-            std::cout << "DEBUG:   Extracted " << enumerators.size() << " enumerators" << std::endl;
-        }
-    }
-    
-    // Check if enum already exists
-    Symbol* existing = symbol_table->find_symbol(enum_name);
-    if (existing && existing->symbol_type == "enum") {
-        reportError("Enum '" + enum_name + "' already declared", node);
-        return;
-    }
-    
-    // Create enum symbol
-    Symbol* enum_sym = new Symbol(enum_name, "enum", "enum", 
-                                 symbol_table->get_current_scope_level(), node->line_number);
-    
-    // Add all enumerators to the enum symbol and current scope
-    for (const auto& enumerator : enumerators) {
-        enum_sym->add_enumerator(enumerator.first, enumerator.second);
-        
-        // Add enumerator as constant to current scope
-        Symbol* const_sym = new Symbol(enumerator.first, "constant", "int",
-                                      symbol_table->get_current_scope_level(), node->line_number);
-        
-        if (!symbol_table->add_symbol(const_sym)) {
-            // Enumerator already exists - this might be okay in some cases
-            delete const_sym;
-        } else {
-            std::cout << "[Enum " << enum_name << "] Added enumerator: " 
-                      << enumerator.first << " = " << enumerator.second << std::endl;
-        }
-    }
-    
-    // Add enum to symbol table
-    if (!symbol_table->add_symbol(enum_sym)) {
-        reportError("Failed to add enum '" + enum_name + "' to symbol table", node);
-        delete enum_sym;
-    } else {
-        std::cout << "[Enum] Created: " << enum_name << " with " 
-                  << enumerators.size() << " enumerators" << std::endl;
-    }
-}
-
-std::vector<std::pair<std::string, int>> SemanticAnalyzer::extract_enumerators(ASTNode* enumerator_list, int& next_value) {
-    std::vector<std::pair<std::string, int>> enumerators;
-    
-    if (!enumerator_list || enumerator_list->name != "EnumeratorList") {
-        std::cout << "DEBUG: extract_enumerators: Not an EnumeratorList" << std::endl;
-        return enumerators;
-    }
-    
-    std::cout << "DEBUG: EnumeratorList has " << enumerator_list->children.size() << " children" << std::endl;
-    
-    for (size_t i = 0; i < enumerator_list->children.size(); i++) {
-        ASTNode* enumerator_node = enumerator_list->children[i];
-        if (!enumerator_node || enumerator_node->name != "Enumerator") {
-            std::cout << "DEBUG:   Child " << i << " is not an Enumerator" << std::endl;
-            continue;
-        }
-        
-        std::cout << "DEBUG:   Processing Enumerator: lexeme='" << enumerator_node->lexeme << "'" << std::endl;
-        
-        std::string enumerator_name = "unknown";
-        int enumerator_value = next_value; // Default to auto-increment
-        
-        // The Enumerator node should have the name as its lexeme
-        if (!enumerator_node->lexeme.empty() && enumerator_node->lexeme != "default") {
-            enumerator_name = enumerator_node->lexeme;
-            std::cout << "DEBUG:     Enumerator name: " << enumerator_name << std::endl;
-        }
-        
-        // Look for Constant child for explicit value
-        std::cout << "DEBUG:     Enumerator has " << enumerator_node->children.size() << " children" << std::endl;
-        for (size_t j = 0; j < enumerator_node->children.size(); j++) {
-            ASTNode* child = enumerator_node->children[j];
-            if (!child) continue;
-            
-            std::cout << "DEBUG:       Child " << j << ": " << child->name << " lexeme='" << child->lexeme << "'" << std::endl;
-            
-            if (child->name == "Constant") {
-                // Explicit value assigned
-                try {
-                    enumerator_value = std::stoi(child->lexeme);
-                    std::cout << "DEBUG:       Explicit value: " << enumerator_value << std::endl;
-                } catch (const std::exception& e) {
-                    // If not a number, use current auto-increment value
-                    enumerator_value = next_value;
-                    std::cout << "DEBUG:       Invalid constant, using auto-increment: " << enumerator_value << std::endl;
-                }
-            }
-        }
-        
-        if (enumerator_name != "unknown") {
-            enumerators.push_back(std::make_pair(enumerator_name, enumerator_value));
-            next_value = enumerator_value + 1; // Update for next enumerator
-            std::cout << "DEBUG:     Added enumerator: " << enumerator_name << " = " << enumerator_value << std::endl;
-        }
-    }
-    
-    std::cout << "DEBUG: Total enumerators extracted: " << enumerators.size() << std::endl;
-    return enumerators;
-}
-
 void SemanticAnalyzer::process_parameter(ASTNode* param_decl) {
     if (!param_decl || !symbol_table) return;
     
@@ -746,56 +836,10 @@ void SemanticAnalyzer::process_parameter(ASTNode* param_decl) {
     
     if (param_name != "unknown") {
         Symbol* param_sym = new Symbol(param_name, "parameter", param_type,
-                                      symbol_table->get_current_scope_level(), param_decl->line_number);
-        if (!symbol_table->add_symbol(param_sym)) {
-            reportError("Parameter '" + param_name + "' already declared", param_decl);
-        } else {
+                                      symbol_table->get_current_scope_level(), 0);
+        if (symbol_table->add_symbol(param_sym)) {
             std::cout << "[Scope " << symbol_table->get_current_scope_level() 
-                      << "] Added parameter at line " << param_decl->line_number
-                      << ": " << param_name << " : " << param_type << std::endl;
-        }
-    }
-}
-
-void SemanticAnalyzer::process_parameter(ASTNode* param_decl, Symbol* func_sym) {
-    if (!param_decl || !symbol_table) return;
-    
-    std::string param_type = "int";
-    std::string param_name = "unknown";
-    
-    for (size_t i = 0; i < param_decl->children.size(); i++) {
-        ASTNode* child = param_decl->children[i];
-        if (!child) continue;
-        
-        if (child->name == "DeclarationSpecifiers") {
-            param_type = extract_base_type(child);
-        }
-        else if (child->name == "Declarator" || child->name == "DirectDeclarator") {
-            param_name = extract_declarator_name(child);
-        }
-    }
-    
-    if (param_name != "unknown") {
-        // Create SEPARATE symbols for scope and function info
-        Symbol* scope_param_sym = new Symbol(param_name, "parameter", param_type,
-                                           symbol_table->get_current_scope_level(), param_decl->line_number);
-        
-        // Add to scope for semantic checking and variable resolution
-        if (!symbol_table->add_symbol(scope_param_sym)) {
-            reportError("Parameter '" + param_name + "' already declared", param_decl);
-        } else {
-            std::cout << "[Scope " << symbol_table->get_current_scope_level() 
-                      << "] Added parameter at line " << param_decl->line_number
-                      << ": " << param_name << " : " << param_type << std::endl;
-        }
-        
-        // Create a SEPARATE symbol for function parameter list (type info only)
-        if (func_sym) {
-            Symbol* func_param_sym = new Symbol(param_name, "parameter", param_type,
-                                              func_sym->scope_level, 0);
-            func_sym->add_parameter(func_param_sym);
-            std::cout << "[Function " << func_sym->name << "] Added parameter info: " 
-                      << param_name << " : " << param_type << std::endl;
+                      << "] Added parameter: " << param_name << " : " << param_type << std::endl;
         }
     }
 }
@@ -805,79 +849,121 @@ void SemanticAnalyzer::process_variable(ASTNode* declarator, const std::string& 
     
     std::string var_name = extract_declarator_name(declarator);
     
-    if (var_name == "unknown" || var_name.empty()) {
-        reportError("Variable declaration has no name", declarator);
+    if (var_name == "unknown" || var_name.empty()) return;
+    
+    // Check for redeclaration in current scope
+    Symbol* existing = symbol_table->lookup_current_scope(var_name);
+    if (existing && !in_function_params) {
+        report_error("Redeclaration of variable '" + var_name + "'", declarator);
         return;
     }
     
-    // Create symbol with basic type
-    std::string symbol_type = in_function_params ? "parameter" : "variable";
-    Symbol* var_sym = new Symbol(var_name, symbol_type, base_type,
-                                symbol_table->get_current_scope_level(), declarator->line_number);
-    
-    // Extract enhanced type information
-    extract_type_info(declarator, var_sym);
-    
-    std::cout << "[Scope " << symbol_table->get_current_scope_level() 
-              << "] Added " << symbol_type << " at line " << declarator->line_number
-              << ": " << var_name << " : " << var_sym->get_full_type() << std::endl;
-    
-    if (!symbol_table->add_symbol(var_sym)) {
-        reportError("Variable '" + var_name + "' already declared in this scope", declarator);
-        delete var_sym;
+    // Track array dimensions
+    std::vector<int> dims = extract_array_dimensions(declarator);
+    if (!dims.empty()) {
+        array_dimensions[var_name] = dims;
+        std::cout << "[ARRAY] " << var_name << " dimensions: ";
+        for (int d : dims) std::cout << d << " ";
+        std::cout << std::endl;
     }
+    
+    // Track pointer levels
+    int ptr_level = count_pointer_levels(declarator);
+    if (ptr_level > 0) {
+        pointer_levels[var_name] = ptr_level;
+        std::cout << "[POINTER] " << var_name << " pointer level: " << ptr_level << std::endl;
+    }
+    
+    std::string symbol_type = in_function_params ? "parameter" : "variable";
+    std::string full_type = base_type + std::string(ptr_level, '*');
+    
+    Symbol* var_sym = new Symbol(var_name, symbol_type, full_type,
+                                symbol_table->get_current_scope_level(), 0);
+    
+    if (symbol_table->add_symbol(var_sym)) {
+        std::cout << "[Scope " << symbol_table->get_current_scope_level() 
+                  << "] Added " << symbol_type << ": " << var_name << " : " << full_type << std::endl;
+    }
+}
+
+void SemanticAnalyzer::process_struct(ASTNode* node) {
+    if (!node || !symbol_table) return;
+    
+    std::string struct_name = "anonymous";
+    
+    for (size_t i = 0; i < node->children.size(); i++) {
+        ASTNode* child = node->children[i];
+        if (!child) continue;
+        
+        if ((child->name == "Identifier" || child->name == "IDENTIFIER") && 
+            !child->lexeme.empty() && child->lexeme != "default") {
+            struct_name = child->lexeme;
+            break;
+        }
+    }
+    
+    Symbol* struct_sym = new Symbol(struct_name, "struct", "struct", 
+                                   symbol_table->get_current_scope_level(), 0);
+    symbol_table->add_symbol(struct_sym);
+}
+
+void SemanticAnalyzer::process_enum(ASTNode* node) {
+    if (!node || !symbol_table) return;
+    
+    std::string enum_name = "anonymous";
+    
+    for (size_t i = 0; i < node->children.size(); i++) {
+        ASTNode* child = node->children[i];
+        if (!child) continue;
+        
+        if ((child->name == "Identifier" || child->name == "IDENTIFIER") && 
+            !child->lexeme.empty() && child->lexeme != "default") {
+            enum_name = child->lexeme;
+            break;
+        }
+    }
+    
+    Symbol* enum_sym = new Symbol(enum_name, "enum", "enum", 
+                                 symbol_table->get_current_scope_level(), 0);
+    symbol_table->add_symbol(enum_sym);
+}
+
+std::string SemanticAnalyzer::extract_function_name(ASTNode* declarator) {
+    if (!declarator) return "unknown";
+    
+    if (!declarator->lexeme.empty() && declarator->lexeme != "default") {
+        return declarator->lexeme;
+    }
+    
+    for (size_t i = 0; i < declarator->children.size(); i++) {
+        ASTNode* child = declarator->children[i];
+        if (!child) continue;
+        
+        if (child->name == "DirectDeclarator") {
+            if (!child->lexeme.empty() && child->lexeme != "default") {
+                return child->lexeme;
+            }
+            
+            for (size_t j = 0; j < child->children.size(); j++) {
+                ASTNode* grandchild = child->children[j];
+                if (!grandchild) continue;
+                
+                if (!grandchild->lexeme.empty() && grandchild->lexeme != "default") {
+                    return grandchild->lexeme;
+                }
+            }
+        }
+    }
+    return "unknown";
 }
 
 std::string SemanticAnalyzer::extract_declarator_name(ASTNode* declarator) {
     if (!declarator) return "unknown";
     
-    // If current node has identifier, use it
     if (!declarator->lexeme.empty() && declarator->lexeme != "default") {
         return declarator->lexeme;
     }
     
-    // Handle Declarator node (wrapper for Pointer + DirectDeclarator)
-    if (declarator->name == "Declarator") {
-        for (size_t i = 0; i < declarator->children.size(); i++) {
-            ASTNode* child = declarator->children[i];
-            if (!child) continue;
-            
-            // Look for DirectDeclarator inside Declarator
-            if (child->name == "DirectDeclarator") {
-                std::string name = extract_declarator_name(child);
-                if (name != "unknown") return name;
-            }
-        }
-    }
-    
-    // Handle ArrayDeclarator - search in its children
-    if (declarator->name == "ArrayDeclarator") {
-        for (size_t i = 0; i < declarator->children.size(); i++) {
-            ASTNode* child = declarator->children[i];
-            if (!child) continue;
-            
-            // ArrayDeclarator can have DirectDeclarator OR another ArrayDeclarator as first child
-            if (child->name == "DirectDeclarator" || child->name == "ArrayDeclarator") {
-                std::string name = extract_declarator_name(child);
-                if (name != "unknown") return name;
-            }
-        }
-    }
-    
-    // Handle FunctionDeclarator
-    if (declarator->name == "FunctionDeclarator") {
-        for (size_t i = 0; i < declarator->children.size(); i++) {
-            ASTNode* child = declarator->children[i];
-            if (!child) continue;
-            
-            if (child->name == "DirectDeclarator" || child->name == "Declarator") {
-                std::string name = extract_declarator_name(child);
-                if (name != "unknown") return name;
-            }
-        }
-    }
-    
-    // Search recursively in children
     for (size_t i = 0; i < declarator->children.size(); i++) {
         ASTNode* child = declarator->children[i];
         if (!child) continue;
@@ -899,12 +985,10 @@ std::string SemanticAnalyzer::extract_base_type(ASTNode* decl_specifiers) {
         if (!child) continue;
         
         if (child->name == "TypeSpecifier") {
-            // Check TypeSpecifier's own lexeme
             if (!child->lexeme.empty() && child->lexeme != "default") {
                 return child->lexeme;
             }
             
-            // Check TypeSpecifier's children
             for (size_t j = 0; j < child->children.size(); j++) {
                 ASTNode* type_child = child->children[j];
                 if (!type_child) continue;
@@ -914,388 +998,89 @@ std::string SemanticAnalyzer::extract_base_type(ASTNode* decl_specifiers) {
                 }
             }
         }
-        else if (child->name == "StructOrUnionSpecifier") {
-            // Extract struct/union type and name
-            std::string specifier_type = "struct"; // default
-            std::string type_name = "anonymous";
-            
-            for (size_t j = 0; j < child->children.size(); j++) {
-                ASTNode* struct_child = child->children[j];
-                if (!struct_child) continue;
-                
-                if (struct_child->name == "StructOrUnion") {
-                    specifier_type = struct_child->lexeme; // "struct" or "union"
-                }
-                else if (struct_child->name == "Identifier") {
-                    type_name = struct_child->lexeme;
-                }
-            }
-            
-            // Return the full type: "struct Point" or "union Data"
-            return specifier_type + " " + type_name;
-        }
     }
     return "int";
 }
 
-std::string SemanticAnalyzer::extract_base_type_from_node(ASTNode* node) {
-    if (!node) return "int";
-    
-    // Check current node's lexeme
-    if (!node->lexeme.empty() && node->lexeme != "default") {
-        return node->lexeme;
-    }
-    
-    // Check children
-    for (size_t i = 0; i < node->children.size(); i++) {
-        ASTNode* child = node->children[i];
-        if (!child) continue;
-        
-        if (!child->lexeme.empty() && child->lexeme != "default") {
-            return child->lexeme;
-        }
-    }
-    return "int";
-}
+// ============================================================================
+// UTILITY HELPERS
+// ============================================================================
 
-std::string SemanticAnalyzer::extract_struct_member_name(ASTNode* node) {
-    if (!node) return "unknown";
+std::vector<int> SemanticAnalyzer::extract_array_dimensions(ASTNode* node) {
+    std::vector<int> dims;
+    if (!node) return dims;
     
-    for (size_t i = 0; i < node->children.size(); i++) {
-        ASTNode* child = node->children[i];
-        if (!child) continue;
-        
-        // Struct members can be DirectDeclarator or ArrayDeclarator
-        if (child->name == "DirectDeclarator" || child->name == "ArrayDeclarator") {
-            return extract_declarator_name(child);
-        }
-    }
-    return "unknown";
-}
-
-
-
-bool SemanticAnalyzer::is_function_declaration(ASTNode* declaration_node) {
-    if (!declaration_node) return false;
-    
-    // Simple check: look for ParameterList in the declaration
-    for (size_t i = 0; i < declaration_node->children.size(); i++) {
-        ASTNode* child = declaration_node->children[i];
-        if (!child) continue;
-        
-        if (child->name == "InitDeclaratorList") {
-            for (size_t j = 0; j < child->children.size(); j++) {
-                ASTNode* init_decl = child->children[j];
-                if (!init_decl || init_decl->name != "InitDeclarator") continue;
-                
-                // Check if any declarator has parameters
-                for (size_t k = 0; k < init_decl->children.size(); k++) {
-                    ASTNode* decl = init_decl->children[k];
-                    if (!decl) continue;
-                    
-                    // Skip function pointers (they have Pointer inside FunctionDeclarator)
-                    if (is_function_pointer(decl)) {
-                        continue; // Skip function pointers
-                    }
-                    
-                    if (has_parameter_list(decl)) {
-                        return true;
-                    }
-                }
-            }
-        }
-    }
-    return false;
-}
-
-// ADD THIS HELPER METHOD:
-bool SemanticAnalyzer::is_function_pointer(ASTNode* node) {
-    if (!node) return false;
-    
-    if (node->name == "FunctionDeclarator") {
-        // Look for Declarator with Pointer inside FunctionDeclarator
-        for (size_t i = 0; i < node->children.size(); i++) {
-            ASTNode* child = node->children[i];
+    if (node->name == "ArrayDeclarator") {
+        for (auto child : node->children) {
             if (!child) continue;
-            
-            if (child->name == "Declarator") {
-                // Check if Declarator has Pointer
-                for (size_t j = 0; j < child->children.size(); j++) {
-                    if (child->children[j] && child->children[j]->name == "Pointer") {
-                        return true; // This is a function pointer
-                    }
-                }
+            if (child->name == "Constant") {
+                try {
+                    dims.push_back(std::stoi(child->lexeme));
+                } catch (...) {}
+            } else {
+                auto sub = extract_array_dimensions(child);
+                dims.insert(dims.end(), sub.begin(), sub.end());
             }
-        }
-    }
-    return false;
-}
-
-
-void SemanticAnalyzer::process_function_declaration(ASTNode* node) {
-    if (!node || !symbol_table) return;
-    
-    std::string func_name = "unknown";
-    std::string return_type = "int";
-    
-    // Extract return type and function name (same logic as process_function)
-    for (size_t i = 0; i < node->children.size(); i++) {
-        ASTNode* child = node->children[i];
-        if (!child) continue;
-        
-        if (child->name == "DeclarationSpecifiers") {
-            return_type = extract_base_type(child);
-        }
-        else if (child->name == "InitDeclaratorList") {
-            // Extract function name from declarators
-            for (size_t j = 0; j < child->children.size(); j++) {
-                ASTNode* init_decl = child->children[j];
-                if (!init_decl) continue;
-                
-                for (size_t k = 0; k < init_decl->children.size(); k++) {
-                    ASTNode* decl = init_decl->children[k];
-                    func_name = extract_declarator_name(decl);
-                    if (func_name != "unknown") break;
-                }
-                if (func_name != "unknown") break;
-            }
-        }
-    }
-    
-    if (func_name == "unknown") {
-        reportError("Function declaration has no name", node);
-        return;
-    }
-    
-    // Check if function already exists
-    Symbol* existing = symbol_table->find_symbol(func_name);
-    
-    if (existing) {
-        if (existing->symbol_type == "function") {
-            // Function already declared - this is normal for multiple declarations
-            std::cout << "[Info] Function '" << func_name << "' already declared" << std::endl;
-            // Don't create a new symbol or add to table
-        } else {
-            reportError("Symbol '" + func_name + "' already declared as different kind", node);
         }
     } else {
-        // Create new function symbol
-        Symbol* func_sym = new Symbol(func_name, "function", return_type,
-                                     symbol_table->get_current_scope_level(), node->line_number);
-        
-        // Process parameters for type information ONLY
-        for (size_t i = 0; i < node->children.size(); i++) {
-            ASTNode* child = node->children[i];
-            if (!child) continue;
-            
-            if (child->name == "InitDeclaratorList") {
-                process_function_parameters(child);  // Use the version that doesn't add to symbol table
-            }
-        }
-        
-        // Add to symbol table
-        if (!symbol_table->add_symbol(func_sym)) {
-            reportError("Failed to add function declaration '" + func_name + "'", node);
-            delete func_sym;
-        } else {
-            std::cout << "[Declaration] Function: " << func_name << " : " << return_type << std::endl;
+        for (auto c : node->children) {
+            auto sub = extract_array_dimensions(c);
+            dims.insert(dims.end(), sub.begin(), sub.end());
         }
     }
+    return dims;
 }
 
-bool SemanticAnalyzer::has_parameter_list(ASTNode* node) {
-    if (!node) return false;
+int SemanticAnalyzer::count_pointer_levels(ASTNode* node) {
+    if (!node) return 0;
     
-    if (node->name == "ParameterList" || node->name == "ParameterTypeList") {
-        return true;
-    }
-    
-    for (size_t i = 0; i < node->children.size(); i++) {
-        if (has_parameter_list(node->children[i])) {
-            return true;
+    int count = 0;
+    if (node->name == "Pointer") {
+        count = 1;
+        for (auto child : node->children) {
+            count += count_pointer_levels(child);
         }
-    }
-    return false;
-}
-
-
-// New helper method to extract type information
-void SemanticAnalyzer::extract_type_info(ASTNode* declarator, Symbol* symbol) {
-    if (!declarator || !symbol) return;
-    
-    // Handle Declarator node (contains Pointer + DirectDeclarator)
-    if (declarator->name == "Declarator") {
-        extract_pointer_info(declarator, symbol);
-        
-        // Find the inner DirectDeclarator or ArrayDeclarator
-        for (size_t i = 0; i < declarator->children.size(); i++) {
-            ASTNode* child = declarator->children[i];
-            if (!child) continue;
-            
-            if (child->name == "DirectDeclarator" || child->name == "ArrayDeclarator") {
-                extract_type_info(child, symbol);
-            }
-        }
-    }
-    // Handle ArrayDeclarator
-    else if (declarator->name == "ArrayDeclarator") {
-    // Check if this is pointer-to-array (has Declarator with Pointer inside ArrayDeclarator)
-    	bool is_pointer_to_array = false;
-    
-    	for (size_t i = 0; i < declarator->children.size(); i++) {
-        	ASTNode* child = declarator->children[i];
-        	if (!child) continue;
-        
-        	if (child->name == "Declarator") {
-            // This is pointer-to-array case: int (*arr_ptr)[10]
-           	 extract_pointer_info(child, symbol);
-           	 is_pointer_to_array = true;
-            
-            // Extract the name from inner DirectDeclarator
-           	 for (size_t j = 0; j < child->children.size(); j++) {
-            	    if (child->children[j] && child->children[j]->name == "DirectDeclarator") {
-              	      extract_type_info(child->children[j], symbol);
-                	}
-            	}
-        	}
-    	}
-    
-    	if (!is_pointer_to_array) {
-        // Normal array case
-        	symbol->is_array = true;
-        	extract_array_dimensions(declarator, symbol);
-        
-        // Find the inner declarator
-    	    for (size_t i = 0; i < declarator->children.size(); i++) {
-        	    ASTNode* child = declarator->children[i];
-        	    if (!child) continue;
-            
-            	if (child->name == "DirectDeclarator" || child->name == "ArrayDeclarator") {
-                	extract_type_info(child, symbol);
-            	}
-        	}
     } else {
-        // For pointer-to-array, extract array dimensions from the ArrayDeclarator itself
-        symbol->is_array = true;
-        extract_array_dimensions(declarator, symbol);
-    }
-}
-    // Handle FunctionDeclarator (for function pointers)
-    else if (declarator->name == "FunctionDeclarator") {
-        // Check if this is a function pointer (has Pointer inside Declarator)
-        bool is_func_ptr = false;
-        for (size_t i = 0; i < declarator->children.size(); i++) {
-            ASTNode* child = declarator->children[i];
-            if (!child) continue;
-            
-            if (child->name == "Declarator") {
-                extract_pointer_info(child, symbol);
-                is_func_ptr = symbol->is_pointer; // Will be true if we found pointers
-                
-                // Extract the name from inner DirectDeclarator
-                for (size_t j = 0; j < child->children.size(); j++) {
-                    if (child->children[j] && child->children[j]->name == "DirectDeclarator") {
-                        extract_type_info(child->children[j], symbol);
-                    }
-                }
-            }
-        }
-        
-        if (is_func_ptr) {
-            // This is a function pointer variable
-            symbol->symbol_type = "variable";
-            // TODO: Extract function parameter types for the function pointer
-        } else {
-            // This is a function declaration
-            symbol->symbol_type = "function";
+        for (auto child : node->children) {
+            count += count_pointer_levels(child);
         }
     }
+    return count;
 }
 
-// Extract pointer information from nested Pointer nodes
-void SemanticAnalyzer::extract_pointer_info(ASTNode* declarator, Symbol* symbol) {
-    if (!declarator || !symbol) return;
-    
-    // Count nested Pointer nodes
-    for (size_t i = 0; i < declarator->children.size(); i++) {
-        ASTNode* child = declarator->children[i];
-        if (!child) continue;
-        
-        if (child->name == "Pointer") {
-            symbol->is_pointer = true;
-            symbol->pointer_level++;
-            
-            // Check for nested pointers (int** etc.)
-            for (size_t j = 0; j < child->children.size(); j++) {
-                if (child->children[j] && child->children[j]->name == "Pointer") {
-                    extract_pointer_info(child, symbol);
-                }
-            }
-        }
+// ============================================================================
+// ERROR REPORTING
+// ============================================================================
+
+void SemanticAnalyzer::report_error(const std::string& message, ASTNode* node) {
+    std::cerr << "SEMANTIC ERROR: " << message;
+    if (node) {
+        std::cerr << " [at node: " << node->name << "]";
     }
+    std::cerr << std::endl;
+    error_count++;
 }
 
-// Extract array dimensions from nested ArrayDeclarator nodes
-void SemanticAnalyzer::extract_array_dimensions(ASTNode* array_declarator, Symbol* symbol) {
-    if (!array_declarator || !symbol || array_declarator->name != "ArrayDeclarator") return;
-    
-    // Look for Constant children for array dimensions
-    for (size_t i = 0; i < array_declarator->children.size(); i++) {
-        ASTNode* child = array_declarator->children[i];
-        if (!child) continue;
-        
-        if (child->name == "Constant" && !child->lexeme.empty() && child->lexeme != "default") {
-            try {
-                int dimension = std::stoi(child->lexeme);
-                symbol->array_dimensions.push_back(dimension);
-            } catch (const std::exception& e) {
-                // If not a number, treat as incomplete array (size 0 or -1)
-                symbol->array_dimensions.push_back(-1);
-            }
-        }
+void SemanticAnalyzer::report_warning(const std::string& message, ASTNode* node) {
+    std::cout << "WARNING: " << message;
+    if (node) {
+        std::cout << " [at node: " << node->name << "]";
     }
-    
-    // If no Constant found, it's an incomplete array
-    if (symbol->array_dimensions.empty()) {
-        symbol->array_dimensions.push_back(-1);
-    }
-    
-    // Reverse dimensions because they're stored outermost first in AST
-    // but we want innermost first for type representation
-    std::reverse(symbol->array_dimensions.begin(), symbol->array_dimensions.end());
+    std::cout << std::endl;
+    warning_count++;
 }
-void SemanticAnalyzer::check_member_access(ASTNode* node) {
-    if (!node || node->name != "MemberAccess") return;
-    if (node->children.size() < 2) return;
+
+void SemanticAnalyzer::print_summary() {
+    std::cout << "\n=== SEMANTIC ANALYSIS SUMMARY ===" << std::endl;
+    std::cout << "Errors: " << error_count << std::endl;
+    std::cout << "Warnings: " << warning_count << std::endl;
     
-    ASTNode* struct_node = node->children[0];  // p
-    ASTNode* member_node = node->children[1];  // x
-    
-    if (!struct_node || !member_node) return;
-    
-    // Find the struct variable
-    Symbol* struct_var = symbol_table->find_symbol(struct_node->lexeme);
-    if (!struct_var) return;
-    
-    // Get struct type name and clean it
-    std::string struct_type_name = struct_var->base_type;
-    std::string clean_struct_name = struct_type_name;
-    if (struct_type_name.find("struct ") == 0) {
-        clean_struct_name = struct_type_name.substr(7);
-    } else if (struct_type_name.find("union ") == 0) {
-        clean_struct_name = struct_type_name.substr(6);
-    }
-    
-    // Find the struct type definition
-    Symbol* struct_type = symbol_table->find_symbol(clean_struct_name);
-    if (!struct_type || !struct_type->is_complete) return;
-    
-    // Check if member exists
-    std::string member_name = member_node->lexeme;
-    for (auto member : struct_type->members) {
-        if (member->name == member_name) {
-            std::cout << "[Member Access] " << struct_node->lexeme << "." << member_name << std::endl;
-            return;
+    if (!recursive_functions.empty()) {
+        std::cout << "\n[RECURSIVE FUNCTIONS DETECTED]:" << std::endl;
+        for (const auto& func : recursive_functions) {
+            std::cout << "  - " << func << std::endl;
         }
     }
+    
+    std::cout << "=================================" << std::endl;
 }

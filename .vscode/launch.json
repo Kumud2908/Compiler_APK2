@@ -8,8 +8,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": false,
-      "cwd": "/home/kumud/Desktop/compiler_grp_project/test",
-      "program": "/home/kumud/Desktop/compiler_grp_project/test/build/Debug/outDebug",
+      "cwd": "/home/kumud/Downloads/ast_14oct/src",
+      "program": "/home/kumud/Downloads/ast_14oct/src/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [
