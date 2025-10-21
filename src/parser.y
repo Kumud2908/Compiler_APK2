@@ -2,6 +2,8 @@
 #include "ast.h"
 #include "symbol.h"
 #include "semantic.h"
+#include "tac.h"
+#include "codegen.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -38,7 +40,7 @@ SymbolTable* symbol_table = NULL;
 
 /* AST helper functions */
 ASTNode* create_node(const char* name, const char* lexeme = "") {
-    return new ASTNode(name, lexeme, yylineno);
+    return new ASTNode(name, lexeme);
 }
 
 void push_node(ASTNode* node) {
@@ -1094,19 +1096,24 @@ int main(int argc, char* argv[]) {
         fclose(file);
     }
     
-    // MOVE ALL PRINTING LOGIC HERE
     if (syntax_errors == 0 && result == 0) {
         printf("\n=== PARSING SUCCESSFUL ===\n");
-        //print_token_table();
-
-	// SEMANTIC ANALYSIS
+        
+        // SEMANTIC ANALYSIS
         printf("\n=== SEMANTIC ANALYSIS ===\n");
         SemanticAnalyzer analyzer(symbol_table);
         analyzer.analyze(root);
         
-        // Print results
+        // Print symbol table
         symbol_table->print_table();
-
+        
+        // THREE ADDRESS CODE GENERATION
+        printf("\n=== CODE GENERATION ===\n");
+        TACGenerator tac_gen;
+        CodeGenerator code_gen(&tac_gen);
+        
+        code_gen.generate(root);
+        tac_gen.print();
         
         // Print AST
         if (root) {
@@ -1122,6 +1129,16 @@ int main(int argc, char* argv[]) {
                 dotFile << "}\n";
                 dotFile.close();
                 printf("\nAST DOT file generated: ast.dot\n");
+            }
+            
+            // Generate TAC output file
+            std::ofstream tacFile("output.tac");
+            if (tacFile.is_open()) {
+                for (const auto& instr : tac_gen.get_instructions()) {
+                    tacFile << instr.toString() << std::endl;
+                }
+                tacFile.close();
+                printf("TAC file generated: output.tac\n");
             }
         }
     } else {
