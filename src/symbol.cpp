@@ -39,10 +39,20 @@ void Scope::print() {
 }
 
 // Symbol implementation
-Symbol::Symbol(const std::string& name, const std::string& sym_type, 
-               const std::string& base_type, int scope, int line)
-    : name(name), symbol_type(sym_type), base_type(base_type), 
-      scope_level(scope), line_number(line) {}
+Symbol::Symbol(const std::string& name, const std::string& sym_kind, 
+               const std::string& data_type, int scope, int line)
+    : name(name), 
+      kind(sym_kind),           // "variable", "function", etc.
+      symbol_type(data_type),   // "int", "int*", "float*", etc.
+      base_type(data_type),     // Same as symbol_type for now
+      scope_level(scope), 
+      line_number(line),
+      offset(0),
+      param_count(0),
+      is_array(false),
+      pointer_level(0),
+      is_initialized(false),
+      is_used(false) {}
 
 void Symbol::add_parameter(Symbol* param) {
     if (param) parameters.push_back(param);
