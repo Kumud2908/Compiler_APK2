@@ -8,6 +8,16 @@
 #include <sstream>
 #include <algorithm>
 
+
+#include <unordered_set>
+
+static const std::unordered_set<std::string> builtin_functions = {
+    "printf", "scanf", "gets", "puts", "fopen", "fclose", "fread", "fwrite",
+    "malloc", "free", "exit", "strlen", "strcpy", "strcmp", "strcat", "atoi",
+    "atof", "sprintf", "fprintf", "fscanf", "getchar", "putchar"
+};
+
+
 SemanticAnalyzer::SemanticAnalyzer(SymbolTable* table) 
     : symbol_table(table), in_function_params(false), 
       loop_depth(0), switch_depth(0), has_default_in_switch(false),
@@ -15,6 +25,14 @@ SemanticAnalyzer::SemanticAnalyzer(SymbolTable* table)
     if (!symbol_table) {
         std::cerr << "ERROR: SymbolTable is null!" << std::endl;
     }
+}
+
+//  function to check if a declarator has an initializer
+bool SemanticAnalyzer::has_initializer(ASTNode* init_declarator) {
+    if (!init_declarator || init_declarator->name != "InitDeclarator") return false;
+    
+    // InitDeclarator with more than 1 child means it has an initializer
+    return init_declarator->children.size() > 1;
 }
 
 void SemanticAnalyzer::analyze(ASTNode* root) {
@@ -196,6 +214,21 @@ void SemanticAnalyzer::traverse(ASTNode* node) {
     if (node->name == "SwitchStatement") {
         switch_depth--;
     }
+
+     // Add this check for InitDeclarator
+
+    if (node->name == "InitDeclarator") {
+        if (node->children.size() > 0) {
+            std::string var_name = extract_declarator_name(node->children[0]);
+            if (!var_name.empty() && var_name != "unknown") {
+                // Has initializer if there are 2+ children
+                if (node->children.size() > 1) {
+                    variable_initialized[var_name] = true;
+                    std::cout << "[INIT] Variable '" << var_name << "' is initialized" << std::endl;
+                }
+            }
+        }
+    }
 }
 
 // ============================================================================
@@ -204,8 +237,13 @@ void SemanticAnalyzer::traverse(ASTNode* node) {
 
 void SemanticAnalyzer::check_undeclared_identifier(ASTNode* node) {
     if (!node || node->lexeme.empty()) return;
+    // Ignore built-in functions
+    
     
     Symbol* sym = symbol_table->lookup(node->lexeme);
+
+    if (!sym && builtin_functions.find(node->lexeme) != builtin_functions.end())
+        return;
     if (!sym) {
         report_error("Undeclared identifier '" + node->lexeme + "'", node);
     }
@@ -218,18 +256,26 @@ void SemanticAnalyzer::check_function_call(ASTNode* node) {
     if (!func_id || func_id->name != "Identifier") return;
     
     std::string func_name = func_id->lexeme;
+
+    // Trim whitespace (optional but safe)
+    func_name.erase(std::remove_if(func_name.begin(), func_name.end(), ::isspace), func_name.end());
+
     
     // Check if function exists
     Symbol* func_sym = symbol_table->lookup(func_name);
-    if (!func_sym) {
-        report_error("Undeclared function '" + func_name + "'", node);
-        return;
-    }
+
+ 
+// Ignore built-in functions
+
+
+if (!func_sym && builtin_functions.find(func_name) == builtin_functions.end()) {
+    report_error("Undeclared function '" + func_name + "'", node);
+}
     
-    if (func_sym->kind != "function") {
-        report_error("'" + func_name + "' is not a function", node);
-        return;
-    }
+   if (func_sym && func_sym->kind != "function") {
+    report_error("'" + func_name + "' is not a function", node);
+    return;
+}
     
     // Check for recursion
     if (!current_function_name.empty()) {
@@ -263,14 +309,38 @@ void SemanticAnalyzer::check_assignment(ASTNode* node) {
     int rhs_ptr_level = get_pointer_level(rhs_type);
     
     if (lhs_ptr_level != rhs_ptr_level) {
-        report_error("Pointer level mismatch in assignment: cannot assign '" + 
-                    rhs_type + "' to '" + lhs_type + "'", node);
-        return;
+        // Special case: check if RHS is an address-of operation
+        bool is_address_of = false;
+        if (node->children[1]->name == "UnaryExpression" && 
+            node->children[1]->lexeme == "&") {
+            is_address_of = true;
+            // This is valid if pointer levels match after considering &
+        }
+        
+        if (!is_address_of) {
+            report_error("Pointer level mismatch in assignment: cannot assign '" + 
+                        rhs_type + "' to '" + lhs_type + "'", node);
+            return;
+        }
     }
     
     if (!types_compatible(lhs_type, rhs_type)) {
         report_warning("Implicit type conversion in assignment: '" + 
                       rhs_type + "' to '" + lhs_type + "'", node);
+    }
+    
+    // NEW: Mark LHS as initialized after assignment
+    if (node->children[0]->name == "Identifier") {
+        std::string var_name = node->children[0]->lexeme;
+        variable_initialized[var_name] = true;
+    }
+    // Also handle dereferenced pointers like *p
+    else if (node->children[0]->name == "UnaryExpression" && 
+             node->children[0]->lexeme == "*" &&
+             node->children[0]->children.size() > 0 &&
+             node->children[0]->children[0]->name == "Identifier") {
+        std::string var_name = node->children[0]->children[0]->lexeme;
+        variable_initialized[var_name] = true;
     }
 }
 
@@ -324,25 +394,45 @@ void SemanticAnalyzer::check_binary_operation(ASTNode* node) {
 
 void SemanticAnalyzer::check_unary_operation(ASTNode* node) {
     if (!node || node->children.empty()) return;
-    
+
     std::string operand_type = get_expression_type(node->children[0]);
     std::string op = node->lexeme;
-    
+
     if (op == "*") {
-        // Dereference - must be pointer
         if (!is_pointer_type(operand_type)) {
             report_error("Cannot dereference non-pointer type '" + operand_type + "'", node);
+            return;
         }
-    } else if (op == "&") {
-        // Address-of - operand must be lvalue
-        // TODO: Check if operand is lvalue
-    } else if (op == "++" || op == "--") {
-        // Increment/decrement - must be numeric or pointer
+        
+        // NEW: Check if pointer is initialized before dereferencing
+        if (node->children[0]->name == "Identifier") {
+            std::string var_name = node->children[0]->lexeme;
+            if (variable_initialized.find(var_name) != variable_initialized.end()) {
+                if (!variable_initialized[var_name]) {
+                    report_error("Dereferencing uninitialized pointer '" + var_name + "'", node);
+                }
+            }
+        }
+    } 
+    else if (op == "&") {
+        if (node->children[0]->name != "Identifier" && 
+            node->children[0]->name != "ArraySubscript" &&
+            node->children[0]->name != "MemberAccess") {
+            report_error("Operand of '&' must be an lvalue", node);
+        }
+    } 
+    else if (op == "++" || op == "--") {
         if (!is_numeric_type(operand_type) && !is_pointer_type(operand_type)) {
             report_error("Increment/decrement requires numeric or pointer type", node);
         }
+    } 
+    else if (op == "+" || op == "-") {
+        if (!is_numeric_type(operand_type)) {
+            report_error("Unary + or - requires numeric type", node);
+        }
     }
 }
+
 
 void SemanticAnalyzer::check_return_statement(ASTNode* node) {
     if (current_function_return_type.empty()) {
@@ -539,82 +629,102 @@ void SemanticAnalyzer::check_cast_validity(ASTNode* node) {
 // ============================================================================
 // TYPE CHECKING HELPERS
 // ============================================================================
-
 std::string SemanticAnalyzer::get_expression_type(ASTNode* expr) {
     if (!expr) return "unknown";
-    
+
+    // Identifier
     if (expr->name == "Identifier") {
         return get_identifier_type(expr->lexeme);
     }
-    
+
+    // Constants
     if (expr->name == "Constant") {
-        if (expr->lexeme.find('.') != std::string::npos || 
-            expr->lexeme.find('f') != std::string::npos) {
+        if (expr->lexeme.find('.') != std::string::npos || expr->lexeme.find('f') != std::string::npos)
             return "float";
-        }
-        if (expr->lexeme == "true" || expr->lexeme == "false") {
+        if (expr->lexeme == "true" || expr->lexeme == "false")
             return "bool";
-        }
         return "int";
     }
-    
+
+    // String literals
     if (expr->name == "StringLiteral") {
         return "char*";
     }
-    
-    // Binary operations
-    if (expr->name == "AdditiveExpression" || expr->name == "MultiplicativeExpression") {
-        std::string left_type = get_expression_type(expr->children[0]);
-        std::string right_type = get_expression_type(expr->children[1]);
-        
-        // Result type promotion
-        if (left_type == "float" || right_type == "float") return "float";
-        if (left_type == "double" || right_type == "double") return "double";
-        return "int";
-    }
-    
-    // Relational/Equality operations return bool
-    if (expr->name == "RelationalExpression" || expr->name == "EqualityExpression" ||
-        expr->name == "LogicalAndExpression" || expr->name == "LogicalOrExpression") {
-        return "bool";
-    }
-    
+
     // Unary operations
-    if (expr->name == "UnaryExpression") {
-        if (expr->lexeme == "*") {
-            // Dereference - remove one pointer level
-            std::string operand_type = get_expression_type(expr->children[0]);
-            if (operand_type.find('*') != std::string::npos) {
-                return operand_type.substr(0, operand_type.length() - 1);
+    if (expr->name == "UnaryExpression" && !expr->children.empty()) {
+        std::string operand_type = get_expression_type(expr->children[0]);
+        std::string op = expr->lexeme;
+
+        if (op == "*") {
+            if (is_pointer_type(operand_type)) {
+                // Dereference: remove one pointer level
+                size_t star_pos = operand_type.rfind('*');
+                std::string result = operand_type.substr(0, star_pos);
+                if (result.empty()) result = "unknown";
+                return result;
+            } else {
+                report_error("Cannot dereference non-pointer type '" + operand_type + "'", expr);
+                return "unknown";
             }
-        } else if (expr->lexeme == "&") {
-            // Address-of - add one pointer level
-            std::string operand_type = get_expression_type(expr->children[0]);
+        } else if (op == "&") {
+            // Address-of: add one pointer level
             return operand_type + "*";
+        } else if (op == "++" || op == "--") {
+            if (!is_numeric_type(operand_type) && !is_pointer_type(operand_type)) {
+                report_error("Increment/decrement requires numeric or pointer type", expr);
+            }
+            return operand_type; // type doesn't change
+        } else if (op == "+" || op == "-") {
+            return operand_type;
         }
-        return get_expression_type(expr->children[0]);
+
+        // Fallback
+        return operand_type;
     }
-    
+
+    // Binary operations
+    if (!expr->children.empty()) {
+        std::string left_type = get_expression_type(expr->children[0]);
+        std::string right_type = expr->children.size() > 1 ? get_expression_type(expr->children[1]) : "unknown";
+
+        if (expr->name == "AdditiveExpression" || expr->name == "MultiplicativeExpression") {
+            if (left_type == "float" || right_type == "float") return "float";
+            if (left_type == "double" || right_type == "double") return "double";
+            return "int";
+        }
+
+        if (expr->name == "RelationalExpression" || expr->name == "EqualityExpression" ||
+            expr->name == "LogicalAndExpression" || expr->name == "LogicalOrExpression") {
+            return "bool";
+        }
+    }
+
     // Function call
-    if (expr->name == "FunctionCall" && expr->children.size() > 0) {
-        std::string func_name = expr->children[0]->lexeme;
-        Symbol* func_sym = symbol_table->lookup(func_name);
-        if (func_sym) {
-            return func_sym->symbol_type;
-        }
+    if (expr->name == "FunctionCall" && !expr->children.empty()) {
+        Symbol* func_sym = symbol_table->lookup(expr->children[0]->lexeme);
+        if (func_sym) return func_sym->symbol_type;
     }
-    
+
     // Array subscript
-    if (expr->name == "ArraySubscript" && expr->children.size() > 0) {
-        return get_expression_type(expr->children[0]);
+    if (expr->name == "ArraySubscript" && !expr->children.empty()) {
+        std::string array_type = get_expression_type(expr->children[0]);
+        if (is_pointer_type(array_type)) {
+            // array[i] returns base type (dereference pointer)
+            size_t star_pos = array_type.rfind('*');
+            std::string result = array_type.substr(0, star_pos);
+            if (result.empty()) result = "unknown";
+            return result;
+        }
+        return array_type;
     }
-    
+
     return "unknown";
 }
 
 std::string SemanticAnalyzer::get_identifier_type(const std::string& name) {
     Symbol* sym = symbol_table->lookup(name);
-    return sym ? sym->symbol_type : "unknown";
+    return sym ? sym->symbol_type : "unknown";  // Now this will be correct
 }
 
 int SemanticAnalyzer::get_pointer_level(const std::string& type) {
@@ -843,7 +953,7 @@ void SemanticAnalyzer::process_parameter(ASTNode* param_decl) {
         }
     }
 }
-
+// Add to process_variable() - track initialization
 void SemanticAnalyzer::process_variable(ASTNode* declarator, const std::string& base_type) {
     if (!declarator || !symbol_table) return;
     
@@ -862,16 +972,12 @@ void SemanticAnalyzer::process_variable(ASTNode* declarator, const std::string& 
     std::vector<int> dims = extract_array_dimensions(declarator);
     if (!dims.empty()) {
         array_dimensions[var_name] = dims;
-        std::cout << "[ARRAY] " << var_name << " dimensions: ";
-        for (int d : dims) std::cout << d << " ";
-        std::cout << std::endl;
     }
     
     // Track pointer levels
     int ptr_level = count_pointer_levels(declarator);
     if (ptr_level > 0) {
         pointer_levels[var_name] = ptr_level;
-        std::cout << "[POINTER] " << var_name << " pointer level: " << ptr_level << std::endl;
     }
     
     std::string symbol_type = in_function_params ? "parameter" : "variable";
@@ -883,7 +989,14 @@ void SemanticAnalyzer::process_variable(ASTNode* declarator, const std::string& 
     if (symbol_table->add_symbol(var_sym)) {
         std::cout << "[Scope " << symbol_table->get_current_scope_level() 
                   << "] Added " << symbol_type << ": " << var_name << " : " << full_type << std::endl;
+        
+        // Track initialization status - variables are uninitialized by default
+        variable_initialized[var_name] = false;
     }
+
+    if (variable_initialized.find(var_name) == variable_initialized.end()) {
+    variable_initialized[var_name] = false;
+}
 }
 
 void SemanticAnalyzer::process_struct(ASTNode* node) {

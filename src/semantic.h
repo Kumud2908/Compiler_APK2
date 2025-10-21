@@ -15,6 +15,11 @@ class SemanticAnalyzer {
 private:
     SymbolTable* symbol_table;
     bool in_function_params;
+
+
+    // Add these tracking maps
+    std::set<std::string> initialized_variables;
+    std::map<std::string, bool> variable_initialized;
     
     // Context tracking
     std::string current_function_name;
@@ -100,6 +105,8 @@ private:
     // Error reporting
     void report_error(const std::string& message, ASTNode* node = nullptr);
     void report_warning(const std::string& message, ASTNode* node = nullptr);
+
+    bool has_initializer(ASTNode* init_declarator);
 
 public:
     SemanticAnalyzer(SymbolTable* table);
