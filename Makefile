@@ -1,6 +1,6 @@
 # Compiler settings
 CXX = g++
-CXXFLAGS = -std=c++11 -Wall -g -Isrc
+CXXFLAGS = -std=c++11 -Wall -g -Isrc -I$(BUILD_DIR)
 LEX = flex
 YACC = bison
 YACCFLAGS = -d -v
@@ -32,11 +32,12 @@ $(BUILD_DIR)/parser.tab.cpp $(BUILD_DIR)/parser.tab.h: $(SRC_DIR)/parser.y
 
 # Generate lexer from lex file
 $(BUILD_DIR)/lexer.cpp: $(SRC_DIR)/lexer.l $(BUILD_DIR)/parser.tab.h
+	mkdir -p $(BUILD_DIR)
 	$(LEX) -o $(BUILD_DIR)/lexer.cpp $<
 
 # Compile object files
 $(BUILD_DIR)/lexer.o: $(BUILD_DIR)/lexer.cpp $(BUILD_DIR)/parser.tab.h $(SRC_DIR)/ast.h
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) -I$(BUILD_DIR) -c $< -o $@
 
 $(BUILD_DIR)/parser.tab.o: $(BUILD_DIR)/parser.tab.cpp $(SRC_DIR)/ast.h $(SRC_DIR)/symbol.h \
                           $(SRC_DIR)/semantic.h $(SRC_DIR)/tac.h $(SRC_DIR)/codegen.h
@@ -63,6 +64,6 @@ clean:
 
 # Test target
 test: $(TARGET)
-	./$(TARGET) test.c
+	./$(TARGET) test.cpp
 
 .PHONY: all clean test

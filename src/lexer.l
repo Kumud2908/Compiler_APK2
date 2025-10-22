@@ -1,7 +1,7 @@
 %{
 
 #include "ast.h"        // Include this FIRST
-#include "parser.tab.h" // Include this SECOND
+#include "../build/parser.tab.hpp" // Include this SECOND
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -60,6 +60,7 @@ char* make_string(const char* text);
 /* Start conditions for comments and strings */
 %x COMMENT
 %x STRING_STATE
+%x CLASS_NAME   
 
 /* Regular expressions for patterns */
 DIGIT           [0-9]
@@ -122,6 +123,15 @@ ID_PATTERN      {LETTER}{ALNUM}*
 
     /* C++ Keywords */
 "class"         { add_token(yytext, "KEYWORD"); move(yytext); yylval.str = make_string(yytext); return CLASS; }
+
+<CLASS_NAME>{ID_PATTERN} {
+    add_token(yytext, "CLASS_NAME");  // Tag as class name
+    move(yytext);
+    yylval.str = make_string(yytext);
+    BEGIN(INITIAL);  // Return to normal scanning
+    return ID;       // Or define a CLASS_NAME token if you want a separate type
+}
+
 "private"       { add_token(yytext, "KEYWORD"); move(yytext); yylval.str = make_string(yytext); return PRIVATE; }
 "protected"     { add_token(yytext, "KEYWORD"); move(yytext); yylval.str = make_string(yytext); return PROTECTED; }
 "public"        { add_token(yytext, "KEYWORD"); move(yytext); yylval.str = make_string(yytext); return PUBLIC; }
@@ -142,6 +152,13 @@ ID_PATTERN      {LETTER}{ALNUM}*
 "bool"          { add_token(yytext, "KEYWORD"); move(yytext); yylval.str = make_string(yytext); return BOOL; }
 "true"          { add_token(yytext, "BOOLEAN_CONSTANT"); move(yytext); yylval.str = make_string(yytext); return TRUE; }
 "false"         { add_token(yytext, "BOOLEAN_CONSTANT"); move(yytext); yylval.str = make_string(yytext); return FALSE; }
+"~"{ID_PATTERN} {
+    add_token(yytext, "DESTRUCTOR");
+    move(yytext);
+    yylval.str = make_string(yytext);
+    return DESTRUCTOR;
+}
+
 
     /* Identifiers */
 {ID_PATTERN}    { 

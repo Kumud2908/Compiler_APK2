@@ -164,9 +164,10 @@ extern int yydebug;
     NEWLINE = 365,                 /* NEWLINE  */
     END = 366,                     /* END  */
     ERROR = 367,                   /* ERROR  */
-    UMINUS = 368,                  /* UMINUS  */
-    UPLUS = 369,                   /* UPLUS  */
-    IF_WITHOUT_ELSE = 370          /* IF_WITHOUT_ELSE  */
+    DESTRUCTOR = 368,              /* DESTRUCTOR  */
+    UMINUS = 369,                  /* UMINUS  */
+    UPLUS = 370,                   /* UPLUS  */
+    IF_WITHOUT_ELSE = 371          /* IF_WITHOUT_ELSE  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -175,13 +176,13 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 78 "src/parser.y"
+#line 80 "src/parser.y"
 
     char* str;
     int num;
     ASTNode* node;
 
-#line 185 "build/parser.tab.hpp"
+#line 186 "build/parser.tab.hpp"
 
 };
 typedef union YYSTYPE YYSTYPE;
