@@ -11,6 +11,8 @@
 #include <cstring>
   // Include your AST header
 
+  
+
 extern int yylex();
 extern int yylineno;
 extern char* yytext;
@@ -115,6 +117,8 @@ int in_typedef_declaration = 0;
 /* Special */
 %token <str> PREP NEWLINE END ERROR
 
+%token DESTRUCTOR
+
 /* Precedence and associativity */
 %right ASSIGN PLUS_EQ MINUS_EQ MUL_EQ DIV_EQ MOD_EQ AND_EQ OR_EQ XOR_EQ LSHIFT_EQ RSHIFT_EQ
 %right QUESTION COLON
@@ -146,6 +150,8 @@ int in_typedef_declaration = 0;
 %type <node> abstract_declarator direct_abstract_declarator type_name
 %type <node> initializer initializer_list compound_statement block_item_list block_item
 %type <node> statement labeled_statement expression_statement selection_statement
+%type <node> class_specifier class_declaration_list class_declaration
+%type <node> access_specifier member_declaration member_declarator_list member_declarator
 %type <node> iteration_statement jump_statement expression assignment_expression
 %type <node> conditional_expression logical_or_expression logical_and_expression
 %type <node> inclusive_or_expression exclusive_or_expression and_expression
@@ -262,6 +268,7 @@ type_specifier:
     }
     | struct_or_union_specifier { $$ = $1; }
     | enum_specifier { $$ = $1; }
+    | class_specifier { $$ = $1; }
     ;
 
 type_keyword:
@@ -351,6 +358,93 @@ enum_specifier:
     }
     ;
 
+/* Class specifier */
+class_specifier:
+    CLASS ID LBRACE class_declaration_list RBRACE {
+        $$ = create_node("ClassSpecifier");
+        $$->addChild(create_node("Identifier", $2));
+        $$->addChild($4);
+    }
+    | CLASS LBRACE class_declaration_list RBRACE {
+        $$ = create_node("ClassSpecifier");
+        $$->addChild($3);
+    }
+    | CLASS ID {
+        $$ = create_node("ClassSpecifier");
+        $$->addChild(create_node("Identifier", $2));
+    }
+    ;
+
+class_declaration_list:
+    class_declaration {
+        $$ = create_node("ClassDeclarationList");
+        $$->addChild($1);
+    }
+    | class_declaration_list class_declaration {
+        $$ = $1;
+        $$->addChild($2);
+    }
+    ;
+
+class_declaration:
+    access_specifier COLON {
+        $$ = $1;
+    }
+    | member_declaration {
+        $$ = $1;
+    }
+    ;
+
+access_specifier:
+    PUBLIC { 
+        $$ = create_node("AccessSpecifier", "public"); 
+    }
+    | PRIVATE { 
+        $$ = create_node("AccessSpecifier", "private"); 
+    }
+    | PROTECTED { 
+        $$ = create_node("AccessSpecifier", "protected"); 
+    }
+    ;
+
+member_declaration:
+    declaration_specifiers member_declarator_list SEMI {
+        $$ = create_node("MemberDeclaration");
+        $$->addChild($1);
+        $$->addChild($2);
+    }
+    | declaration_specifiers SEMI {
+        $$ = create_node("MemberDeclaration");
+        $$->addChild($1);
+    }
+    | function_definition {
+        $$ = create_node("MemberFunction");
+        $$->addChild($1);
+    }
+    ;
+
+member_declarator_list:
+    member_declarator {
+        $$ = create_node("MemberDeclaratorList");
+        $$->addChild($1);
+    }
+    | member_declarator_list COMMA member_declarator {
+        $$ = $1;
+        $$->addChild($3);
+    }
+    ;
+
+member_declarator:
+    declarator {
+        $$ = $1;
+    }
+    | declarator ASSIGN assignment_expression {
+        $$ = create_node("MemberDeclarator");
+        $$->addChild($1);
+        $$->addChild($3);
+    }
+    ;
+
 enumerator_list:
     enumerator {
         $$ = create_node("EnumeratorList");
@@ -423,27 +517,23 @@ direct_declarator:
     | LPAREN declarator RPAREN {
         $$ = $2;
     }
+    | direct_declarator LBRACKET RBRACKET {
+        $$ = create_node("ArrayDeclarator");
+        $$->addChild($1);
+    }
     | direct_declarator LBRACKET assignment_expression RBRACKET {
         $$ = create_node("ArrayDeclarator");
         $$->addChild($1);
         $$->addChild($3);
     }
-    | direct_declarator LBRACKET RBRACKET {
-        $$ = create_node("ArrayDeclarator");
-        $$->addChild($1);
-    }
-    | direct_declarator LPAREN {
-        in_function_params = 1;
-    } parameter_list RPAREN {
-        $$ = create_node("FunctionDeclarator");
-        $$->addChild($1);
-        $$->addChild($4);
-        in_function_params = 0;
-    }
     | direct_declarator LPAREN RPAREN {
         $$ = create_node("FunctionDeclarator");
         $$->addChild($1);
-        in_function_params = 0;
+    }
+    | direct_declarator LPAREN parameter_list RPAREN {
+        $$ = create_node("FunctionDeclarator");
+        $$->addChild($1);
+        $$->addChild($3);
     }
     ;
 

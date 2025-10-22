@@ -68,6 +68,20 @@ void SemanticAnalyzer::traverse(ASTNode* node) {
     node->processed = true;
 
     // ========== CRITICAL SEMANTIC CHECKS ==========
+
+
+    if (node->name == "InitDeclarator") {
+        if (node->children.size() > 0) {
+            std::string var_name = extract_declarator_name(node->children[0]);
+            if (!var_name.empty() && var_name != "unknown") {
+                // Has initializer if there are 2+ children
+                if (node->children.size() > 1) {
+                    variable_initialized[var_name] = true;
+                    std::cout << "[INIT] Variable '" << var_name << "' is initialized" << std::endl;
+                }
+            }
+        }
+    }
     
     // 1. CHECK UNDECLARED IDENTIFIERS
     if (node->name == "Identifier" && !in_function_params) {
@@ -204,6 +218,12 @@ void SemanticAnalyzer::traverse(ASTNode* node) {
     for (size_t i = 0; i < node->children.size(); i++) {
         if (node->children[i]) traverse(node->children[i]);
     }
+
+    if (node->name == "ClassSpecifier") {
+        process_class(node);
+        return;  // Don't traverse children again
+    }
+
     
     // Exit tracking
     if (node->name == "WhileStatement" || node->name == "DoWhileStatement" || 
@@ -217,18 +237,6 @@ void SemanticAnalyzer::traverse(ASTNode* node) {
 
      // Add this check for InitDeclarator
 
-    if (node->name == "InitDeclarator") {
-        if (node->children.size() > 0) {
-            std::string var_name = extract_declarator_name(node->children[0]);
-            if (!var_name.empty() && var_name != "unknown") {
-                // Has initializer if there are 2+ children
-                if (node->children.size() > 1) {
-                    variable_initialized[var_name] = true;
-                    std::cout << "[INIT] Variable '" << var_name << "' is initialized" << std::endl;
-                }
-            }
-        }
-    }
 }
 
 // ============================================================================
@@ -487,7 +495,24 @@ void SemanticAnalyzer::check_array_access(ASTNode* node) {
         check_array_dimensions(array_name, access_dims, node);
     }
     
-    // TODO: Bounds checking for constant indices
+    // Bounds check for constant indices
+    if (!array_name.empty() && array_dimensions.find(array_name) != array_dimensions.end()) {
+        const std::vector<int>& dims = array_dimensions[array_name];
+
+        ASTNode* index_node = node->children[1];
+        if (index_node->name == "Constant") {
+            try {
+                int index_val = std::stoi(index_node->lexeme);
+                if (!dims.empty() && index_val >= dims[0]) {
+                    report_error("Array index out of bounds for '" + array_name +
+                                 "': " + std::to_string(index_val) +
+                                 " >= " + std::to_string(dims[0]), node);
+                }
+            } catch (...) {
+                // Ignore invalid constants
+            }
+        }
+    }
 }
 
 void SemanticAnalyzer::check_array_dimensions(const std::string& array_name, 
@@ -739,9 +764,11 @@ bool SemanticAnalyzer::types_compatible(const std::string& type1, const std::str
         return false;
     }
     
-    // Allow implicit numeric conversions
+    // Allow implicit numeric conversions BUT return false so we can warn
+    // DON'T return true here - we want to detect the conversion!
     if (is_numeric_type(type1) && is_numeric_type(type2)) {
-        return true;
+        // They're compatible, but not the same - caller should warn
+        return false;  // Changed from true to false!
     }
     
     return false;
@@ -777,12 +804,12 @@ bool SemanticAnalyzer::is_pointer_type(const std::string& type) {
 // ============================================================================
 // EXISTING METHODS (from your original code)
 // ============================================================================
-
 void SemanticAnalyzer::process_declaration(ASTNode* node) {
     if (!node) return;
     
     std::string base_type = "int";
     
+    // Extract base type
     for (size_t i = 0; i < node->children.size(); i++) {
         ASTNode* child = node->children[i];
         if (!child) continue;
@@ -793,6 +820,7 @@ void SemanticAnalyzer::process_declaration(ASTNode* node) {
         }
     }
     
+    // Process declarators
     for (size_t i = 0; i < node->children.size(); i++) {
         ASTNode* child = node->children[i];
         if (!child) continue;
@@ -800,16 +828,21 @@ void SemanticAnalyzer::process_declaration(ASTNode* node) {
         if (child->name == "InitDeclaratorList") {
             for (size_t j = 0; j < child->children.size(); j++) {
                 ASTNode* init_decl = child->children[j];
-                if (!init_decl) continue;
+                if (!init_decl || init_decl->name != "InitDeclarator") continue;
                 
-                if (init_decl->name == "InitDeclarator") {
-                    for (size_t k = 0; k < init_decl->children.size(); k++) {
-                        ASTNode* decl = init_decl->children[k];
-                        if (!decl) continue;
-                        
-                        if (decl->name == "Declarator" || decl->name == "DirectDeclarator") {
-                            process_variable(decl, base_type);
-                        }
+                if (init_decl->children.size() > 0) {
+                    ASTNode* decl = init_decl->children[0];
+                    
+                    // Process variable (add to symbol table)
+                    process_variable(decl, base_type);
+                    
+                    // Get the full type with pointers for type checking
+                    int ptr_level = count_pointer_levels(decl);
+                    std::string full_type = base_type + std::string(ptr_level, '*');
+                    
+                    // Check initialization type compatibility if there's an initializer
+                    if (init_decl->children.size() > 1) {
+                        check_initialization(init_decl, full_type);
                     }
                 }
             }
@@ -990,13 +1023,63 @@ void SemanticAnalyzer::process_variable(ASTNode* declarator, const std::string& 
         std::cout << "[Scope " << symbol_table->get_current_scope_level() 
                   << "] Added " << symbol_type << ": " << var_name << " : " << full_type << std::endl;
         
-        // Track initialization status - variables are uninitialized by default
-        variable_initialized[var_name] = false;
+        // Track initialization status
+        if (variable_initialized.find(var_name) == variable_initialized.end()) {
+            variable_initialized[var_name] = false;
+        }
+    }
+}
+void SemanticAnalyzer::check_initialization(ASTNode* init_declarator, const std::string& declared_type) {
+     std::cout << "[DEBUG] check_initialization called for type: " << declared_type << std::endl;
+    
+        if (!init_declarator || init_declarator->children.size() < 2) {
+        std::cout << "[DEBUG] No initializer or not enough children" << std::endl;
+        return;
     }
 
-    if (variable_initialized.find(var_name) == variable_initialized.end()) {
-    variable_initialized[var_name] = false;
-}
+    
+    // Get the initializer (second child)
+    ASTNode* initializer = init_declarator->children[1];
+    if (!initializer) return;
+    
+    // Get the actual initialization expression
+    ASTNode* init_expr = nullptr;
+    if (initializer->name == "Initializer" && initializer->children.size() > 0) {
+        init_expr = initializer->children[0];
+    } else {
+        init_expr = initializer;
+    }
+    
+    if (!init_expr) return;
+    
+    std::string init_type = get_expression_type(init_expr);
+    
+    if (init_type == "unknown" || declared_type == "unknown") return;
+    
+    // Check pointer level compatibility
+    int declared_ptr_level = get_pointer_level(declared_type);
+    int init_ptr_level = get_pointer_level(init_type);
+    
+    // Special case: check if init is an address-of operation
+    bool init_is_address_of = (init_expr->name == "UnaryExpression" && init_expr->lexeme == "&");
+    
+    if (init_is_address_of) {
+        init_ptr_level += 1;
+    }
+    
+    if (declared_ptr_level != init_ptr_level) {
+        if (!init_is_address_of) {
+            report_error("Pointer level mismatch in initialization: cannot initialize '" + 
+                        declared_type + "' with '" + init_type + "'", init_declarator);
+            return;
+        }
+    }
+    
+    // Check type compatibility (even if both are non-pointers or same pointer level)
+    if (!types_compatible(declared_type, init_type) && !init_is_address_of) {
+        report_warning("Implicit type conversion in initialization: '" + 
+                      init_type + "' to '" + declared_type + "'", init_declarator);
+    }
 }
 
 void SemanticAnalyzer::process_struct(ASTNode* node) {
@@ -1039,6 +1122,44 @@ void SemanticAnalyzer::process_enum(ASTNode* node) {
     Symbol* enum_sym = new Symbol(enum_name, "enum", "enum", 
                                  symbol_table->get_current_scope_level(), 0);
     symbol_table->add_symbol(enum_sym);
+}
+
+void SemanticAnalyzer::process_class(ASTNode* node) {
+    if (!node || !symbol_table) return;
+    
+    std::string class_name = "anonymous";
+    
+    for (size_t i = 0; i < node->children.size(); i++) {
+        ASTNode* child = node->children[i];
+        if (!child) continue;
+        
+        if (child->name == "Identifier" && !child->lexeme.empty()) {
+            class_name = child->lexeme;
+            break;
+        }
+    }
+    
+    std::cout << "[Scope " << symbol_table->get_current_scope_level() 
+              << "] Found class: " << class_name << std::endl;
+    
+    Symbol* class_sym = new Symbol(class_name, "class", "class", 
+                                   symbol_table->get_current_scope_level(), 0);
+    symbol_table->add_symbol(class_sym);
+    
+    // Enter new scope for class members
+    symbol_table->enter_scope();
+    
+    // Process class members
+    for (size_t i = 0; i < node->children.size(); i++) {
+        ASTNode* child = node->children[i];
+        if (child && child->name == "ClassDeclarationList") {
+            for (size_t j = 0; j < child->children.size(); j++) {
+                traverse(child->children[j]);
+            }
+        }
+    }
+    
+    symbol_table->exit_scope();
 }
 
 std::string SemanticAnalyzer::extract_function_name(ASTNode* declarator) {

@@ -1,16 +1,18 @@
-factorial:
-    t0 = n <= 1
-    ifFalse t0 goto L0
-    return 1
-L0:
-    t1 = n - 1
-    param t1
-    t2 = call factorial, 1
-    t3 = * n
-    return t3
-    return
 main:
-    param 1
-    t4 = call printf, 1
+    x = 4
+    j = 0
+    k = 0
+L0:
+    t0 = k < 10
+    ifFalse t0 goto L1
+L2:
+    t1 = j < 5
+    ifFalse t1 goto L3
+    goto L2
+L3:
+    t2 = k
+    k = k + 1
+    goto L0
+L1:
     return 0
     return

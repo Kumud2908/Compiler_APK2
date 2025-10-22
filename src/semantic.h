@@ -107,6 +107,8 @@ private:
     void report_warning(const std::string& message, ASTNode* node = nullptr);
 
     bool has_initializer(ASTNode* init_declarator);
+    void process_class(ASTNode* node);
+     void check_initialization(ASTNode* init_declarator, const std::string& declared_type);
 
 public:
     SemanticAnalyzer(SymbolTable* table);
