@@ -86,88 +86,90 @@ extern int yydebug;
     VOID = 287,                    /* VOID  */
     VOLATILE = 288,                /* VOLATILE  */
     WHILE = 289,                   /* WHILE  */
-    CLASS = 290,                   /* CLASS  */
-    PRIVATE = 291,                 /* PRIVATE  */
-    PROTECTED = 292,               /* PROTECTED  */
-    PUBLIC = 293,                  /* PUBLIC  */
-    VIRTUAL = 294,                 /* VIRTUAL  */
-    FRIEND = 295,                  /* FRIEND  */
-    INLINE = 296,                  /* INLINE  */
-    OPERATOR = 297,                /* OPERATOR  */
-    OVERLOAD = 298,                /* OVERLOAD  */
-    TEMPLATE = 299,                /* TEMPLATE  */
-    THIS = 300,                    /* THIS  */
-    NEW = 301,                     /* NEW  */
-    DELETE = 302,                  /* DELETE  */
-    NAMESPACE = 303,               /* NAMESPACE  */
-    USING = 304,                   /* USING  */
-    TRY = 305,                     /* TRY  */
-    CATCH = 306,                   /* CATCH  */
-    THROW = 307,                   /* THROW  */
-    BOOL = 308,                    /* BOOL  */
-    TRUE = 309,                    /* TRUE  */
-    FALSE = 310,                   /* FALSE  */
-    TYPEDEF_NAME = 311,            /* TYPEDEF_NAME  */
-    ID = 312,                      /* ID  */
-    NUM = 313,                     /* NUM  */
-    FLOAT_LIT = 314,               /* FLOAT_LIT  */
-    CHAR_LIT = 315,                /* CHAR_LIT  */
-    STRING_LIT = 316,              /* STRING_LIT  */
-    PLUS = 317,                    /* PLUS  */
-    MINUS = 318,                   /* MINUS  */
-    MUL = 319,                     /* MUL  */
-    DIV = 320,                     /* DIV  */
-    MOD = 321,                     /* MOD  */
-    ASSIGN = 322,                  /* ASSIGN  */
-    PLUS_EQ = 323,                 /* PLUS_EQ  */
-    MINUS_EQ = 324,                /* MINUS_EQ  */
-    MUL_EQ = 325,                  /* MUL_EQ  */
-    DIV_EQ = 326,                  /* DIV_EQ  */
-    MOD_EQ = 327,                  /* MOD_EQ  */
-    INC = 328,                     /* INC  */
-    DEC = 329,                     /* DEC  */
-    EQ = 330,                      /* EQ  */
-    NE = 331,                      /* NE  */
-    LT = 332,                      /* LT  */
-    GT = 333,                      /* GT  */
-    LE = 334,                      /* LE  */
-    GE = 335,                      /* GE  */
-    AND = 336,                     /* AND  */
-    OR = 337,                      /* OR  */
-    NOT = 338,                     /* NOT  */
-    BIT_AND = 339,                 /* BIT_AND  */
-    BIT_OR = 340,                  /* BIT_OR  */
-    BIT_XOR = 341,                 /* BIT_XOR  */
-    BIT_NOT = 342,                 /* BIT_NOT  */
-    LSHIFT = 343,                  /* LSHIFT  */
-    RSHIFT = 344,                  /* RSHIFT  */
-    AND_EQ = 345,                  /* AND_EQ  */
-    OR_EQ = 346,                   /* OR_EQ  */
-    XOR_EQ = 347,                  /* XOR_EQ  */
-    LSHIFT_EQ = 348,               /* LSHIFT_EQ  */
-    RSHIFT_EQ = 349,               /* RSHIFT_EQ  */
-    ARROW = 350,                   /* ARROW  */
-    DOT = 351,                     /* DOT  */
-    SCOPE = 352,                   /* SCOPE  */
-    SEMI = 353,                    /* SEMI  */
-    COMMA = 354,                   /* COMMA  */
-    QUESTION = 355,                /* QUESTION  */
-    COLON = 356,                   /* COLON  */
-    LPAREN = 357,                  /* LPAREN  */
-    RPAREN = 358,                  /* RPAREN  */
-    LBRACE = 359,                  /* LBRACE  */
-    RBRACE = 360,                  /* RBRACE  */
-    LBRACKET = 361,                /* LBRACKET  */
-    RBRACKET = 362,                /* RBRACKET  */
-    ELLIPSIS = 363,                /* ELLIPSIS  */
-    PREP = 364,                    /* PREP  */
-    NEWLINE = 365,                 /* NEWLINE  */
-    END = 366,                     /* END  */
-    ERROR = 367,                   /* ERROR  */
-    DESTRUCTOR = 368,              /* DESTRUCTOR  */
-    UMINUS = 369,                  /* UMINUS  */
-    UPLUS = 370,                   /* UPLUS  */
-    IF_WITHOUT_ELSE = 371          /* IF_WITHOUT_ELSE  */
+    NULL_TOKEN = 290,              /* NULL_TOKEN  */
+    NULLPTR = 291,                 /* NULLPTR  */
+    CLASS = 292,                   /* CLASS  */
+    PRIVATE = 293,                 /* PRIVATE  */
+    PROTECTED = 294,               /* PROTECTED  */
+    PUBLIC = 295,                  /* PUBLIC  */
+    VIRTUAL = 296,                 /* VIRTUAL  */
+    FRIEND = 297,                  /* FRIEND  */
+    INLINE = 298,                  /* INLINE  */
+    OPERATOR = 299,                /* OPERATOR  */
+    OVERLOAD = 300,                /* OVERLOAD  */
+    TEMPLATE = 301,                /* TEMPLATE  */
+    THIS = 302,                    /* THIS  */
+    NEW = 303,                     /* NEW  */
+    DELETE = 304,                  /* DELETE  */
+    NAMESPACE = 305,               /* NAMESPACE  */
+    USING = 306,                   /* USING  */
+    TRY = 307,                     /* TRY  */
+    CATCH = 308,                   /* CATCH  */
+    THROW = 309,                   /* THROW  */
+    BOOL = 310,                    /* BOOL  */
+    TRUE = 311,                    /* TRUE  */
+    FALSE = 312,                   /* FALSE  */
+    TYPEDEF_NAME = 313,            /* TYPEDEF_NAME  */
+    ID = 314,                      /* ID  */
+    NUM = 315,                     /* NUM  */
+    FLOAT_LIT = 316,               /* FLOAT_LIT  */
+    CHAR_LIT = 317,                /* CHAR_LIT  */
+    STRING_LIT = 318,              /* STRING_LIT  */
+    PLUS = 319,                    /* PLUS  */
+    MINUS = 320,                   /* MINUS  */
+    MUL = 321,                     /* MUL  */
+    DIV = 322,                     /* DIV  */
+    MOD = 323,                     /* MOD  */
+    ASSIGN = 324,                  /* ASSIGN  */
+    PLUS_EQ = 325,                 /* PLUS_EQ  */
+    MINUS_EQ = 326,                /* MINUS_EQ  */
+    MUL_EQ = 327,                  /* MUL_EQ  */
+    DIV_EQ = 328,                  /* DIV_EQ  */
+    MOD_EQ = 329,                  /* MOD_EQ  */
+    INC = 330,                     /* INC  */
+    DEC = 331,                     /* DEC  */
+    EQ = 332,                      /* EQ  */
+    NE = 333,                      /* NE  */
+    LT = 334,                      /* LT  */
+    GT = 335,                      /* GT  */
+    LE = 336,                      /* LE  */
+    GE = 337,                      /* GE  */
+    AND = 338,                     /* AND  */
+    OR = 339,                      /* OR  */
+    NOT = 340,                     /* NOT  */
+    BIT_AND = 341,                 /* BIT_AND  */
+    BIT_OR = 342,                  /* BIT_OR  */
+    BIT_XOR = 343,                 /* BIT_XOR  */
+    BIT_NOT = 344,                 /* BIT_NOT  */
+    LSHIFT = 345,                  /* LSHIFT  */
+    RSHIFT = 346,                  /* RSHIFT  */
+    AND_EQ = 347,                  /* AND_EQ  */
+    OR_EQ = 348,                   /* OR_EQ  */
+    XOR_EQ = 349,                  /* XOR_EQ  */
+    LSHIFT_EQ = 350,               /* LSHIFT_EQ  */
+    RSHIFT_EQ = 351,               /* RSHIFT_EQ  */
+    ARROW = 352,                   /* ARROW  */
+    DOT = 353,                     /* DOT  */
+    SCOPE = 354,                   /* SCOPE  */
+    SEMI = 355,                    /* SEMI  */
+    COMMA = 356,                   /* COMMA  */
+    QUESTION = 357,                /* QUESTION  */
+    COLON = 358,                   /* COLON  */
+    LPAREN = 359,                  /* LPAREN  */
+    RPAREN = 360,                  /* RPAREN  */
+    LBRACE = 361,                  /* LBRACE  */
+    RBRACE = 362,                  /* RBRACE  */
+    LBRACKET = 363,                /* LBRACKET  */
+    RBRACKET = 364,                /* RBRACKET  */
+    ELLIPSIS = 365,                /* ELLIPSIS  */
+    PREP = 366,                    /* PREP  */
+    NEWLINE = 367,                 /* NEWLINE  */
+    END = 368,                     /* END  */
+    ERROR = 369,                   /* ERROR  */
+    DESTRUCTOR = 370,              /* DESTRUCTOR  */
+    UMINUS = 371,                  /* UMINUS  */
+    UPLUS = 372,                   /* UPLUS  */
+    IF_WITHOUT_ELSE = 373          /* IF_WITHOUT_ELSE  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -176,13 +178,13 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 80 "src/parser.y"
+#line 127 "src/parser.y"
 
     char* str;
     int num;
     ASTNode* node;
 
-#line 186 "build/parser.tab.hpp"
+#line 188 "build/parser.tab.hpp"
 
 };
 typedef union YYSTYPE YYSTYPE;

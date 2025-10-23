@@ -25,6 +25,8 @@ private:
     void generate_for_statement(ASTNode* node);
     void generate_return_statement(ASTNode* node);
     void generate_expression_statement(ASTNode* node);
+    void generate_load(const std::string &target, const std::string &addr);
+    void generate_address_of(const std::string &var, const std::string &target);
 
     void flatten_array_initialization(const std::string &array_name, const std::vector<int> &dims, ASTNode *init_node, std::vector<std::string> indices);
 
