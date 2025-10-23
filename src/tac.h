@@ -75,6 +75,11 @@ public:
                               const std::string& result);
     void generate_array_store(const std::string& array, const std::string& index,
                              const std::string& value);
+
+
+    void generate_load(const std::string &target, const std::string &addr);
+    void generate_address_of(const std::string &var, const std::string &target) ;
+
     
     // Print all instructions
     void print() const;

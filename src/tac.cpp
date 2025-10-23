@@ -6,7 +6,6 @@
 void TACInstruction::print() const {
     std::cout << toString() << std::endl;
 }
-
 std::string TACInstruction::toString() const {
     std::stringstream ss;
     
@@ -47,16 +46,23 @@ std::string TACInstruction::toString() const {
         }
     }
     else if (op == "[]") {
-    // Array access: result = array[index]
-    ss << "    " << result << " = " << arg1 << "[" << arg2 << "]";
-}
-
+        ss << "    " << result << " = " << arg1 << "[" << arg2 << "]";
+    }
     else if (op == "[]=") {
-        // Array store: a[i] = t
         ss << "    " << result << "[" << arg1 << "] = " << arg2;
     }
-    else if (op == "unary-" || op == "unary+" || op == "!" || op == "~" || op == "&" || op == "*") {
-        ss << "    " << result << " = " << op << " " << arg1;
+    // ✅ ADD THIS: Handle unary operators
+    else if (op == "unary-" || op == "unary+" || op == "unary!" || op == "unary~") {
+        ss << "    " << result << " = " << op.substr(5) << arg1;
+    }
+    else if (op == "&" && arg2.empty()) {
+        ss << "    " << result << " = &" << arg1;
+    }
+    else if (op == "*" && arg2.empty()) {
+        ss << "    " << result << " = *" << arg1;
+    }
+    else if (op == "!" && arg2.empty()) {
+        ss << "    " << result << " = !" << arg1;
     }
     else {
         // Binary operations
@@ -88,6 +94,13 @@ void TACGenerator::add_label(const std::string& label) {
     instructions.push_back(TACInstruction("", "", "", "", label));
 }
 
+void TACGenerator::generate_load(const std::string &target, const std::string &addr) {
+    add_instruction("*", addr, "", target);  
+}
+
+void TACGenerator::generate_address_of(const std::string &var, const std::string &target) {
+    add_instruction("&", var, "", target);  
+}
 void TACGenerator::generate_assignment(const std::string& dest, const std::string& src) {
     add_instruction("=", src, "", dest);
 }

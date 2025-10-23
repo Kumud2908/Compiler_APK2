@@ -876,7 +876,7 @@ logical_or_expression:
         $$ = $1;
     }
     | logical_or_expression OR logical_and_expression {
-        $$ = create_node("LogicalOrExpression");
+        $$ = create_node("LogicalOrExpression", "||");
         $$->addChild($1);
         $$->addChild($3);
     }
@@ -887,7 +887,7 @@ logical_and_expression:
         $$ = $1;
     }
     | logical_and_expression AND inclusive_or_expression {
-        $$ = create_node("LogicalAndExpression");
+        $$ = create_node("LogicalAndExpression","&&");
         $$->addChild($1);
         $$->addChild($3);
     }
@@ -898,7 +898,7 @@ inclusive_or_expression:
         $$ = $1;
     }
     | inclusive_or_expression BIT_OR exclusive_or_expression {
-        $$ = create_node("InclusiveOrExpression");
+        $$ = create_node("InclusiveOrExpression","|");
         $$->addChild($1);
         $$->addChild($3);
     }
@@ -909,7 +909,7 @@ exclusive_or_expression:
         $$ = $1;
     }
     | exclusive_or_expression BIT_XOR and_expression {
-        $$ = create_node("ExclusiveOrExpression");
+        $$ = create_node("ExclusiveOrExpression","^");
         $$->addChild($1);
         $$->addChild($3);
     }
@@ -920,7 +920,7 @@ and_expression:
         $$ = $1;
     }
     | and_expression BIT_AND equality_expression {
-        $$ = create_node("AndExpression");
+        $$ = create_node("AndExpression","&");
         $$->addChild($1);
         $$->addChild($3);
     }

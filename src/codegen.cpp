@@ -25,6 +25,8 @@ void CodeGenerator::generate_node(ASTNode* node) {
     }
 }
 
+
+
 // =======================================================
 //  Function Definitions
 // =======================================================
@@ -107,6 +109,25 @@ std::string CodeGenerator::generate_expression(ASTNode* node) {
     // String literal
     if (node->name == "StringLiteral") return node->lexeme;
 
+  
+    if (node->name == "TypeName") {
+        return "";
+    }
+
+   
+    if (node->name == "CastExpression") {
+        if (node->children.size() >= 2) {
+            // children[0] = TypeName (ignore for TAC)
+            // children[1] = expression being casted
+            return generate_expression(node->children[1]);
+        }
+        if (node->children.size() == 1) {
+            return generate_expression(node->children[0]);
+        }
+        return "";
+    }
+
+
     // Assignment Expression
     if (node->name == "AssignmentExpression") {
         if (node->children.size() >= 2) {
@@ -144,11 +165,30 @@ std::string CodeGenerator::generate_expression(ASTNode* node) {
 
     // Unary operations
     if (node->name == "UnaryExpression" && node->children.size() >= 1) {
-        std::string arg = generate_expression(node->children[0]);
-        std::string result = tac->new_temp();
-        tac->generate_unary_op("unary" + node->lexeme, arg, result);
-        return result;
+    std::string arg = generate_expression(node->children[0]);
+    std::string result = tac->new_temp();
+
+    if (node->lexeme == "&") {
+        tac->generate_address_of(arg, result); // address-of operator
     }
+    else if (node->lexeme == "*") {
+        tac->generate_load(result, arg); // dereference operator
+    }
+    else if (node->lexeme == "+"
+          || node->lexeme == "-"
+          || node->lexeme == "!"
+          || node->lexeme == "~") {
+        tac->generate_unary_op("unary" + node->lexeme, arg, result);
+    }
+    else {
+        // fallback safety
+        tac->generate_binary_op(node->lexeme, arg, "", result);
+    }
+
+    return result;
+}
+
+
 
     // Postfix ++ / --
     if (node->name == "PostfixExpression") {
