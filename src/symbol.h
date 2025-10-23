@@ -78,9 +78,9 @@ public:
     void exit_scope();
     bool add_symbol(Symbol* symbol);
     Symbol* find_symbol(const std::string& name);
-    Symbol* lookup(const std::string& name) { return find_symbol(name); }
+
     Symbol* find_symbol_current_scope(const std::string& name);
-    Symbol* lookup_current_scope(const std::string& name) { return find_symbol_current_scope(name); }
+
     void print_table();
     void print_all_scopes();
     
