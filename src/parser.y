@@ -11,8 +11,6 @@
 #include <cstring>
   // Include your AST header
 
-  
-
 extern int yylex();
 extern int yylineno;
 extern char* yytext;
@@ -34,6 +32,7 @@ extern int token_count;
 extern int errors;
 extern void print_token_table();
 
+
 /* Global AST root */
 ASTNode* root = NULL;
 ASTNode* current_node = NULL;
@@ -42,7 +41,7 @@ SymbolTable* symbol_table = NULL;
 
 /* AST helper functions */
 ASTNode* create_node(const char* name, const char* lexeme = "") {
-    return new ASTNode(name, lexeme);
+    return new ASTNode(name, lexeme, yylineno);
 }
 
 void push_node(ASTNode* node) {
@@ -61,15 +60,63 @@ void pop_node() {
     }
 }
 
-/* Symbol table declarations (for future use) */
-typedef enum {
-    SYMBOL_VARIABLE,
-    SYMBOL_FUNCTION,
-    SYMBOL_PARAMETER,
-    SYMBOL_STRUCT,
-    SYMBOL_ENUM,
-    SYMBOL_TYPEDEF
-} SymbolType;
+std::vector<std::string> parser_type_names;
+
+void parser_add_type_name(const char* name) {
+    parser_type_names.push_back(name);
+}
+int parser_is_type_name(const char* name) {
+    for (const auto& type : parser_type_names) {
+        if (type == name) {        
+            return 1;
+        }
+    }
+    return 0;
+}
+std::string extract_dec_name(ASTNode* node) {
+    if (!node) return "unknown";
+    
+    // If current node has identifier, use it
+    if (!node->lexeme.empty() && node->lexeme != "default") {
+        return node->lexeme;
+    }
+    
+    // For typedefs, we mainly care about DirectDeclarator
+    if (node->name == "DirectDeclarator" && !node->lexeme.empty()) {
+        return node->lexeme;
+    }
+    
+    // Search in immediate children (no deep recursion needed for typedef names)
+    for (size_t i = 0; i < node->children.size(); i++) {
+        ASTNode* child = node->children[i];
+        if (!child) continue;
+        
+        if (!child->lexeme.empty() && child->lexeme != "default") {
+            return child->lexeme;
+        }
+    }
+    
+    return "unknown";
+}
+void collect_typedef_names(ASTNode* init_decl_list) {
+    if (!init_decl_list) return;
+    
+    for (size_t i = 0; i < init_decl_list->children.size(); i++) {  // ← size_t
+        ASTNode* init_decl = init_decl_list->children[i];
+        if (!init_decl || init_decl->name != "InitDeclarator") continue;
+        
+        for (size_t j = 0; j < init_decl->children.size(); j++) {   // ← size_t
+            ASTNode* decl = init_decl->children[j];
+            if (!decl) continue;
+            
+            std::string name = extract_dec_name(decl);       // ← FIXED NAME
+            if (!name.empty() && name != "unknown") {
+                parser_add_type_name(name.c_str());
+                printf("Added typedef name: %s\n", name.c_str());
+            }
+        }
+    }
+}
 
 char current_type[64] = "int";
 int in_function_params = 0;
@@ -88,6 +135,7 @@ int in_typedef_declaration = 0;
 %token <str> DOUBLE ELSE ENUM EXTERN FLOAT FOR GOTO IF
 %token <str> INT LONG REGISTER RETURN SHORT SIGNED SIZEOF STATIC
 %token <str> STRUCT SWITCH TYPEDEF UNION UNSIGNED VOID VOLATILE WHILE
+%token <str> NULL_TOKEN NULLPTR
 
 /* C++ Keywords */
 %token <str> CLASS PRIVATE PROTECTED PUBLIC VIRTUAL FRIEND INLINE
@@ -150,8 +198,6 @@ int in_typedef_declaration = 0;
 %type <node> abstract_declarator direct_abstract_declarator type_name
 %type <node> initializer initializer_list compound_statement block_item_list block_item
 %type <node> statement labeled_statement expression_statement selection_statement
-%type <node> class_specifier class_declaration_list class_declaration
-%type <node> access_specifier member_declaration member_declarator_list member_declarator
 %type <node> iteration_statement jump_statement expression assignment_expression
 %type <node> conditional_expression logical_or_expression logical_and_expression
 %type <node> inclusive_or_expression exclusive_or_expression and_expression
@@ -220,6 +266,10 @@ declaration:
         $$ = create_node("Declaration");
         $$->addChild($1);
         $$->addChild($2);
+	if (in_typedef_declaration) {
+            collect_typedef_names($2);
+        }
+
         in_typedef_declaration = 0;
     }
     | declaration_specifiers SEMI {
@@ -268,7 +318,10 @@ type_specifier:
     }
     | struct_or_union_specifier { $$ = $1; }
     | enum_specifier { $$ = $1; }
-    | class_specifier { $$ = $1; }
+    | TYPEDEF_NAME {  // ← Now conflict-free!
+        $$ = create_node("TypeSpecifier", $1);
+        strcpy(current_type, $1);
+    }
     ;
 
 type_keyword:
@@ -290,6 +343,14 @@ struct_or_union_specifier:
         $$->addChild(create_node("StructOrUnion", $1));
         $$->addChild(create_node("Identifier", $2));
         $$->addChild($4);
+        parser_add_type_name($2);
+    }
+    | struct_or_union TYPEDEF_NAME LBRACE struct_declaration_list RBRACE {  // ← ADD THIS
+        $$ = create_node("StructOrUnionSpecifier");
+        $$->addChild(create_node("StructOrUnion", $1));
+        $$->addChild(create_node("Identifier", $2));
+        $$->addChild($4);
+        parser_add_type_name($2);
     }
     | struct_or_union LBRACE struct_declaration_list RBRACE {
         $$ = create_node("StructOrUnionSpecifier");
@@ -300,6 +361,13 @@ struct_or_union_specifier:
         $$ = create_node("StructOrUnionSpecifier");
         $$->addChild(create_node("StructOrUnion", $1));
         $$->addChild(create_node("Identifier", $2));
+        parser_add_type_name($2);
+    }
+    | struct_or_union TYPEDEF_NAME {  // ← ADD THIS
+        $$ = create_node("StructOrUnionSpecifier");
+        $$->addChild(create_node("StructOrUnion", $1));
+        $$->addChild(create_node("Identifier", $2));
+        parser_add_type_name($2);
     }
     ;
 
@@ -347,6 +415,13 @@ enum_specifier:
         $$ = create_node("EnumSpecifier");
         $$->addChild(create_node("Identifier", $2));
         $$->addChild($4);
+        parser_add_type_name($2);
+    }
+    | ENUM TYPEDEF_NAME LBRACE enumerator_list RBRACE {  // ← ADD THIS
+        $$ = create_node("EnumSpecifier");
+        $$->addChild(create_node("Identifier", $2));
+        $$->addChild($4);
+        parser_add_type_name($2);
     }
     | ENUM LBRACE enumerator_list RBRACE {
         $$ = create_node("EnumSpecifier");
@@ -355,93 +430,12 @@ enum_specifier:
     | ENUM ID {
         $$ = create_node("EnumSpecifier");
         $$->addChild(create_node("Identifier", $2));
+        parser_add_type_name($2);
     }
-    ;
-
-/* Class specifier */
-class_specifier:
-    CLASS ID LBRACE class_declaration_list RBRACE {
-        $$ = create_node("ClassSpecifier");
+    | ENUM TYPEDEF_NAME {  // ← ADD THIS
+        $$ = create_node("EnumSpecifier");
         $$->addChild(create_node("Identifier", $2));
-        $$->addChild($4);
-    }
-    | CLASS LBRACE class_declaration_list RBRACE {
-        $$ = create_node("ClassSpecifier");
-        $$->addChild($3);
-    }
-    | CLASS ID {
-        $$ = create_node("ClassSpecifier");
-        $$->addChild(create_node("Identifier", $2));
-    }
-    ;
-
-class_declaration_list:
-    class_declaration {
-        $$ = create_node("ClassDeclarationList");
-        $$->addChild($1);
-    }
-    | class_declaration_list class_declaration {
-        $$ = $1;
-        $$->addChild($2);
-    }
-    ;
-
-class_declaration:
-    access_specifier COLON {
-        $$ = $1;
-    }
-    | member_declaration {
-        $$ = $1;
-    }
-    ;
-
-access_specifier:
-    PUBLIC { 
-        $$ = create_node("AccessSpecifier", "public"); 
-    }
-    | PRIVATE { 
-        $$ = create_node("AccessSpecifier", "private"); 
-    }
-    | PROTECTED { 
-        $$ = create_node("AccessSpecifier", "protected"); 
-    }
-    ;
-
-member_declaration:
-    declaration_specifiers member_declarator_list SEMI {
-        $$ = create_node("MemberDeclaration");
-        $$->addChild($1);
-        $$->addChild($2);
-    }
-    | declaration_specifiers SEMI {
-        $$ = create_node("MemberDeclaration");
-        $$->addChild($1);
-    }
-    | function_definition {
-        $$ = create_node("MemberFunction");
-        $$->addChild($1);
-    }
-    ;
-
-member_declarator_list:
-    member_declarator {
-        $$ = create_node("MemberDeclaratorList");
-        $$->addChild($1);
-    }
-    | member_declarator_list COMMA member_declarator {
-        $$ = $1;
-        $$->addChild($3);
-    }
-    ;
-
-member_declarator:
-    declarator {
-        $$ = $1;
-    }
-    | declarator ASSIGN assignment_expression {
-        $$ = create_node("MemberDeclarator");
-        $$->addChild($1);
-        $$->addChild($3);
+        parser_add_type_name($2);
     }
     ;
 
@@ -517,23 +511,27 @@ direct_declarator:
     | LPAREN declarator RPAREN {
         $$ = $2;
     }
-    | direct_declarator LBRACKET RBRACKET {
-        $$ = create_node("ArrayDeclarator");
-        $$->addChild($1);
-    }
     | direct_declarator LBRACKET assignment_expression RBRACKET {
         $$ = create_node("ArrayDeclarator");
         $$->addChild($1);
         $$->addChild($3);
     }
+    | direct_declarator LBRACKET RBRACKET {
+        $$ = create_node("ArrayDeclarator");
+        $$->addChild($1);
+    }
+    | direct_declarator LPAREN {
+        in_function_params = 1;
+    } parameter_list RPAREN {
+        $$ = create_node("FunctionDeclarator");
+        $$->addChild($1);
+        $$->addChild($4);
+        in_function_params = 0;
+    }
     | direct_declarator LPAREN RPAREN {
         $$ = create_node("FunctionDeclarator");
         $$->addChild($1);
-    }
-    | direct_declarator LPAREN parameter_list RPAREN {
-        $$ = create_node("FunctionDeclarator");
-        $$->addChild($1);
-        $$->addChild($3);
+        in_function_params = 0;
     }
     ;
 
@@ -648,6 +646,7 @@ initializer:
         $$ = create_node("InitializerList");
         $$->addChild($2);
     }
+
     ;
 
 initializer_list:
@@ -1149,6 +1148,8 @@ constant:
     | CHAR_LIT { $$ = create_node("Constant", $1); }
     | TRUE { $$ = create_node("Constant", "true"); }
     | FALSE { $$ = create_node("Constant", "false"); }
+    | NULL_TOKEN { $$ = create_node("Constant", "NULL"); }           // ← Use NULL directly
+    | NULLPTR { $$ = create_node("Constant", "nullptr"); }  
     ;
 
 %%
@@ -1186,17 +1187,21 @@ int main(int argc, char* argv[]) {
         fclose(file);
     }
     
+    // MOVE ALL PRINTING LOGIC HERE
     if (syntax_errors == 0 && result == 0) {
         printf("\n=== PARSING SUCCESSFUL ===\n");
-        
-        // SEMANTIC ANALYSIS
+        //print_token_table();
+
+	// SEMANTIC ANALYSIS
         printf("\n=== SEMANTIC ANALYSIS ===\n");
         SemanticAnalyzer analyzer(symbol_table);
         analyzer.analyze(root);
         
-        // Print symbol table
+        // Print results
         symbol_table->print_table();
+
         
+        // Print AST
         // THREE ADDRESS CODE GENERATION
         printf("\n=== CODE GENERATION ===\n");
         TACGenerator tac_gen;

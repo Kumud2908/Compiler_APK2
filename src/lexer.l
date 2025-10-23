@@ -8,7 +8,7 @@
 
 
 /* TYpe DEf identfication */
-extern int is_typedef_name(const char* name);
+extern int parser_is_type_name(const char* name);
 
 /* Global variables */
 int line = 1;
@@ -115,7 +115,8 @@ ID_PATTERN      {LETTER}{ALNUM}*
 "union"         { add_token(yytext, "KEYWORD"); move(yytext); yylval.str = make_string(yytext); return UNION; }
 "unsigned"      { add_token(yytext, "KEYWORD"); move(yytext); yylval.str = make_string(yytext); return UNSIGNED; }
 "void"          { add_token(yytext, "KEYWORD"); move(yytext); yylval.str = make_string(yytext); return VOID; }
-
+"NULL"          { add_token(yytext, "KEYWORD"); move(yytext); yylval.str = make_string(yytext); return NULL_TOKEN; }
+"nullptr"       { add_token(yytext, "KEYWORD"); move(yytext); yylval.str = make_string(yytext); return NULLPTR; }
 
 
 "volatile"      { add_token(yytext, "KEYWORD"); move(yytext); yylval.str = make_string(yytext); return VOLATILE; }
@@ -160,9 +161,14 @@ ID_PATTERN      {LETTER}{ALNUM}*
 }
 
 
-    /* Identifiers */
 {ID_PATTERN}    { 
-    /* Check if it's a typedef name */
+    /* Check if it's a typedef name FIRST */
+    if (parser_is_type_name(yytext)) {
+        add_token(yytext, "TYPEDEF_NAME");  // ← Add this line
+        move(yytext); 
+        yylval.str = make_string(yytext); 
+        return TYPEDEF_NAME;  // ← Return immediately
+    }
         
     add_token(yytext, "IDENTIFIER"); 
     move(yytext); 

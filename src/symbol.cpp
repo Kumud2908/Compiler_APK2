@@ -1,4 +1,5 @@
 #include "symbol.h"
+#include <sstream>
 
 // Scope implementation
 Scope::Scope(int lvl, Scope* p) : level(lvl), parent(p) {}
@@ -13,9 +14,6 @@ bool Scope::add_symbol(Symbol* symbol) {
     if (!symbol) return false;
     
     if (symbols.find(symbol->name) != symbols.end()) {
-        std::cout << "SYMBOL ERROR: Redeclaration of '" << symbol->name 
-                  << "' in scope " << level << std::endl;
-        delete symbol;
         return false;
     }
     
@@ -23,7 +21,7 @@ bool Scope::add_symbol(Symbol* symbol) {
     return true;
 }
 
-Symbol* Scope::lookup(const std::string& name) {
+Symbol* Scope::find_symbol(const std::string& name) {
     auto it = symbols.find(name);
     return (it != symbols.end()) ? it->second : nullptr;
 }
@@ -38,48 +36,154 @@ void Scope::print() {
     }
 }
 
-// Symbol implementation
-Symbol::Symbol(const std::string& name, const std::string& sym_kind, 
-               const std::string& data_type, int scope, int line)
+// Symbol implementation - FIXED CONSTRUCTOR
+Symbol::Symbol(const std::string& name, const std::string& sym_type, 
+               const std::string& base_type, int scope, int line)
     : name(name), 
-      kind(sym_kind),           // "variable", "function", etc.
-      symbol_type(data_type),   // "int", "int*", "float*", etc.
-      base_type(data_type),     // Same as symbol_type for now
+      symbol_type(sym_type), 
+      base_type(base_type),
       scope_level(scope), 
       line_number(line),
-      offset(0),
-      param_count(0),
-      is_array(false),
+      is_pointer(false),           // Initialize existing fields
       pointer_level(0),
-      is_initialized(false),
-      is_used(false) {}
+      is_array(false),
+      next_enum_value(0),
+      const_value(0),
+      is_complete(false),
+      is_initialized(false),       // Initialize NEW fields
+      is_used(false),
+      has_return_statement(false),
+      is_recursive(false),
+      in_call_chain(false),
+      offset(0) {}
+
+std::string Symbol::get_full_type() const {
+    std::stringstream ss;
+    
+    // Add base type
+    ss << base_type;
+    
+    // Add pointer asterisks
+    if (is_pointer) {
+        for (int i = 0; i < pointer_level; i++) {
+            ss << "*";
+        }
+    }
+    
+    // Add array dimensions
+    if (is_array && !array_dimensions.empty()) {
+        for (int dim : array_dimensions) {
+            ss << "[";
+            if (dim >= 0) {
+                ss << dim;
+            }
+            ss << "]";
+        }
+    }
+    
+    // For functions, add parameter types
+    if (symbol_type == "function" && !parameters.empty()) {
+        ss << "(";
+        for (size_t i = 0; i < parameters.size(); i++) {
+            if (i > 0) ss << ", ";
+            ss << parameters[i]->get_full_type();
+        }
+        ss << ")";
+    }
+    
+    return ss.str();
+}
+
+bool Symbol::is_type_compatible(const Symbol* other) const {
+    if (!other) return false;
+    
+    // Basic type compatibility
+    if (base_type != other->base_type) {
+        // TODO: Add type promotion rules (char->int, etc.)
+        return false;
+    }
+    
+    // Pointer level must match
+    if (is_pointer != other->is_pointer || pointer_level != other->pointer_level) {
+        return false;
+    }
+    
+    // Array dimensions must match
+    if (is_array != other->is_array) {
+        return false;
+    }
+    
+    if (is_array && array_dimensions != other->array_dimensions) {
+        // Allow assignment between compatible arrays (some leniency needed)
+        // For now, strict matching
+        return false;
+    }
+    
+    return true;
+}
+
+bool Symbol::is_assignable_to(const Symbol* other) const {
+    if (!other) return false;
+    
+    // Basic type compatibility
+    if (!is_type_compatible(other)) {
+        // TODO: Add implicit conversion rules
+        return false;
+    }
+    
+    // Additional assignment rules can go here
+    // e.g., const correctness, etc.
+    
+    return true;
+}
 
 void Symbol::add_parameter(Symbol* param) {
     if (param) parameters.push_back(param);
 }
 
 void Symbol::add_member(Symbol* member) {
-    if (member) members.emplace(member->name, member);
+    if (member) members.push_back(member);
+}
+
+void Symbol::add_enumerator(const std::string& name, int value) {
+    enumerators.push_back(std::make_pair(name, value));
+    next_enum_value = value + 1;
 }
 
 void Symbol::print(int depth) {
-    for (int i = 0; i < depth; i++) std::cout << "  ";
-    std::cout << symbol_type << " '" << name << "' : " << base_type;
-    std::cout << " (scope: " << scope_level << ", line: " << line_number << ")" << std::endl;
+    std::string indent(depth * 2, ' ');
     
-    for (auto param : parameters) param->print(depth + 1);
-    for (auto &member : members) member.second->print(depth + 1);
+    std::cout << indent << symbol_type << " '" << name << "' : " << get_full_type();
+    std::cout << " (scope: " << scope_level << ", line: " << line_number << ")";
+    
+    // Show new semantic attributes
+    if (is_initialized) std::cout << " [initialized]";
+    if (is_used) std::cout << " [used]";
+    if (is_recursive) std::cout << " [recursive]";
+    if (has_return_statement) std::cout << " [has_return]";
+    
+    std::cout << std::endl;
+    
+    for (auto param : parameters) {
+        param->print(depth + 1);
+    }
+    
+    for (auto member : members) {
+        member->print(depth + 1);
+    }
 }
 
 // SymbolTable implementation
 SymbolTable::SymbolTable() {
     global_scope = new Scope(0);
     current_scope = global_scope;
+
+    Symbol* null_sym = new Symbol("NULL", "constant", "void*", 0, 0);
+    null_sym->const_value = 0;
+    global_scope->add_symbol(null_sym);
 }
 
 SymbolTable::~SymbolTable() {
-    // Safe deletion - only delete global scope
-    // Other scopes are already deleted when exit_scope is called
     if (global_scope) {
         delete global_scope;
     }
@@ -102,24 +206,23 @@ bool SymbolTable::add_symbol(Symbol* symbol) {
     return current_scope->add_symbol(symbol);
 }
 
-Symbol* SymbolTable::lookup(const std::string& name) {
+Symbol* SymbolTable::find_symbol(const std::string& name) {
     Scope* scope = current_scope;
     while (scope) {
-        Symbol* sym = scope->lookup(name);
+        Symbol* sym = scope->find_symbol(name);
         if (sym) return sym;
         scope = scope->parent;
     }
     return nullptr;
 }
 
-Symbol* SymbolTable::lookup_current_scope(const std::string& name) {
-    return current_scope->lookup(name);
+Symbol* SymbolTable::find_symbol_current_scope(const std::string& name) {
+    return current_scope->find_symbol(name);
 }
 
 void SymbolTable::print_table() {
     std::cout << "\n=== SYMBOL TABLE (ACTIVE SCOPES) ===" << std::endl;
     
-    // Collect active scope hierarchy
     std::vector<Scope*> active_scopes;
     Scope* scope = current_scope;
     while (scope) {
@@ -127,7 +230,6 @@ void SymbolTable::print_table() {
         scope = scope->parent;
     }
     
-    // Print global first (reverse order)
     for (int i = active_scopes.size() - 1; i >= 0; i--) {
         active_scopes[i]->print();
     }
@@ -137,12 +239,7 @@ void SymbolTable::print_all_scopes() {
     print_table();
 }
 
-// Symbol destructor
-Symbol::~Symbol() {
-    for (auto& param : parameters) {
-        delete param;
-    }
-    for (auto& member : members) {
-        delete member.second;
-    }
+void SymbolTable::check_unused_variables() {
+    // Friend's functionality - check for unused variables
+    std::cout << "[Unused Variable Check] Not implemented yet" << std::endl;
 }
