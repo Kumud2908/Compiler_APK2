@@ -16,6 +16,9 @@ private:
 
     // Expression code generation - returns the variable holding the result
     std::string generate_expression(ASTNode* node);
+  
+    std::string current_break_label;
+    std::string current_continue_label;
 
     // Statement code generation
     void generate_statement(ASTNode* node);
@@ -47,6 +50,12 @@ public:
 
     void generate(ASTNode* root);
     void generate_node(ASTNode* node);
+    void generate_do_while_statement(ASTNode* node);
+    void generate_switch_statement(ASTNode* node);
+    void generate_case_statement(ASTNode* node);
+    void generate_default_statement(ASTNode* node);
+    void generate_break_statement(ASTNode* node);
+    void generate_continue_statement(ASTNode* node);
 };
 
 #endif // CODEGEN_H

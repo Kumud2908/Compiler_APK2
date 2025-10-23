@@ -85,6 +85,12 @@ void CodeGenerator::generate_statement(ASTNode* node) {
     else if (node->name == "IfStatement") generate_if_statement(node);
     else if (node->name == "WhileStatement") generate_while_statement(node);
     else if (node->name == "ForStatement") generate_for_statement(node);
+    else if (node->name == "DoWhileStatement") generate_do_while_statement(node);  // ✅ ADD
+    else if (node->name == "SwitchStatement") generate_switch_statement(node);      // ✅ ADD
+    else if (node->name == "BreakStatement") generate_break_statement(node);        // ✅ ADD
+    else if (node->name == "ContinueStatement") generate_continue_statement(node);  // ✅ ADD
+    else if (node->name == "CaseStatement") generate_case_statement(node);          // ✅ ADD
+    else if (node->name == "DefaultStatement") generate_default_statement(node);    // ✅ ADD
     else if (node->name == "ReturnStatement") generate_return_statement(node);
 }
 
@@ -315,6 +321,12 @@ void CodeGenerator::generate_while_statement(ASTNode* node) {
     if (!node || node->children.size() < 2) return;
     std::string label_start = tac->new_label();
     std::string label_end = tac->new_label();
+    
+    // ✅ ADD THESE:
+    std::string old_break = current_break_label;
+    std::string old_continue = current_continue_label;
+    current_break_label = label_end;
+    current_continue_label = label_start;
 
     tac->add_label(label_start);
     std::string cond = generate_expression(node->children[0]);
@@ -322,18 +334,31 @@ void CodeGenerator::generate_while_statement(ASTNode* node) {
     generate_statement(node->children[1]);
     tac->generate_goto(label_start);
     tac->add_label(label_end);
+    
+    // ✅ ADD THESE:
+    current_break_label = old_break;
+    current_continue_label = old_continue;
 }
 
 void CodeGenerator::generate_for_statement(ASTNode* node) {
     if (!node || node->children.size() < 3) return;
+    
     if (node->children[0]->name == "ForInitStatement") {
         for (auto child : node->children[0]->children) {
             if (child->name == "Declaration") generate_declaration(child);
             else generate_expression(child);
         }
     }
+    
     std::string label_start = tac->new_label();
     std::string label_end = tac->new_label();
+    std::string label_increment = tac->new_label();  // ✅ ADD THIS
+    
+    // ✅ ADD THESE:
+    std::string old_break = current_break_label;
+    std::string old_continue = current_continue_label;
+    current_break_label = label_end;
+    current_continue_label = label_increment;
 
     tac->add_label(label_start);
     if (node->children[1]->name == "ExpressionStatement") {
@@ -342,11 +367,19 @@ void CodeGenerator::generate_for_statement(ASTNode* node) {
             if (!cond.empty()) tac->generate_if_false_goto(cond, label_end);
         }
     }
+    
     int body_index = (node->children.size() == 4) ? 3 : 2;
     generate_statement(node->children[body_index]);
+    
+    tac->add_label(label_increment);  // ✅ ADD THIS
     if (node->children.size() == 4) generate_expression(node->children[2]);
+    
     tac->generate_goto(label_start);
     tac->add_label(label_end);
+    
+    // ✅ ADD THESE:
+    current_break_label = old_break;
+    current_continue_label = old_continue;
 }
 
 void CodeGenerator::generate_return_statement(ASTNode* node) {
@@ -491,6 +524,78 @@ std::vector<int> CodeGenerator::extract_array_dimensions(ASTNode* node) {
         }
     }
     return dims;
+}
+
+// Add these member variables to your CodeGenerator class header:
+// std::string current_break_label;
+// std::string current_continue_label;
+
+void CodeGenerator::generate_do_while_statement(ASTNode* node) {
+    if (!node || node->children.size() < 2) return;
+    std::string label_start = tac->new_label();
+    std::string label_end = tac->new_label();
+    
+    std::string old_break = current_break_label;
+    std::string old_continue = current_continue_label;
+    current_break_label = label_end;
+    current_continue_label = label_start;
+
+    tac->add_label(label_start);
+    generate_statement(node->children[0]);  // body
+    std::string cond = generate_expression(node->children[1]);  // condition
+    tac->generate_if_goto(cond, label_start);
+    tac->add_label(label_end);
+    
+    current_break_label = old_break;
+    current_continue_label = old_continue;
+}
+
+void CodeGenerator::generate_switch_statement(ASTNode* node) {
+    if (!node || node->children.size() < 2) return;
+    
+    std::string switch_var = generate_expression(node->children[0]);
+    std::string end_label = tac->new_label();
+    
+    std::string old_break = current_break_label;
+    current_break_label = end_label;
+    
+    // Generate the switch body (which contains case/default statements)
+    generate_statement(node->children[1]);
+    
+    tac->add_label(end_label);
+    current_break_label = old_break;
+}
+
+void CodeGenerator::generate_case_statement(ASTNode* node) {
+    if (!node || node->children.size() < 2) return;
+    
+    // For simplicity, just generate a label and the statement
+    std::string case_label = tac->new_label();
+    tac->add_label(case_label);
+    
+    // Generate the statement after the case
+    generate_statement(node->children[1]);
+}
+
+void CodeGenerator::generate_default_statement(ASTNode* node) {
+    if (!node || node->children.size() < 1) return;
+    
+    std::string default_label = tac->new_label();
+    tac->add_label(default_label);
+    
+    generate_statement(node->children[0]);
+}
+
+void CodeGenerator::generate_break_statement(ASTNode* node) {
+    if (!current_break_label.empty()) {
+        tac->generate_goto(current_break_label);
+    }
+}
+
+void CodeGenerator::generate_continue_statement(ASTNode* node) {
+    if (!current_continue_label.empty()) {
+        tac->generate_goto(current_continue_label);
+    }
 }
 
 
