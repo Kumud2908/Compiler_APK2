@@ -20,6 +20,8 @@ void yyerror(const char* s);
 
 int syntax_errors = 0;
 int parse_success = 1;
+bool has_semantic_errors = false;
+
 
 /* External declarations for lexer's token table */
 typedef struct {
@@ -1162,7 +1164,6 @@ void yyerror(const char* s) {
         printf("Near token: '%s'\n", yytext);
     }
 }
-
 int main(int argc, char* argv[]) {
     
     symbol_table = new SymbolTable();
@@ -1187,21 +1188,38 @@ int main(int argc, char* argv[]) {
         fclose(file);
     }
     
-    // MOVE ALL PRINTING LOGIC HERE
     if (syntax_errors == 0 && result == 0) {
         printf("\n=== PARSING SUCCESSFUL ===\n");
-        //print_token_table();
-
-	// SEMANTIC ANALYSIS
+        
+        // SEMANTIC ANALYSIS
         printf("\n=== SEMANTIC ANALYSIS ===\n");
+        has_semantic_errors = false;  // ✅ Reset flag
+        
         SemanticAnalyzer analyzer(symbol_table);
         analyzer.analyze(root);
         
-        // Print results
+        // Print symbol table
         symbol_table->print_table();
-
         
-        // Print AST
+        // ✅ CHECK THE FLAG
+        if (has_semantic_errors) {
+            printf("\n");
+            printf("==================================================\n");
+            printf("❌ COMPILATION FAILED\n");
+            printf("==================================================\n");
+            printf("Semantic errors found (see above)\n");
+            printf("Code generation has been skipped.\n");
+            printf("Please fix the errors and recompile.\n");
+            printf("==================================================\n");
+            
+            // Clean up and exit
+            if (root) delete root;
+            delete symbol_table;
+            return 1;
+        }
+        
+        printf("\n✅ Semantic analysis passed with no errors.\n");
+        
         // THREE ADDRESS CODE GENERATION
         printf("\n=== CODE GENERATION ===\n");
         TACGenerator tac_gen;
@@ -1235,12 +1253,24 @@ int main(int argc, char* argv[]) {
                 tacFile.close();
                 printf("TAC file generated: output.tac\n");
             }
+            
+            printf("\n");
+            printf("==================================================\n");
+            printf("✅ COMPILATION SUCCESSFUL\n");
+            printf("==================================================\n");
         }
     } else {
         printf("\n=== PARSING FAILED ===\n");
         printf("Total syntax errors: %d\n", syntax_errors);
+        
+        if (root) delete root;
+        delete symbol_table;
         return 1;
     }
+    
+    // Clean up
+    if (root) delete root;
+    delete symbol_table;
     
     return 0;
 }

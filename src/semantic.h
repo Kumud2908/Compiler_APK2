@@ -11,6 +11,8 @@
 class SemanticAnalyzer {
 private:
     SymbolTable* symbol_table;
+    std::vector<std::string> errors;
+    std::vector<std::string> warnings;
     bool in_function_params;
     std::string current_base_type;
     int error_count;
@@ -39,6 +41,25 @@ public:
     // ADD THESE NEW METHODS for advanced validation:
     void print_summary();
     void report_warning(const std::string& message, ASTNode* node = nullptr);
+    int get_error_count() const {
+        return errors.size();
+    }
+    
+    int get_warning_count() const {
+        return warnings.size();
+    }
+    
+    bool has_errors() const {
+        return !errors.empty();
+    }
+    
+    const std::vector<std::string>& get_errors() const {
+        return errors;
+    }
+    
+    const std::vector<std::string>& get_warnings() const {
+        return warnings;
+    }
 
 private:
     
