@@ -3,6 +3,8 @@
 #include <algorithm>  
 
 #include <unordered_set>
+int semantic_error_count = 0;
+bool semantic_ok = true;
 
 static const std::unordered_set<std::string> builtin_functions = {
     "printf", "scanf", "gets", "puts", "fopen", "fclose", "fread", "fwrite",
@@ -27,6 +29,8 @@ void SemanticAnalyzer::reportError(const std::string& message, ASTNode* node) {
     } else {
         std::cout << "SEMANTIC ERROR: " << message << std::endl;
     }
+     extern bool has_semantic_errors;
+    has_semantic_errors = true;
 }
 
 void SemanticAnalyzer::check_identifier_usage(ASTNode* node) {
