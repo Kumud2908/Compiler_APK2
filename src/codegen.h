@@ -56,6 +56,9 @@ public:
     void generate_default_statement(ASTNode* node);
     void generate_break_statement(ASTNode* node);
     void generate_continue_statement(ASTNode* node);
+     std::string get_base_array_name(ASTNode* node);
+    void collect_array_indices(ASTNode* node, std::vector<std::string>& indices);
+
 };
 
 #endif // CODEGEN_H
