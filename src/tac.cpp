@@ -51,7 +51,7 @@ std::string TACInstruction::toString() const {
     }
     else if (op == "[]=") {
        
-         ss << "    " << arg1 << "[" << arg2 << "] = " << result;
+        ss << "    " << result << "[" << arg1 << "] = " << arg2;
     }
     // ✅ ADD THIS: Handle unary operators
     else if (op == "unary-" || op == "unary+" || op == "unary!" || op == "unary~") {

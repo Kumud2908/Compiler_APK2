@@ -1,23 +1,23 @@
 #include <stdio.h>
 
 int main() {
-    int a[3][3];
-    int x = 1;
-
+    int a[3][3] = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
+    int b[3][3];
+    
+    // Transpose
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
-            a[i][j] = (i + j) * x;
-            x++;
+            b[j][i] = a[i][j];
         }
     }
-
-    int sum = 0;
+    
+    // Print result
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
-            sum += a[i][j];
+            printf("%d ", b[i][j]);
         }
+        printf("\n");
     }
-
-    printf("Sum = %d\n", sum);
+    
     return 0;
 }
