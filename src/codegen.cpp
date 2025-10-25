@@ -28,18 +28,19 @@ void CodeGenerator::generate_node(ASTNode* node) {
 // =======================================================
 //  Function Definitions
 // =======================================================
-
 void CodeGenerator::generate_function_definition(ASTNode* node) {
     if (!node) return;
     
     std::string func_name = "unknown";
-    
     for (auto child : node->children) {
         if (child->name == "Declarator" || child->name == "FunctionDeclarator") {
             func_name = extract_declarator_name(child);
             break;
         }
     }
+    
+    current_function_name = func_name;
+    std::cerr << "DEBUG: current_function_name = " << current_function_name << std::endl; // ✅ ADD THIS
     
     tac->add_label(func_name);
     
@@ -51,7 +52,6 @@ void CodeGenerator::generate_function_definition(ASTNode* node) {
     
     tac->generate_return();
 }
-
 // =======================================================
 //  Compound / Statements
 // =======================================================
@@ -105,7 +105,17 @@ std::string CodeGenerator::generate_expression(ASTNode* node) {
     if (!node) return "";
 
     // Identifier
-    if (node->name == "Identifier") return node->lexeme;
+     if (node->name == "Identifier") {
+        std::string var_name = node->lexeme;
+        std::string static_var = get_static_variable_name(var_name);
+        
+        // If this identifier refers to a static variable, use the mangled name
+        if (static_variables.find(static_var) != static_variables.end()) {
+            return static_var;
+        }
+        return var_name;
+    }
+
 
     // Constant
     if (node->name == "Constant") return node->lexeme;
@@ -381,6 +391,8 @@ std::string CodeGenerator::generate_expression(ASTNode* node) {
     return "";
 }
 
+
+
 // =======================================================
 //  Statement Types
 // =======================================================
@@ -587,47 +599,106 @@ void CodeGenerator::flatten_array_initialization(const std::string &array_name,
         tac->generate_array_store(array_name, offset, value);
     }
 }
-
 void CodeGenerator::generate_declaration(ASTNode* node) {
     if (!node) return;
-
-    // Handle variable initialization
+    
+    bool is_static = is_static_declaration(node);
+    
+    // Extract variable name and initializer
+    std::string var_name;
+    ASTNode* init_node = nullptr;
+    bool is_array = false;
+    std::vector<int> dims;
+    
     for (auto child : node->children) {
+        if (!child) continue;
+        
         if (child->name == "InitDeclaratorList") {
             for (auto init_decl : child->children) {
-                if (init_decl->name == "InitDeclarator") {
-                    ASTNode* declarator = init_decl->children[0];
-
-                    // Extract variable/array name
-                    std::string var_name = extract_declarator_name(declarator);
-                    if (var_name.empty()) continue;
-
-                    // Store array dimensions if present
-                    std::vector<int> dims = extract_array_dimensions(declarator);
+                if (!init_decl || init_decl->name != "InitDeclarator") continue;
+                
+                // Get declarator (variable name)
+                if (init_decl->children.size() > 0) {
+                    var_name = extract_declarator_name(init_decl->children[0]);
+                    
+                    // Check if it's an array
+                    dims = extract_array_dimensions(init_decl->children[0]);
                     if (!dims.empty()) {
-                        array_dims[var_name] = dims;
+                        is_array = true;
                     }
-
-                    // Handle initialization
-                    if (init_decl->children.size() >= 2) {
-                        ASTNode* init_val_node = init_decl->children[1];
-
-                        // If it's a simple scalar initialization
-                        if (dims.empty()) {
-                            std::string init_val = generate_expression(init_val_node);
-                            if (!init_val.empty()) {
-                                tac->generate_assignment(var_name, init_val);
-                            }
-                        } else {
-                            // Array initialization (flatten multi-dimensional)
-                            flatten_array_initialization(var_name, dims, init_val_node, {});
-                        }
-                    }
+                }
+                
+                // Get initializer if present
+                if (init_decl->children.size() > 1) {
+                    init_node = init_decl->children[1];
                 }
             }
         }
     }
+    
+    if (var_name.empty()) return;
+    
+    // ✅ Handle static variables
+    if (is_static) {
+        std::string static_var = get_static_variable_name(var_name);
+        
+        std::cerr << "DEBUG: Found static variable: " << var_name << " -> " << static_var << std::endl;
+        
+        // ✅ CRITICAL: Check if already initialized BEFORE doing anything
+        if (static_variables.find(static_var) != static_variables.end()) {
+            std::cerr << "DEBUG: Skipping re-initialization of " << static_var << std::endl;
+            return;  // ← Exit early, don't generate any TAC!
+        }
+        
+        // ✅ Mark as initialized IMMEDIATELY, before generating any TAC
+        static_variables.insert(static_var);
+        
+        std::cerr << "DEBUG: Initializing " << static_var << " for the first time" << std::endl;
+        
+        // Now generate initialization code (only happens once)
+        if (is_array) {
+            array_dims[static_var] = dims;
+            
+            if (init_node) {
+                flatten_array_initialization(static_var, dims, init_node, {});
+            } else {
+                // Zero-initialize static array
+                int total_size = 1;
+                for (int d : dims) total_size *= d;
+                
+                for (int i = 0; i < total_size; ++i) {
+                    tac->generate_array_store(static_var, std::to_string(i), "0");
+                }
+            }
+        } else {
+            // Regular static variable
+            if (init_node) {
+                std::string init_val = generate_expression(init_node);
+                tac->generate_assignment(static_var, init_val);
+            } else {
+                // Initialize to 0
+                tac->generate_assignment(static_var, "0");
+            }
+        }
+    }
+    // ✅ Handle regular (non-static) variables
+    else {
+        if (is_array) {
+            array_dims[var_name] = dims;
+            
+            if (init_node) {
+                flatten_array_initialization(var_name, dims, init_node, {});
+            }
+        } else {
+            // Regular variable initialization
+            if (init_node) {
+                std::string init_val = generate_expression(init_node);
+                tac->generate_assignment(var_name, init_val);
+            }
+        }
+    }
 }
+
 
 // =======================================================
 //  Utility Functions
@@ -704,4 +775,32 @@ std::vector<int> CodeGenerator::extract_array_dimensions(ASTNode* node) {
         }
     }
     return dims;
+}
+// =======================================================
+//  Static Variable Helpers
+// =======================================================
+
+bool CodeGenerator::is_static_declaration(ASTNode* node) {
+    if (!node) return false;
+    
+    // Check if any child node has "static" storage class
+    for (auto child : node->children) {
+        if (!child) continue;
+        
+        if (child->name == "DeclarationSpecifiers") {
+            for (auto spec : child->children) {
+                // ✅ CHANGED: Check for "StorageClass" instead of "StorageClassSpecifier"
+                if (spec && spec->name == "StorageClass" && 
+                    spec->lexeme == "static") {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+std::string CodeGenerator::get_static_variable_name(const std::string& var_name) {
+    // Create a unique name for static variable: function_name.var_name
+    return current_function_name + "." + var_name;
 }

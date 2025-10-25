@@ -6,10 +6,15 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <unordered_set>
 
 class CodeGenerator {
 private:
     TACGenerator* tac;
+
+    //  Track static variables
+    std::unordered_set<std::string> static_variables;
+    std::string current_function_name;
 
     // Store array dimensions: array name -> list of dimensions
     std::unordered_map<std::string, std::vector<int>> array_dims;
@@ -44,6 +49,10 @@ private:
     // ===== New array helpers =====
     int getArrayNumCols(const std::string &name);
     std::vector<int> extract_array_dimensions(ASTNode* node);
+
+    //  Static variable helpers
+    bool is_static_declaration(ASTNode* node);
+    std::string get_static_variable_name(const std::string& var_name);
 
 public:
     CodeGenerator(TACGenerator* generator) : tac(generator) {}
