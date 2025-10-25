@@ -25,23 +25,22 @@ void CodeGenerator::generate_node(ASTNode* node) {
     }
 }
 
-
-
 // =======================================================
 //  Function Definitions
 // =======================================================
-
 void CodeGenerator::generate_function_definition(ASTNode* node) {
     if (!node) return;
     
     std::string func_name = "unknown";
-    
     for (auto child : node->children) {
         if (child->name == "Declarator" || child->name == "FunctionDeclarator") {
             func_name = extract_declarator_name(child);
             break;
         }
     }
+    
+    current_function_name = func_name;
+    std::cerr << "DEBUG: current_function_name = " << current_function_name << std::endl; // ✅ ADD THIS
     
     tac->add_label(func_name);
     
@@ -53,7 +52,6 @@ void CodeGenerator::generate_function_definition(ASTNode* node) {
     
     tac->generate_return();
 }
-
 // =======================================================
 //  Compound / Statements
 // =======================================================
@@ -85,6 +83,12 @@ void CodeGenerator::generate_statement(ASTNode* node) {
     else if (node->name == "IfStatement") generate_if_statement(node);
     else if (node->name == "WhileStatement") generate_while_statement(node);
     else if (node->name == "ForStatement") generate_for_statement(node);
+    else if (node->name == "DoWhileStatement") generate_do_while_statement(node);
+    else if (node->name == "SwitchStatement") generate_switch_statement(node);
+    else if (node->name == "BreakStatement") generate_break_statement(node);
+    else if (node->name == "ContinueStatement") generate_continue_statement(node);
+    else if (node->name == "CaseStatement") generate_case_statement(node);
+    else if (node->name == "DefaultStatement") generate_default_statement(node);
     else if (node->name == "ReturnStatement") generate_return_statement(node);
 }
 
@@ -101,7 +105,17 @@ std::string CodeGenerator::generate_expression(ASTNode* node) {
     if (!node) return "";
 
     // Identifier
-    if (node->name == "Identifier") return node->lexeme;
+     if (node->name == "Identifier") {
+        std::string var_name = node->lexeme;
+        std::string static_var = get_static_variable_name(var_name);
+        
+        // If this identifier refers to a static variable, use the mangled name
+        if (static_variables.find(static_var) != static_variables.end()) {
+            return static_var;
+        }
+        return var_name;
+    }
+
 
     // Constant
     if (node->name == "Constant") return node->lexeme;
@@ -109,12 +123,12 @@ std::string CodeGenerator::generate_expression(ASTNode* node) {
     // String literal
     if (node->name == "StringLiteral") return node->lexeme;
 
-  
+    // TypeName - ignore for TAC
     if (node->name == "TypeName") {
         return "";
     }
 
-   
+    // Cast Expression
     if (node->name == "CastExpression") {
         if (node->children.size() >= 2) {
             // children[0] = TypeName (ignore for TAC)
@@ -127,12 +141,108 @@ std::string CodeGenerator::generate_expression(ASTNode* node) {
         return "";
     }
 
+    // ✅ STRUCT MEMBER ACCESS (must be before AssignmentExpression)
+    if (node->name == "MemberAccess" || node->name == "StructMemberAccess") {
+        std::string base = generate_expression(node->children[0]); // e.g., 'p'
+        std::string field = node->children[1]->lexeme;            // e.g., 'x'
+        std::string temp = tac->new_temp();
+        tac->generate_struct_load(base, field, temp);
+        return temp;
+    }
 
     // Assignment Expression
     if (node->name == "AssignmentExpression") {
         if (node->children.size() >= 2) {
-            std::string lhs = generate_expression(node->children[0]);
+            ASTNode* lhs_node = node->children[0];
             std::string rhs = generate_expression(node->children[1]);
+            
+            // ✅ CHECK IF LHS IS STRUCT MEMBER ACCESS
+            if (lhs_node->name == "MemberAccess" || lhs_node->name == "StructMemberAccess") {
+                std::string base = generate_expression(lhs_node->children[0]); // e.g., 'p'
+                std::string field = lhs_node->children[1]->lexeme;            // e.g., 'x'
+                
+                if (node->lexeme == "=") {
+                    tac->generate_struct_store(base, field, rhs);
+                    return base;
+                } else {
+                    // Compound assignment: p.x += value
+                    std::string temp_load = tac->new_temp();
+                    tac->generate_struct_load(base, field, temp_load);
+                    
+                    std::string temp_result = tac->new_temp();
+                    std::string op = node->lexeme.substr(0, node->lexeme.length() - 1);
+                    tac->generate_binary_op(op, temp_load, rhs, temp_result);
+                    
+                    tac->generate_struct_store(base, field, temp_result);
+                    return base;
+                }
+            }
+            
+            // ✅ CHECK IF LHS IS ARRAY SUBSCRIPT
+            if (lhs_node->name == "ArraySubscript") {
+                // Check if multi-dimensional
+                if (lhs_node->children[0]->name == "ArraySubscript") {
+                    // Multi-dimensional array assignment
+                    std::string base_array = get_base_array_name(lhs_node);
+                    std::vector<std::string> indices;
+                    collect_array_indices(lhs_node, indices);
+                    
+                    if (array_dims.find(base_array) != array_dims.end()) {
+                        const auto& dims = array_dims[base_array];
+                        
+                        // Calculate flattened index
+                        std::string offset = indices[0];
+                        for (size_t i = 1; i < indices.size(); ++i) {
+                            std::string t_mul = tac->new_temp();
+                            tac->generate_binary_op("*", offset, std::to_string(dims[i]), t_mul);
+                            
+                            std::string t_add = tac->new_temp();
+                            tac->generate_binary_op("+", t_mul, indices[i], t_add);
+                            offset = t_add;
+                        }
+                        
+                        if (node->lexeme == "=") {
+                            tac->generate_array_store(base_array, offset, rhs);
+                            return base_array;
+                        } else {
+                            // Compound assignment
+                            std::string temp_load = tac->new_temp();
+                            tac->generate_array_access(base_array, offset, temp_load);
+                            
+                            std::string temp_result = tac->new_temp();
+                            std::string op = node->lexeme.substr(0, node->lexeme.length() - 1);
+                            tac->generate_binary_op(op, temp_load, rhs, temp_result);
+                            
+                            tac->generate_array_store(base_array, offset, temp_result);
+                            return base_array;
+                        }
+                    }
+                }
+                
+                // Simple 1D array assignment
+                std::string array_base = generate_expression(lhs_node->children[0]);
+                std::string index = generate_expression(lhs_node->children[1]);
+                
+                if (node->lexeme == "=") {
+                    tac->generate_array_store(array_base, index, rhs);
+                    return array_base;
+                } else {
+                    // Compound assignment: a[i] += value
+                    std::string temp_load = tac->new_temp();
+                    tac->generate_array_access(array_base, index, temp_load);
+                    
+                    std::string temp_result = tac->new_temp();
+                    std::string op = node->lexeme.substr(0, node->lexeme.length() - 1);
+                    tac->generate_binary_op(op, temp_load, rhs, temp_result);
+                    
+                    tac->generate_array_store(array_base, index, temp_result);
+                    return array_base;
+                }
+            }
+            
+            // Regular variable assignment
+            std::string lhs = generate_expression(lhs_node);
+            
             if (node->lexeme == "=") {
                 tac->generate_assignment(lhs, rhs);
                 return lhs;
@@ -165,30 +275,26 @@ std::string CodeGenerator::generate_expression(ASTNode* node) {
 
     // Unary operations
     if (node->name == "UnaryExpression" && node->children.size() >= 1) {
-    std::string arg = generate_expression(node->children[0]);
-    std::string result = tac->new_temp();
+        std::string arg = generate_expression(node->children[0]);
+        std::string result = tac->new_temp();
 
-    if (node->lexeme == "&") {
-        tac->generate_address_of(arg, result); // address-of operator
-    }
-    else if (node->lexeme == "*") {
-        tac->generate_load(result, arg); // dereference operator
-    }
-    else if (node->lexeme == "+"
-          || node->lexeme == "-"
-          || node->lexeme == "!"
-          || node->lexeme == "~") {
-        tac->generate_unary_op("unary" + node->lexeme, arg, result);
-    }
-    else {
-        // fallback safety
-        tac->generate_binary_op(node->lexeme, arg, "", result);
-    }
+        if (node->lexeme == "&") {
+            tac->generate_address_of(arg, result); // address-of operator
+        }
+        else if (node->lexeme == "*") {
+            tac->generate_load(result, arg); // dereference operator
+        }
+        else if (node->lexeme == "+" || node->lexeme == "-" || 
+                 node->lexeme == "!" || node->lexeme == "~") {
+            tac->generate_unary_op("unary" + node->lexeme, arg, result);
+        }
+        else {
+            // fallback safety
+            tac->generate_binary_op(node->lexeme, arg, "", result);
+        }
 
-    return result;
-}
-
-
+        return result;
+    }
 
     // Postfix ++ / --
     if (node->name == "PostfixExpression") {
@@ -219,49 +325,45 @@ std::string CodeGenerator::generate_expression(ASTNode* node) {
         return result;
     }
 
-    // =======================================================
-    //  ✅ Fixed Array Subscript: handles arr[i][j]
-    // =======================================================
-   // Array subscript (flattened for multi-dimensional arrays)
-if (node->name == "ArraySubscript") {
-    std::string array_name = generate_expression(node->children[0]);
-    ASTNode* index_node = node->children[1];
-
-    // Generate TAC for index expression
-    std::string index_val = generate_expression(index_node);
-
-    // Flattened index computation if array is multidimensional
-    if (array_dims.find(array_name) != array_dims.end()) {
-        const auto& dims = array_dims[array_name];
-        std::string offset = index_val;
-
-        // Walk up the parent ArraySubscript nodes for higher dimensions
-        ASTNode* current = node->parent;
-        int dim_level = dims.size() - 1;
-        while (current && current->name == "ArraySubscript" && dim_level > 0) {
-            std::string prev_index = generate_expression(current->children[1]);
-            std::string t_mul = tac->new_temp();
-            tac->generate_binary_op("*", prev_index, std::to_string(dims[dim_level]), t_mul);
-
-            std::string t_sum = tac->new_temp();
-            tac->generate_binary_op("+", t_mul, offset, t_sum);
-            offset = t_sum;
-
-            current = current->parent;
-            dim_level--;
+    // Array subscript (flattened for multi-dimensional arrays)
+    if (node->name == "ArraySubscript") {
+        // Check if this is a nested array subscript (e.g., a[i][j])
+        if (node->children[0]->name == "ArraySubscript") {
+            // This is a multi-dimensional array access
+            std::string base_array = get_base_array_name(node);
+            
+            // Collect all indices from innermost to outermost
+            std::vector<std::string> indices;
+            collect_array_indices(node, indices);
+            
+            // Check if we have dimension information
+            if (array_dims.find(base_array) != array_dims.end()) {
+                const auto& dims = array_dims[base_array];
+                
+                // Calculate flattened index: i * dims[1] + j for a[i][j]
+                std::string offset = indices[0];
+                for (size_t i = 1; i < indices.size(); ++i) {
+                    std::string t_mul = tac->new_temp();
+                    tac->generate_binary_op("*", offset, std::to_string(dims[i]), t_mul);
+                    
+                    std::string t_add = tac->new_temp();
+                    tac->generate_binary_op("+", t_mul, indices[i], t_add);
+                    offset = t_add;
+                }
+                
+                std::string result = tac->new_temp();
+                tac->generate_array_access(base_array, offset, result);
+                return result;
+            }
         }
-
-        std::string result = tac->new_temp();
-        tac->generate_array_access(array_name, offset, result);
-        return result;
-    } else {
-        // Fallback for 1D array
+        
+        // Simple 1D array or couldn't determine dimensions
+        std::string array_name = generate_expression(node->children[0]);
+        std::string index_val = generate_expression(node->children[1]);
         std::string result = tac->new_temp();
         tac->generate_array_access(array_name, index_val, result);
         return result;
     }
-}
-
 
     // Conditional expression (ternary)
     if (node->name == "ConditionalExpression" && node->children.size() >= 3) {
@@ -285,8 +387,11 @@ if (node->name == "ArraySubscript") {
 
     // Recursively handle single child
     if (node->children.size() == 1) return generate_expression(node->children[0]);
+    
     return "";
 }
+
+
 
 // =======================================================
 //  Statement Types
@@ -315,6 +420,11 @@ void CodeGenerator::generate_while_statement(ASTNode* node) {
     if (!node || node->children.size() < 2) return;
     std::string label_start = tac->new_label();
     std::string label_end = tac->new_label();
+    
+    std::string old_break = current_break_label;
+    std::string old_continue = current_continue_label;
+    current_break_label = label_end;
+    current_continue_label = label_start;
 
     tac->add_label(label_start);
     std::string cond = generate_expression(node->children[0]);
@@ -322,18 +432,29 @@ void CodeGenerator::generate_while_statement(ASTNode* node) {
     generate_statement(node->children[1]);
     tac->generate_goto(label_start);
     tac->add_label(label_end);
+    
+    current_break_label = old_break;
+    current_continue_label = old_continue;
 }
 
 void CodeGenerator::generate_for_statement(ASTNode* node) {
     if (!node || node->children.size() < 3) return;
+    
     if (node->children[0]->name == "ForInitStatement") {
         for (auto child : node->children[0]->children) {
             if (child->name == "Declaration") generate_declaration(child);
             else generate_expression(child);
         }
     }
+    
     std::string label_start = tac->new_label();
     std::string label_end = tac->new_label();
+    std::string label_increment = tac->new_label();
+    
+    std::string old_break = current_break_label;
+    std::string old_continue = current_continue_label;
+    current_break_label = label_end;
+    current_continue_label = label_increment;
 
     tac->add_label(label_start);
     if (node->children[1]->name == "ExpressionStatement") {
@@ -342,11 +463,18 @@ void CodeGenerator::generate_for_statement(ASTNode* node) {
             if (!cond.empty()) tac->generate_if_false_goto(cond, label_end);
         }
     }
+    
     int body_index = (node->children.size() == 4) ? 3 : 2;
     generate_statement(node->children[body_index]);
+    
+    tac->add_label(label_increment);
     if (node->children.size() == 4) generate_expression(node->children[2]);
+    
     tac->generate_goto(label_start);
     tac->add_label(label_end);
+    
+    current_break_label = old_break;
+    current_continue_label = old_continue;
 }
 
 void CodeGenerator::generate_return_statement(ASTNode* node) {
@@ -359,10 +487,77 @@ void CodeGenerator::generate_return_statement(ASTNode* node) {
     }
 }
 
+void CodeGenerator::generate_do_while_statement(ASTNode* node) {
+    if (!node || node->children.size() < 2) return;
+    std::string label_start = tac->new_label();
+    std::string label_end = tac->new_label();
+    
+    std::string old_break = current_break_label;
+    std::string old_continue = current_continue_label;
+    current_break_label = label_end;
+    current_continue_label = label_start;
+
+    tac->add_label(label_start);
+    generate_statement(node->children[0]);  // body
+    std::string cond = generate_expression(node->children[1]);  // condition
+    tac->generate_if_goto(cond, label_start);
+    tac->add_label(label_end);
+    
+    current_break_label = old_break;
+    current_continue_label = old_continue;
+}
+
+void CodeGenerator::generate_switch_statement(ASTNode* node) {
+    if (!node || node->children.size() < 2) return;
+    
+    std::string switch_var = generate_expression(node->children[0]);
+    std::string end_label = tac->new_label();
+    
+    std::string old_break = current_break_label;
+    current_break_label = end_label;
+    
+    // Generate the switch body (which contains case/default statements)
+    generate_statement(node->children[1]);
+    
+    tac->add_label(end_label);
+    current_break_label = old_break;
+}
+
+void CodeGenerator::generate_case_statement(ASTNode* node) {
+    if (!node || node->children.size() < 2) return;
+    
+    // For simplicity, just generate a label and the statement
+    std::string case_label = tac->new_label();
+    tac->add_label(case_label);
+    
+    // Generate the statement after the case
+    generate_statement(node->children[1]);
+}
+
+void CodeGenerator::generate_default_statement(ASTNode* node) {
+    if (!node || node->children.size() < 1) return;
+    
+    std::string default_label = tac->new_label();
+    tac->add_label(default_label);
+    
+    generate_statement(node->children[0]);
+}
+
+void CodeGenerator::generate_break_statement(ASTNode* node) {
+    if (!current_break_label.empty()) {
+        tac->generate_goto(current_break_label);
+    }
+}
+
+void CodeGenerator::generate_continue_statement(ASTNode* node) {
+    if (!current_continue_label.empty()) {
+        tac->generate_goto(current_continue_label);
+    }
+}
+
 // =======================================================
 //  Declaration + Array Tracking
 // =======================================================
-
 
 // Recursive helper to flatten array initializers
 void CodeGenerator::flatten_array_initialization(const std::string &array_name,
@@ -404,48 +599,106 @@ void CodeGenerator::flatten_array_initialization(const std::string &array_name,
         tac->generate_array_store(array_name, offset, value);
     }
 }
-
-
 void CodeGenerator::generate_declaration(ASTNode* node) {
     if (!node) return;
-
-    // Handle variable initialization
+    
+    bool is_static = is_static_declaration(node);
+    
+    // Extract variable name and initializer
+    std::string var_name;
+    ASTNode* init_node = nullptr;
+    bool is_array = false;
+    std::vector<int> dims;
+    
     for (auto child : node->children) {
+        if (!child) continue;
+        
         if (child->name == "InitDeclaratorList") {
             for (auto init_decl : child->children) {
-                if (init_decl->name == "InitDeclarator") {
-                    ASTNode* declarator = init_decl->children[0];
-
-                    // Extract variable/array name
-                    std::string var_name = extract_declarator_name(declarator);
-                    if (var_name.empty()) continue;
-
-                    // Store array dimensions if present
-                    std::vector<int> dims = extract_array_dimensions(declarator);
+                if (!init_decl || init_decl->name != "InitDeclarator") continue;
+                
+                // Get declarator (variable name)
+                if (init_decl->children.size() > 0) {
+                    var_name = extract_declarator_name(init_decl->children[0]);
+                    
+                    // Check if it's an array
+                    dims = extract_array_dimensions(init_decl->children[0]);
                     if (!dims.empty()) {
-                        array_dims[var_name] = dims;
+                        is_array = true;
                     }
-
-                    // Handle initialization
-                    if (init_decl->children.size() >= 2) {
-                        ASTNode* init_val_node = init_decl->children[1];
-
-                        // If it's a simple scalar initialization
-                        if (dims.empty()) {
-                            std::string init_val = generate_expression(init_val_node);
-                            if (!init_val.empty()) {
-                                tac->generate_assignment(var_name, init_val);
-                            }
-                        } else {
-                            // Array initialization (flatten multi-dimensional)
-                            flatten_array_initialization(var_name, dims, init_val_node, {});
-                        }
-                    }
+                }
+                
+                // Get initializer if present
+                if (init_decl->children.size() > 1) {
+                    init_node = init_decl->children[1];
                 }
             }
         }
     }
+    
+    if (var_name.empty()) return;
+    
+    // ✅ Handle static variables
+    if (is_static) {
+        std::string static_var = get_static_variable_name(var_name);
+        
+        std::cerr << "DEBUG: Found static variable: " << var_name << " -> " << static_var << std::endl;
+        
+        // ✅ CRITICAL: Check if already initialized BEFORE doing anything
+        if (static_variables.find(static_var) != static_variables.end()) {
+            std::cerr << "DEBUG: Skipping re-initialization of " << static_var << std::endl;
+            return;  // ← Exit early, don't generate any TAC!
+        }
+        
+        // ✅ Mark as initialized IMMEDIATELY, before generating any TAC
+        static_variables.insert(static_var);
+        
+        std::cerr << "DEBUG: Initializing " << static_var << " for the first time" << std::endl;
+        
+        // Now generate initialization code (only happens once)
+        if (is_array) {
+            array_dims[static_var] = dims;
+            
+            if (init_node) {
+                flatten_array_initialization(static_var, dims, init_node, {});
+            } else {
+                // Zero-initialize static array
+                int total_size = 1;
+                for (int d : dims) total_size *= d;
+                
+                for (int i = 0; i < total_size; ++i) {
+                    tac->generate_array_store(static_var, std::to_string(i), "0");
+                }
+            }
+        } else {
+            // Regular static variable
+            if (init_node) {
+                std::string init_val = generate_expression(init_node);
+                tac->generate_assignment(static_var, init_val);
+            } else {
+                // Initialize to 0
+                tac->generate_assignment(static_var, "0");
+            }
+        }
+    }
+    // ✅ Handle regular (non-static) variables
+    else {
+        if (is_array) {
+            array_dims[var_name] = dims;
+            
+            if (init_node) {
+                flatten_array_initialization(var_name, dims, init_node, {});
+            }
+        } else {
+            // Regular variable initialization
+            if (init_node) {
+                std::string init_val = generate_expression(init_node);
+                tac->generate_assignment(var_name, init_val);
+            }
+        }
+    }
 }
+
 
 // =======================================================
 //  Utility Functions
@@ -462,6 +715,37 @@ std::string CodeGenerator::extract_declarator_name(ASTNode* node) {
 }
 
 // ===== Array Helpers =====
+
+// Helper to get the base array name from nested subscripts
+std::string CodeGenerator::get_base_array_name(ASTNode* node) {
+    if (!node) return "";
+    
+    if (node->name == "Identifier") {
+        return node->lexeme;
+    }
+    
+    if (node->name == "ArraySubscript" && node->children.size() > 0) {
+        return get_base_array_name(node->children[0]);
+    }
+    
+    return "";
+}
+
+// Helper to collect all array indices in order
+void CodeGenerator::collect_array_indices(ASTNode* node, std::vector<std::string>& indices) {
+    if (!node || node->name != "ArraySubscript") return;
+    
+    // Recurse to inner subscript first
+    if (node->children[0]->name == "ArraySubscript") {
+        collect_array_indices(node->children[0], indices);
+    }
+    
+    // Then add this level's index
+    if (node->children.size() > 1) {
+        std::string index = generate_expression(node->children[1]);
+        indices.push_back(index);
+    }
+}
 
 int CodeGenerator::getArrayNumCols(const std::string &name) {
     auto it = array_dims.find(name);
@@ -492,5 +776,31 @@ std::vector<int> CodeGenerator::extract_array_dimensions(ASTNode* node) {
     }
     return dims;
 }
+// =======================================================
+//  Static Variable Helpers
+// =======================================================
 
+bool CodeGenerator::is_static_declaration(ASTNode* node) {
+    if (!node) return false;
+    
+    // Check if any child node has "static" storage class
+    for (auto child : node->children) {
+        if (!child) continue;
+        
+        if (child->name == "DeclarationSpecifiers") {
+            for (auto spec : child->children) {
+                // ✅ CHANGED: Check for "StorageClass" instead of "StorageClassSpecifier"
+                if (spec && spec->name == "StorageClass" && 
+                    spec->lexeme == "static") {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
 
+std::string CodeGenerator::get_static_variable_name(const std::string& var_name) {
+    // Create a unique name for static variable: function_name.var_name
+    return current_function_name + "." + var_name;
+}

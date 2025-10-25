@@ -6,16 +6,24 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <unordered_set>
 
 class CodeGenerator {
 private:
     TACGenerator* tac;
+
+    //  Track static variables
+    std::unordered_set<std::string> static_variables;
+    std::string current_function_name;
 
     // Store array dimensions: array name -> list of dimensions
     std::unordered_map<std::string, std::vector<int>> array_dims;
 
     // Expression code generation - returns the variable holding the result
     std::string generate_expression(ASTNode* node);
+  
+    std::string current_break_label;
+    std::string current_continue_label;
 
     // Statement code generation
     void generate_statement(ASTNode* node);
@@ -42,11 +50,24 @@ private:
     int getArrayNumCols(const std::string &name);
     std::vector<int> extract_array_dimensions(ASTNode* node);
 
+    //  Static variable helpers
+    bool is_static_declaration(ASTNode* node);
+    std::string get_static_variable_name(const std::string& var_name);
+
 public:
     CodeGenerator(TACGenerator* generator) : tac(generator) {}
 
     void generate(ASTNode* root);
     void generate_node(ASTNode* node);
+    void generate_do_while_statement(ASTNode* node);
+    void generate_switch_statement(ASTNode* node);
+    void generate_case_statement(ASTNode* node);
+    void generate_default_statement(ASTNode* node);
+    void generate_break_statement(ASTNode* node);
+    void generate_continue_statement(ASTNode* node);
+     std::string get_base_array_name(ASTNode* node);
+    void collect_array_indices(ASTNode* node, std::vector<std::string>& indices);
+
 };
 
 #endif // CODEGEN_H

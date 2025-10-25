@@ -47,9 +47,11 @@ std::string TACInstruction::toString() const {
     }
     else if (op == "[]") {
         ss << "    " << result << " = " << arg1 << "[" << arg2 << "]";
+        
     }
     else if (op == "[]=") {
-        ss << "    " << result << "[" << arg1 << "] = " << arg2;
+       
+         ss << "    " << arg1 << "[" << arg2 << "] = " << result;
     }
     // ✅ ADD THIS: Handle unary operators
     else if (op == "unary-" || op == "unary+" || op == "unary!" || op == "unary~") {
@@ -63,6 +65,13 @@ std::string TACInstruction::toString() const {
     }
     else if (op == "!" && arg2.empty()) {
         ss << "    " << result << " = !" << arg1;
+    }
+    else if (op == ".") {
+    ss << "    " << result << " = " << arg1 << "." << arg2;
+}
+  else if (op == ".=") {
+        // ✅ FIXED: Swap the order to match the storage format
+        ss << "    " << result << "." << arg1 << " = " << arg2;
     }
     else {
         // Binary operations
@@ -142,7 +151,7 @@ void TACGenerator::generate_return(const std::string& value) {
 void TACGenerator::generate_array_access(const std::string& array, const std::string& index,
                                          const std::string& result) {
     // result = array[index]
-    add_instruction("[]", result, array, index);
+    add_instruction("[]", array, index, result);
 }
 
 void TACGenerator::generate_array_store(const std::string& array, const std::string& index,
@@ -157,4 +166,18 @@ void TACGenerator::print() const {
         instr.print();
     }
     std::cout << "\nTotal instructions: " << instructions.size() << std::endl;
+}
+
+void TACGenerator::generate_struct_load(const std::string& structVar,
+                                        const std::string& member,
+                                        const std::string& result) {
+    // result = structVar.member
+    add_instruction(".", structVar, member, result);
+}
+
+void TACGenerator::generate_struct_store(const std::string& structVar,
+                                         const std::string& member,
+                                         const std::string& value) {
+    // structVar.member = value
+    add_instruction(".=", member, value, structVar);
 }

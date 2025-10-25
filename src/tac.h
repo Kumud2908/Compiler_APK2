@@ -13,7 +13,8 @@ public:
     std::string arg2;      // Second argument
     std::string result;    // Result
     std::string label;     // Label for jumps
-    
+     std::string comment; // ✅ NEW: for comments
+
     TACInstruction(const std::string& operation = "", 
                    const std::string& a1 = "", 
                    const std::string& a2 = "", 
@@ -34,6 +35,11 @@ private:
     
 public:
     TACGenerator() : temp_counter(0), label_counter(0) {}
+
+
+   // NEW: Add comment to TAC
+    void add_comment(const std::string& comment); 
+    
     
     // Temporary variable generation
     std::string new_temp();
@@ -79,7 +85,8 @@ public:
 
     void generate_load(const std::string &target, const std::string &addr);
     void generate_address_of(const std::string &var, const std::string &target) ;
-
+     void generate_struct_load(const std::string &target, const std::string &base, const std::string &member);
+    void generate_struct_store(const std::string &base, const std::string &member, const std::string &value);
     
     // Print all instructions
     void print() const;
@@ -89,6 +96,7 @@ public:
     
     // Clear instructions
     void clear() { instructions.clear(); temp_counter = 0; label_counter = 0; }
+    
 };
 
 #endif // TAC_H

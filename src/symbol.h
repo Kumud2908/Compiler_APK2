@@ -89,6 +89,7 @@ public:
     }
 
     void check_unused_variables();
+    
 };
 
 #endif
