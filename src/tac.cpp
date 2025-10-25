@@ -19,6 +19,9 @@ std::string TACInstruction::toString() const {
     if (op == "=") {
         ss << "    " << result << " = " << arg1;
     }
+    else if (op == "*=") {  // ← ADD THIS CASE
+        ss << "    *" << result << " = " << arg1;
+    }
     else if (op == "goto") {
         ss << "    goto " << result;
     }
@@ -105,6 +108,9 @@ void TACGenerator::add_label(const std::string& label) {
 
 void TACGenerator::generate_load(const std::string &target, const std::string &addr) {
     add_instruction("*", addr, "", target);  
+}
+void TACGenerator::generate_store(const std::string& address, const std::string& value) {
+    add_instruction("*=", value, "", address);
 }
 
 void TACGenerator::generate_address_of(const std::string &var, const std::string &target) {

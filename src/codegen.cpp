@@ -50,7 +50,7 @@ void CodeGenerator::generate_function_definition(ASTNode* node) {
         }
     }
     
-    tac->generate_return();
+
 }
 // =======================================================
 //  Compound / Statements
@@ -88,8 +88,23 @@ void CodeGenerator::generate_statement(ASTNode* node) {
     else if (node->name == "BreakStatement") generate_break_statement(node);
     else if (node->name == "ContinueStatement") generate_continue_statement(node);
     else if (node->name == "CaseStatement") generate_case_statement(node);
+    else if (node->name == "GotoStatement") generate_goto_statement(node);
+    else if (node->name == "LabeledStatement") generate_labeled_statement(node);
     else if (node->name == "DefaultStatement") generate_default_statement(node);
     else if (node->name == "ReturnStatement") generate_return_statement(node);
+}
+
+void CodeGenerator::generate_goto_statement(ASTNode* node) {
+    tac->generate_goto(node->lexeme);  // lexeme contains the label name "skip"
+}
+
+void CodeGenerator::generate_labeled_statement(ASTNode* node) {
+    tac->add_label(node->lexeme);  // This should add "skip:"
+    
+    // Generate the statement after the label
+    if (!node->children.empty()) {
+        generate_statement(node->children[0]);
+    }
 }
 
 void CodeGenerator::generate_expression_statement(ASTNode* node) {
@@ -105,16 +120,23 @@ std::string CodeGenerator::generate_expression(ASTNode* node) {
     if (!node) return "";
 
     // Identifier
-     if (node->name == "Identifier") {
-        std::string var_name = node->lexeme;
-        std::string static_var = get_static_variable_name(var_name);
-        
-        // If this identifier refers to a static variable, use the mangled name
-        if (static_variables.find(static_var) != static_variables.end()) {
-            return static_var;
-        }
-        return var_name;
+if (node->name == "Identifier") {
+    std::string var_name = node->lexeme;
+    std::string static_var = get_static_variable_name(var_name);
+    
+    // If this identifier refers to a static variable, use the mangled name
+    if (static_variables.find(static_var) != static_variables.end()) {
+        return static_var;
     }
+    
+    auto it = enum_constants.find(var_name);
+    if (it != enum_constants.end()) {
+        std::cout << "DEBUG: Resolved enum constant " << var_name << " = " << it->second << std::endl;
+        return it->second;  // Return the numeric value
+    }
+    
+    return var_name;
+}
 
 
     // Constant
@@ -155,6 +177,13 @@ std::string CodeGenerator::generate_expression(ASTNode* node) {
         if (node->children.size() >= 2) {
             ASTNode* lhs_node = node->children[0];
             std::string rhs = generate_expression(node->children[1]);
+
+
+        if (lhs_node->name == "UnaryExpression" && lhs_node->lexeme == "*") {
+            std::string pointer = generate_expression(lhs_node->children[0]);
+            tac->generate_store(pointer, rhs);  // *pointer = value
+            return rhs;
+        }
             
             // ✅ CHECK IF LHS IS STRUCT MEMBER ACCESS
             if (lhs_node->name == "MemberAccess" || lhs_node->name == "StructMemberAccess") {
@@ -309,21 +338,31 @@ std::string CodeGenerator::generate_expression(ASTNode* node) {
         }
     }
 
-    // Function call
-    if (node->name == "FunctionCall") {
-        std::string func_name = generate_expression(node->children[0]);
-        int param_count = 0;
-        if (node->children.size() > 1 && node->children[1]->name == "ArgumentList") {
-            for (auto arg : node->children[1]->children) {
-                std::string param = generate_expression(arg);
-                tac->generate_param(param);
-                param_count++;
-            }
+// Function call
+if (node->name == "FunctionCall") {
+    std::string func_name = generate_expression(node->children[0]);
+    int param_count = 0;
+    
+    if (node->children.size() > 1 && node->children[1]->name == "ArgumentList") {
+        for (auto arg : node->children[1]->children) {
+            std::string param = generate_expression(arg);
+            
+            
+            tac->generate_param(param);
+            param_count++;
         }
+    }
+    
+    // Handle void vs non-void functions
+    if (is_void_function(func_name)) {
+        tac->generate_call(func_name, param_count);
+        return "";
+    } else {
         std::string result = tac->new_temp();
         tac->generate_call(func_name, param_count, result);
         return result;
     }
+}
 
     // Array subscript (flattened for multi-dimensional arrays)
     if (node->name == "ArraySubscript") {
@@ -601,14 +640,16 @@ void CodeGenerator::flatten_array_initialization(const std::string &array_name,
 }
 void CodeGenerator::generate_declaration(ASTNode* node) {
     if (!node) return;
-    
+    for (auto child : node->children) {
+        if (child->name == "DeclarationSpecifiers") {
+            for (auto spec : child->children) {
+                if (spec->name == "EnumSpecifier") {
+                    process_enum_declaration(spec);
+                }
+            }
+        }
+    }
     bool is_static = is_static_declaration(node);
-    
-    // Extract variable name and initializer
-    std::string var_name;
-    ASTNode* init_node = nullptr;
-    bool is_array = false;
-    std::vector<int> dims;
     
     for (auto child : node->children) {
         if (!child) continue;
@@ -616,6 +657,12 @@ void CodeGenerator::generate_declaration(ASTNode* node) {
         if (child->name == "InitDeclaratorList") {
             for (auto init_decl : child->children) {
                 if (!init_decl || init_decl->name != "InitDeclarator") continue;
+
+                // Extract variable name and initializer for THIS declaration
+                std::string var_name;
+                ASTNode* init_node = nullptr;
+                bool is_array = false;
+                std::vector<int> dims;
                 
                 // Get declarator (variable name)
                 if (init_decl->children.size() > 0) {
@@ -632,69 +679,69 @@ void CodeGenerator::generate_declaration(ASTNode* node) {
                 if (init_decl->children.size() > 1) {
                     init_node = init_decl->children[1];
                 }
-            }
-        }
-    }
-    
-    if (var_name.empty()) return;
-    
-    // ✅ Handle static variables
-    if (is_static) {
-        std::string static_var = get_static_variable_name(var_name);
-        
-        std::cerr << "DEBUG: Found static variable: " << var_name << " -> " << static_var << std::endl;
-        
-        // ✅ CRITICAL: Check if already initialized BEFORE doing anything
-        if (static_variables.find(static_var) != static_variables.end()) {
-            std::cerr << "DEBUG: Skipping re-initialization of " << static_var << std::endl;
-            return;  // ← Exit early, don't generate any TAC!
-        }
-        
-        // ✅ Mark as initialized IMMEDIATELY, before generating any TAC
-        static_variables.insert(static_var);
-        
-        std::cerr << "DEBUG: Initializing " << static_var << " for the first time" << std::endl;
-        
-        // Now generate initialization code (only happens once)
-        if (is_array) {
-            array_dims[static_var] = dims;
-            
-            if (init_node) {
-                flatten_array_initialization(static_var, dims, init_node, {});
-            } else {
-                // Zero-initialize static array
-                int total_size = 1;
-                for (int d : dims) total_size *= d;
                 
-                for (int i = 0; i < total_size; ++i) {
-                    tac->generate_array_store(static_var, std::to_string(i), "0");
+                if (var_name.empty()) continue;
+                
+                // Handle static variables
+                if (is_static) {
+                    std::string static_var = get_static_variable_name(var_name);
+                    
+                    std::cerr << "DEBUG: Found static variable: " << var_name << " -> " << static_var << std::endl;
+                    
+                    // Check if already initialized BEFORE doing anything
+                    if (static_variables.find(static_var) != static_variables.end()) {
+                        std::cerr << "DEBUG: Skipping re-initialization of " << static_var << std::endl;
+                        continue;  // Skip to next declaration
+                    }
+                    
+                    // Mark as initialized IMMEDIATELY, before generating any TAC
+                    static_variables.insert(static_var);
+                    
+                    std::cerr << "DEBUG: Initializing " << static_var << " for the first time" << std::endl;
+                    
+                    // Now generate initialization code (only happens once)
+                    if (is_array) {
+                        array_dims[static_var] = dims;
+                        
+                        if (init_node) {
+                            flatten_array_initialization(static_var, dims, init_node, {});
+                        } else {
+                            // Zero-initialize static array
+                            int total_size = 1;
+                            for (int d : dims) total_size *= d;
+                            
+                            for (int i = 0; i < total_size; ++i) {
+                                tac->generate_array_store(static_var, std::to_string(i), "0");
+                            }
+                        }
+                    } else {
+                        // Regular static variable
+                        if (init_node) {
+                            std::string init_val = generate_expression(init_node);
+                            tac->generate_assignment(static_var, init_val);
+                        } else {
+                            // Initialize to 0
+                            tac->generate_assignment(static_var, "0");
+                        }
+                    }
                 }
-            }
-        } else {
-            // Regular static variable
-            if (init_node) {
-                std::string init_val = generate_expression(init_node);
-                tac->generate_assignment(static_var, init_val);
-            } else {
-                // Initialize to 0
-                tac->generate_assignment(static_var, "0");
-            }
-        }
-    }
-    // ✅ Handle regular (non-static) variables
-    else {
-        if (is_array) {
-            array_dims[var_name] = dims;
-            
-            if (init_node) {
-                flatten_array_initialization(var_name, dims, init_node, {});
-            }
-        } else {
-            // Regular variable initialization
-            if (init_node) {
-                std::string init_val = generate_expression(init_node);
-                tac->generate_assignment(var_name, init_val);
-            }
+                // Handle regular (non-static) variables
+                else {
+                    if (is_array) {
+                        array_dims[var_name] = dims;
+                        
+                        if (init_node) {
+                            flatten_array_initialization(var_name, dims, init_node, {});
+                        }
+                    } else {
+                        // Regular variable initialization
+                        if (init_node) {
+                            std::string init_val = generate_expression(init_node);
+                            tac->generate_assignment(var_name, init_val);
+                        }
+                    }
+                }
+            }  // End of init_decl loop
         }
     }
 }
@@ -799,8 +846,68 @@ bool CodeGenerator::is_static_declaration(ASTNode* node) {
     }
     return false;
 }
-
+bool CodeGenerator::is_array(ASTNode* node) {
+    if (!node) return false;
+    
+    // Case 1: Direct array identifier
+    if (node->name == "Identifier") {
+        // Check if we have array dimensions stored for this variable
+        return array_dims.find(node->lexeme) != array_dims.end();
+    }
+    
+    // Case 2: Array declarator in declarations
+    if (node->name == "ArrayDeclarator") {
+        return true;
+    }
+    
+    // Case 3: Check children recursively
+    for (auto child : node->children) {
+        if (is_array(child)) return true;
+    }
+    
+    return false;
+}
+bool CodeGenerator::is_void_function(const std::string& func_name) {
+    if (!symbol_table) return false;  // Fallback if no symbol table
+    
+    Symbol* sym = symbol_table->find_symbol(func_name);
+    if (sym && sym->symbol_type == "function") {
+        return sym->base_type == "void";
+    }
+    
+    // Fallback for known library functions
+    return func_name == "printf" || func_name == "scanf";
+}
 std::string CodeGenerator::get_static_variable_name(const std::string& var_name) {
     // Create a unique name for static variable: function_name.var_name
     return current_function_name + "." + var_name;
+}
+
+void CodeGenerator::process_enum_declaration(ASTNode* node) {
+    if (!node || node->name != "EnumSpecifier") return;
+    
+    int current_value = 0;
+    
+    // Find the EnumeratorList
+    for (auto child : node->children) {
+        if (child->name == "EnumeratorList") {
+            for (auto enumerator : child->children) {
+                if (enumerator->name == "Enumerator") {
+                    std::string enum_name = enumerator->lexeme;
+                    
+                    // Check if this enumerator has an explicit value
+                    if (!enumerator->children.empty() && 
+                        enumerator->children[0]->name == "Constant") {
+                        current_value = std::stoi(enumerator->children[0]->lexeme);
+                    }
+                    
+                    // Store the enum constant
+                    enum_constants[enum_name] = std::to_string(current_value);
+                    std::cout << "DEBUG: Enum constant " << enum_name << " = " << current_value << std::endl;
+                    
+                    current_value++;  // Auto-increment for next enumerator
+                }
+            }
+        }
+    }
 }

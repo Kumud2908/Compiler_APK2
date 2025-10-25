@@ -1205,7 +1205,7 @@ int main(int argc, char* argv[]) {
         // THREE ADDRESS CODE GENERATION
         printf("\n=== CODE GENERATION ===\n");
         TACGenerator tac_gen;
-        CodeGenerator code_gen(&tac_gen);
+        CodeGenerator code_gen(&tac_gen,symbol_table);
         
         code_gen.generate(root);
         tac_gen.print();

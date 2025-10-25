@@ -3,6 +3,7 @@
 
 #include "ast.h"
 #include "tac.h"
+#include "symbol.h" 
 #include <string>
 #include <vector>
 #include <unordered_map>
@@ -11,12 +12,16 @@
 class CodeGenerator {
 private:
     TACGenerator* tac;
+    SymbolTable* symbol_table;
 
     //  Track static variables
     std::unordered_set<std::string> static_variables;
     std::string current_function_name;
 
+
+
     // Store array dimensions: array name -> list of dimensions
+    std::unordered_map<std::string, std::string> enum_constants;
     std::unordered_map<std::string, std::vector<int>> array_dims;
 
     // Expression code generation - returns the variable holding the result
@@ -24,6 +29,7 @@ private:
   
     std::string current_break_label;
     std::string current_continue_label;
+    bool is_void_function(const std::string& func_name);
 
     // Statement code generation
     void generate_statement(ASTNode* node);
@@ -35,6 +41,8 @@ private:
     void generate_expression_statement(ASTNode* node);
     void generate_load(const std::string &target, const std::string &addr);
     void generate_address_of(const std::string &var, const std::string &target);
+
+    void process_enum_declaration(ASTNode* node);
 
     void flatten_array_initialization(const std::string &array_name, const std::vector<int> &dims, ASTNode *init_node, std::vector<std::string> indices);
 
@@ -50,12 +58,16 @@ private:
     int getArrayNumCols(const std::string &name);
     std::vector<int> extract_array_dimensions(ASTNode* node);
 
+
+
     //  Static variable helpers
+    bool is_array(ASTNode* node);
     bool is_static_declaration(ASTNode* node);
     std::string get_static_variable_name(const std::string& var_name);
 
 public:
-    CodeGenerator(TACGenerator* generator) : tac(generator) {}
+    CodeGenerator(TACGenerator* generator, SymbolTable* symtab = nullptr) 
+        : tac(generator), symbol_table(symtab) {}
 
     void generate(ASTNode* root);
     void generate_node(ASTNode* node);
@@ -66,6 +78,10 @@ public:
     void generate_break_statement(ASTNode* node);
     void generate_continue_statement(ASTNode* node);
      std::string get_base_array_name(ASTNode* node);
+
+    void generate_goto_statement(ASTNode* node);
+    void generate_labeled_statement(ASTNode* node);
+
     void collect_array_indices(ASTNode* node, std::vector<std::string>& indices);
 
 };
