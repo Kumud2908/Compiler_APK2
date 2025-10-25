@@ -14,15 +14,60 @@ void CodeGenerator::generate(ASTNode* root) {
 void CodeGenerator::generate_node(ASTNode* node) {
     if (!node) return;
     
-    if (node->name == "TranslationUnit") {
-        for (auto child : node->children) generate_node(child);
+    for (auto child : node->children) {
+        if (!child) continue;
+        
+        // Handle function definitions
+        if (child->name == "FunctionDefinition") {
+            // Collect return type first
+            std::string func_name = "unknown";
+            std::string return_type = "int";
+            
+            for (auto grandchild : child->children) {
+                if (grandchild->name == "DeclarationSpecifiers") {
+                    return_type = extract_type_from_decl_specifiers(grandchild);
+                }
+                else if (grandchild->name == "FunctionDeclarator" || 
+                         grandchild->name == "Declarator") {
+                    func_name = extract_declarator_name(grandchild);
+                }
+            }
+            
+            if (func_name != "unknown") {
+                function_return_types[func_name] = return_type;
+            }
+            
+            // Generate function code
+            generate_function_definition(child);
+            continue;
+        }
+        
+        // Handle declarations
+        if (child->name == "Declaration") {
+            generate_declaration(child);
+            continue;
+        }
+        
+        // Handle enum definitions
+        if (child->name == "EnumSpecifier") {
+            process_enum_declaration(child);
+            continue;
+        }
+        
+        // For TranslationUnit and other nodes, traverse deeper
+        generate_node(child);
     }
-    else if (node->name == "FunctionDefinition") {
-        generate_function_definition(node);
+}
+std::string CodeGenerator::extract_type_from_decl_specifiers(ASTNode* decl_specifiers) {
+    if (!decl_specifiers) return "int";
+    
+    for (auto child : decl_specifiers->children) {
+        if (child->name == "TypeSpecifier") {
+            return child->lexeme; // This will be "int", "void", "char", etc.
+        }
     }
-    else if (node->name == "Declaration") {
-        generate_declaration(node);
-    }
+    
+    return "int"; // Default if no type specifier found
 }
 
 // =======================================================
@@ -164,13 +209,17 @@ if (node->name == "Identifier") {
     }
 
     // ✅ STRUCT MEMBER ACCESS (must be before AssignmentExpression)
-    if (node->name == "MemberAccess" || node->name == "StructMemberAccess") {
-        std::string base = generate_expression(node->children[0]); // e.g., 'p'
-        std::string field = node->children[1]->lexeme;            // e.g., 'x'
-        std::string temp = tac->new_temp();
-        tac->generate_struct_load(base, field, temp);
-        return temp;
-    }
+// In generate_expression - when reading struct member
+if (node->name == "MemberAccess" || node->name == "StructMemberAccess") {
+    std::string base = generate_expression(node->children[0]);
+    std::string field = node->children[1]->lexeme;
+    std::string result_temp = tac->new_temp();
+    std::string addr_temp = tac->new_temp();
+    
+    tac->generate_address_of(base, addr_temp);  // t1 = &data
+    tac->generate_load(addr_temp, result_temp); // t2 = *t1
+    return result_temp;
+}
 
     // Assignment Expression
     if (node->name == "AssignmentExpression") {
@@ -186,26 +235,33 @@ if (node->name == "Identifier") {
         }
             
             // ✅ CHECK IF LHS IS STRUCT MEMBER ACCESS
-            if (lhs_node->name == "MemberAccess" || lhs_node->name == "StructMemberAccess") {
-                std::string base = generate_expression(lhs_node->children[0]); // e.g., 'p'
-                std::string field = lhs_node->children[1]->lexeme;            // e.g., 'x'
-                
-                if (node->lexeme == "=") {
-                    tac->generate_struct_store(base, field, rhs);
-                    return base;
-                } else {
-                    // Compound assignment: p.x += value
-                    std::string temp_load = tac->new_temp();
-                    tac->generate_struct_load(base, field, temp_load);
-                    
-                    std::string temp_result = tac->new_temp();
-                    std::string op = node->lexeme.substr(0, node->lexeme.length() - 1);
-                    tac->generate_binary_op(op, temp_load, rhs, temp_result);
-                    
-                    tac->generate_struct_store(base, field, temp_result);
-                    return base;
-                }
-            }
+            // ✅ CHECK IF LHS IS STRUCT MEMBER ACCESS
+if (lhs_node->name == "MemberAccess" || lhs_node->name == "StructMemberAccess") {
+    std::string base = generate_expression(lhs_node->children[0]); // e.g., 'p'
+    std::string field = lhs_node->children[1]->lexeme;            // e.g., 'x'
+    
+    if (node->lexeme == "=") {
+        // CHANGE THIS PART:
+        std::string addr_temp = tac->new_temp();
+        tac->generate_address_of(base, addr_temp);  // t1 = &data
+        tac->generate_store(addr_temp, rhs);        // *t1 = value
+        return base;
+    } else {
+        // For compound assignments, you'll need to update this too
+        std::string addr_temp = tac->new_temp();
+        std::string temp_load = tac->new_temp();
+        
+        tac->generate_address_of(base, addr_temp);  // t1 = &data
+        tac->generate_load(addr_temp, temp_load);   // t2 = *t1
+        
+        std::string temp_result = tac->new_temp();
+        std::string op = node->lexeme.substr(0, node->lexeme.length() - 1);
+        tac->generate_binary_op(op, temp_load, rhs, temp_result);
+        
+        tac->generate_store(addr_temp, temp_result); // *t1 = t3
+        return base;
+    }
+}
             
             // ✅ CHECK IF LHS IS ARRAY SUBSCRIPT
             if (lhs_node->name == "ArraySubscript") {
@@ -868,15 +924,9 @@ bool CodeGenerator::is_array(ASTNode* node) {
     return false;
 }
 bool CodeGenerator::is_void_function(const std::string& func_name) {
-    if (!symbol_table) return false;  // Fallback if no symbol table
-    
-    Symbol* sym = symbol_table->find_symbol(func_name);
-    if (sym && sym->symbol_type == "function") {
-        return sym->base_type == "void";
-    }
-    
-    // Fallback for known library functions
-    return func_name == "printf" || func_name == "scanf";
+    if (func_name == "printf" || func_name == "scanf") return false;
+    auto it = function_return_types.find(func_name);
+    return it != function_return_types.end() && it->second == "void";
 }
 std::string CodeGenerator::get_static_variable_name(const std::string& var_name) {
     // Create a unique name for static variable: function_name.var_name

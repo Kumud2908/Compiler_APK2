@@ -12,7 +12,6 @@
 class CodeGenerator {
 private:
     TACGenerator* tac;
-    SymbolTable* symbol_table;
 
     //  Track static variables
     std::unordered_set<std::string> static_variables;
@@ -21,6 +20,7 @@ private:
 
 
     // Store array dimensions: array name -> list of dimensions
+    std::unordered_map<std::string, std::string> function_return_types;
     std::unordered_map<std::string, std::string> enum_constants;
     std::unordered_map<std::string, std::vector<int>> array_dims;
 
@@ -57,6 +57,7 @@ private:
     // ===== New array helpers =====
     int getArrayNumCols(const std::string &name);
     std::vector<int> extract_array_dimensions(ASTNode* node);
+    std::string extract_type_from_decl_specifiers(ASTNode* decl_specifiers);
 
 
 
@@ -66,8 +67,8 @@ private:
     std::string get_static_variable_name(const std::string& var_name);
 
 public:
-    CodeGenerator(TACGenerator* generator, SymbolTable* symtab = nullptr) 
-        : tac(generator), symbol_table(symtab) {}
+    CodeGenerator(TACGenerator* generator) 
+        : tac(generator) {}
 
     void generate(ASTNode* root);
     void generate_node(ASTNode* node);
