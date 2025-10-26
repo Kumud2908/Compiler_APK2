@@ -1,5 +1,6 @@
 #include "semantic.h"
 #include <iostream>
+#include <functional>
 #include <algorithm>  
 
 #include <unordered_set>
@@ -205,17 +206,20 @@ void SemanticAnalyzer::traverse(ASTNode* node) {
         }
     }
 
-    // SEMANTIC CHECKS
+    // SEMANTIC CHECKS (consolidated - no duplicates)
     if (node->name == "AssignmentExpression") {
         check_assignment(node);
+        check_function_pointer_assignment(node);
     }
     else if (node->name == "FunctionCall") {
         check_function_call(node);
+        check_null_function_pointer_call(node);
     }
     else if (node->name == "ReturnStatement") {
         std::cout << "[Return Context] Current function: '" << current_function_name 
                   << "', return type: '" << current_function_return_type << "'" << std::endl;
         check_return_statement(node);
+        check_function_pointer_return(node);
     }
     else if (node->name == "BreakStatement" || node->name == "ContinueStatement") {
         check_break_continue(node);
@@ -239,6 +243,7 @@ void SemanticAnalyzer::traverse(ASTNode* node) {
     }
     else if (node->name == "UnaryExpression") {
         check_unary_operation(node);
+        check_function_pointer_dereference(node);
     }
     else if (node->name == "IfStatement" && node->children.size() > 0) {
         check_if_condition(node->children[0]);
@@ -330,6 +335,12 @@ void SemanticAnalyzer::traverse(ASTNode* node) {
         case_values_in_switch.clear();
         has_default_in_switch = false;
     }
+
+    // ONLY check generic function pointer operations here
+    // (specific checks are already done above in the main semantic checks section)
+    check_function_pointer_operations(node);
+    check_function_pointer_arithmetic(node);
+    check_function_pointer_comparison(node);
 }
 
 void SemanticAnalyzer::process_declaration(ASTNode* node) {
@@ -2412,3 +2423,281 @@ void SemanticAnalyzer::print_summary() {
     std::cout << "=================================" << std::endl;
 }
 
+
+// ============================================
+// ADDITIONAL SEMANTIC CHECKS FOR FUNCTION POINTERS
+// ============================================
+
+// 1. Check invalid operations on function pointers
+void SemanticAnalyzer::check_function_pointer_operations(ASTNode* node) {
+    if (!node) return;
+    
+    // Function pointers cannot be used in arithmetic operations
+    if (node->name == "AdditiveExpression" || 
+        node->name == "MultiplicativeExpression" ||
+        node->name == "RelationalExpression") {
+        
+        if (node->children.size() >= 2) {
+            std::string type1 = get_expression_type(node->children[0]);
+            std::string type2 = get_expression_type(node->children[1]);
+            
+            // Check if either operand is a function pointer
+            for (auto child : node->children) {
+                if (child->name == "Identifier") {
+                    Symbol* sym = symbol_table->lookup(child->lexeme);
+                    if (sym && sym->isFunctionPointer()) {
+                        reportError("ERROR: Invalid operation on function pointer '" + 
+                                   child->lexeme + "'", node);
+                        return;
+                    }
+                }
+            }
+        }
+    }
+}
+
+// 2. Check function pointer arithmetic (not allowed except assignment)
+void SemanticAnalyzer::check_function_pointer_arithmetic(ASTNode* node) {
+    if (!node) return;
+    
+    // Check for invalid increment/decrement on function pointers
+    if (node->name == "UnaryExpression" && 
+        (node->lexeme == "++" || node->lexeme == "--")) {
+        
+        if (node->children.size() > 0 && node->children[0]->name == "Identifier") {
+            Symbol* sym = symbol_table->lookup(node->children[0]->lexeme);
+            if (sym && sym->isFunctionPointer()) {
+                reportError("ERROR: Cannot increment/decrement function pointer '" + 
+                           sym->name + "'", node);
+            }
+        }
+    }
+    
+    // Check postfix increment/decrement
+    if (node->name == "PostfixExpression" && 
+        (node->lexeme == "++" || node->lexeme == "--")) {
+        
+        if (node->children.size() > 0 && node->children[0]->name == "Identifier") {
+            Symbol* sym = symbol_table->lookup(node->children[0]->lexeme);
+            if (sym && sym->isFunctionPointer()) {
+                reportError("ERROR: Cannot increment/decrement function pointer '" + 
+                           sym->name + "'", node);
+            }
+        }
+    }
+}
+
+// 3. Validate function pointer type in expressions
+void SemanticAnalyzer::validate_function_pointer_type(ASTNode* node, const std::string& func_ptr_name) {
+    Symbol* sym = symbol_table->lookup(func_ptr_name);
+    if (!sym || !sym->isFunctionPointer()) return;
+    
+    // Function pointers must be called or assigned, not used in other contexts
+    if (node->name != "FunctionCall" && 
+        node->name != "AssignmentExpression" &&
+        node->name != "UnaryExpression") {  // Allow & operator
+        
+        reportError("ERROR: Function pointer '" + func_ptr_name + 
+                   "' must be called or assigned, not used in expression", node);
+    }
+}
+
+// 4. Check for NULL function pointer calls
+void SemanticAnalyzer::check_null_function_pointer_call(ASTNode* node) {
+    if (!node || node->name != "FunctionCall") return;
+    
+    ASTNode* func_node = node->children[0];
+    
+    if (func_node->name == "Identifier") {
+        Symbol* sym = symbol_table->lookup(func_node->lexeme);
+        if (sym && sym->isFunctionPointer() && !sym->is_initialized) {
+            report_warning("WARNING: Function pointer '" + func_node->lexeme + 
+                          "' may not be initialized before call", node);
+        }
+    }
+}
+
+// 5. Check function pointer comparison (only equality/inequality allowed)
+void SemanticAnalyzer::check_function_pointer_comparison(ASTNode* node) {
+    if (!node) return;
+    
+    if (node->name == "RelationalExpression" && 
+        (node->lexeme == "<" || node->lexeme == ">" || 
+         node->lexeme == "<=" || node->lexeme == ">=")) {
+        
+        if (node->children.size() >= 2) {
+            for (auto child : node->children) {
+                if (child->name == "Identifier") {
+                    Symbol* sym = symbol_table->lookup(child->lexeme);
+                    if (sym && sym->isFunctionPointer()) {
+                        reportError("ERROR: Relational comparison not allowed on function pointer '" + 
+                                   child->lexeme + "'. Only == and != are allowed", node);
+                        return;
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+// 6. Check array of function pointers
+void SemanticAnalyzer::check_function_pointer_array(ASTNode* declarator, const std::string& base_type) {
+    // This would be called when processing declarations
+    // Array of function pointers: int (*arr[10])(int, int);
+    
+    bool is_array = false;
+    bool is_func_ptr = false;
+    
+    // Check if it's both array and function pointer
+    std::function<void(ASTNode*)> check_node = [&](ASTNode* node) {
+        if (!node) return;
+        
+        if (node->name == "ArrayDeclarator") {
+            is_array = true;
+        }
+        if (node->name == "FunctionDeclarator") {
+            is_func_ptr = true;
+        }
+        
+        for (auto child : node->children) {
+            check_node(child);
+        }
+    };
+    
+    
+    check_node(declarator);
+    
+    if (is_array && is_func_ptr) {
+        std::cout << "[INFO] Detected array of function pointers" << std::endl;
+        // This is valid in C, just informational
+    }
+}
+
+// 7. Check return of function pointer from function
+void SemanticAnalyzer::check_function_pointer_return(ASTNode* node) {
+    if (!node || node->name != "ReturnStatement") return;
+    
+    if (!current_function_name.empty()) {
+        Symbol* func_sym = symbol_table->lookup(current_function_name);
+        if (func_sym && func_sym->isFunctionPointer()) {
+            // Function returns a function pointer
+            if (node->children.size() > 0) {
+                std::string ret_type = get_expression_type(node->children[0]);
+                
+                // Validate the returned value is compatible
+                if (node->children[0]->name == "Identifier") {
+                    Symbol* ret_sym = symbol_table->lookup(node->children[0]->lexeme);
+                    if (ret_sym && !ret_sym->isFunctionPointer() && !ret_sym->isFunction()) {
+                        reportError("ERROR: Cannot return non-function as function pointer", node);
+                    }
+                }
+            }
+        }
+    }
+}
+
+// 8. Check function pointer as parameter
+void SemanticAnalyzer::check_function_pointer_parameter(Symbol* param_sym, ASTNode* param_node) {
+    if (!param_sym || !param_node) return;
+    
+    if (param_sym->isFunctionPointer()) {
+        std::cout << "[INFO] Function parameter '" << param_sym->name 
+                  << "' is a function pointer" << std::endl;
+        
+        // Ensure it has proper parameter list
+        if (param_sym->parameters.empty()) {
+            report_warning("WARNING: Function pointer parameter '" + param_sym->name + 
+                          "' has no parameters specified", param_node);
+        }
+    }
+}
+
+// 9. Check function pointer dereferencing
+void SemanticAnalyzer::check_function_pointer_dereference(ASTNode* node) {
+    if (!node || node->name != "UnaryExpression") return;
+    
+    if (node->lexeme == "*" && node->children.size() > 0) {
+        if (node->children[0]->name == "Identifier") {
+            Symbol* sym = symbol_table->lookup(node->children[0]->lexeme);
+            
+            // Dereferencing a function pointer is only valid in function calls
+            if (sym && sym->isFunctionPointer()) {
+                // Check if parent is a function call
+                // This is typically okay: (*func_ptr)(args)
+                std::cout << "[INFO] Dereferencing function pointer '" << sym->name << "'" << std::endl;
+            }
+        }
+    }
+}
+
+// 10. Check void function pointer (uncommon but valid)
+void SemanticAnalyzer::check_void_function_pointer(Symbol* func_ptr_sym) {
+    if (!func_ptr_sym || !func_ptr_sym->isFunctionPointer()) return;
+    
+    if (func_ptr_sym->return_type == "void") {
+        std::cout << "[INFO] Function pointer '" << func_ptr_sym->name 
+                  << "' returns void" << std::endl;
+        // This is valid, just informational
+    }
+}
+
+// Add this function - it's completely missing!
+void SemanticAnalyzer::check_function_pointer_assignment(ASTNode* node) {
+    if (!node || node->name != "AssignmentExpression") return;
+    
+    // Assignment has at least 2 children: LHS and RHS
+    if (node->children.size() < 2) return;
+    
+    ASTNode* lhs = node->children[0];
+    ASTNode* rhs = node->children[1];
+    
+    if (!lhs || !rhs) return;
+    
+    // Check if LHS is a function pointer variable
+    if (lhs->name == "Identifier") {
+        Symbol* lhs_sym = symbol_table->find_symbol(lhs->lexeme);
+        
+        if (lhs_sym && lhs_sym->isFunctionPointer()) {
+            std::cout << "[INFO] Assigning to function pointer '" << lhs_sym->name << "'" << std::endl;
+            
+            // Check RHS compatibility
+            if (rhs->name == "Identifier") {
+                Symbol* rhs_sym = symbol_table->find_symbol(rhs->lexeme);
+                
+                if (!rhs_sym) {
+                    reportError("Undefined identifier '" + rhs->lexeme + "' in assignment", rhs);
+                    return;
+                }
+                
+                // RHS must be a function or function pointer
+                if (!rhs_sym->isFunction() && !rhs_sym->isFunctionPointer()) {
+                    reportError("Cannot assign non-function to function pointer '" + 
+                               lhs_sym->name + "'", node);
+                    return;
+                }
+                
+                // Check return type compatibility
+                if (lhs_sym->return_type != rhs_sym->return_type) {
+                    reportError("Incompatible return types in function pointer assignment. Expected '" + 
+                               lhs_sym->return_type + "' but got '" + rhs_sym->return_type + "'", node);
+                }
+            }
+            else if (rhs->name == "UnaryExpression" && rhs->lexeme == "&") {
+                // Address-of operator: fp = &func
+                if (rhs->children.size() > 0 && rhs->children[0]->name == "Identifier") {
+                    Symbol* func_sym = symbol_table->find_symbol(rhs->children[0]->lexeme);
+                    
+                    if (func_sym && !func_sym->isFunction()) {
+                        reportError("Cannot take address of non-function '" + 
+                                   func_sym->name + "'", rhs);
+                    }
+                }
+            }
+            else if (rhs->lexeme == "NULL" || (rhs->name == "Constant" && rhs->lexeme == "0")) {
+                // NULL assignment is valid
+                std::cout << "[INFO] Assigning NULL to function pointer" << std::endl;
+            }
+        }
+    }
+}
