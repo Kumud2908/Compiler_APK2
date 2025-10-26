@@ -6,6 +6,7 @@
 #include <fstream>
 #include <iostream>
 
+class Symbol;
 class ASTNode {
 public:
     std::string name;
@@ -15,6 +16,8 @@ public:
     ASTNode* parent;
     bool processed = false;
     int line_number = 0;  // ADD THIS LINE
+
+    Symbol* symbol=nullptr;
 
     // Constructors - UPDATE to include line number
     ASTNode(const std::string &name_, const std::string &lexeme_ = "", int line = 0)

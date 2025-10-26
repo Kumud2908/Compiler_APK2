@@ -491,6 +491,7 @@ void SemanticAnalyzer::process_function(ASTNode* node) {
             return;
         }
     }
+    node->symbol = func_sym;
     
     // NOW enter function scope for parameters
     symbol_table->enter_scope();
@@ -701,6 +702,7 @@ void SemanticAnalyzer::process_struct_or_union(ASTNode* node) {
             std::cout << "[Typedef] Added type: " << type_name << std::endl;
         }
     }
+    node->symbol = type_sym;
 
     // PROCESS MEMBERS only if this is a complete definition
     if (has_members) {
@@ -790,7 +792,7 @@ void SemanticAnalyzer::process_struct_member(ASTNode* member_decl, const std::st
     
     // Extract enhanced type information (pointers, arrays, etc.)
     extract_type_info(member_decl, member_sym);
-    
+    member_decl->symbol = member_sym;
     struct_sym->add_member(member_sym);
     std::cout << "[" << struct_type << " " << struct_sym->name << "] Added member: " 
               << member_name << " : " << member_sym->get_full_type() << std::endl;
@@ -833,47 +835,53 @@ void SemanticAnalyzer::process_enum(ASTNode* node) {
     std::cout << "[DEBUG] find_symbol returned: " << (existing ? existing->name : "null") << std::endl;
     
     if (existing && existing->symbol_type == "enum") {
-    std::cout << "[DEBUG] Enum '" << enum_name << "' already exists" << std::endl;
-    if (has_enumerators) {
-        // Check if this is completing a forward declaration
-        if (existing->is_complete) {
-            reportError("Enum '" + enum_name + "' already declared", node);
-	    return;
-        } else {
-            // Complete the forward declaration
-            std::cout << "[Info] Completing forward-declared enum '" << enum_name << "'" << std::endl;
-            
-            // Add enumerators to the existing enum symbol
-            for (const auto& enumerator : enumerators) {
-                existing->add_enumerator(enumerator.first, enumerator.second);
+        std::cout << "[DEBUG] Enum '" << enum_name << "' already exists" << std::endl;
+        if (has_enumerators) {
+            // Check if this is completing a forward declaration
+            if (existing->is_complete) {
+                reportError("Enum '" + enum_name + "' already declared", node);
+                return;
+            } else {
+                // Complete the forward declaration
+                std::cout << "[Info] Completing forward-declared enum '" << enum_name << "'" << std::endl;
                 
-                // Create enum constant symbol
-                Symbol* const_sym = new Symbol(enumerator.first, "enum_constant", "int",
-                                              symbol_table->get_current_scope_level(), node->line_number);
-                const_sym->const_value = enumerator.second;
-                const_sym->enum_type = enum_name;
-                
-                if (!symbol_table->add_symbol(const_sym)) {
-                    reportError("Enumerator '" + enumerator.first + "' already declared", node);
-                    delete const_sym;
-                } else {
-                    std::cout << "[Enum " << enum_name << "] Added enumerator: " 
-                              << enumerator.first << " = " << enumerator.second << std::endl;
+                // Add enumerators to the existing enum symbol
+                for (const auto& enumerator : enumerators) {
+                    existing->add_enumerator(enumerator.first, enumerator.second);
+                    
+                    // Create enum constant symbol
+                    Symbol* const_sym = new Symbol(enumerator.first, "enum_constant", "int",
+                                                  symbol_table->get_current_scope_level(), node->line_number);
+                    const_sym->const_value = enumerator.second;
+                    const_sym->enum_type = enum_name;
+                    
+                    if (!symbol_table->add_symbol(const_sym)) {
+                        reportError("Enumerator '" + enumerator.first + "' already declared", node);
+                        delete const_sym;
+                    } else {
+                        std::cout << "[Enum " << enum_name << "] Added enumerator: " 
+                                  << enumerator.first << " = " << enumerator.second << std::endl;
+                    }
                 }
+                
+                // Mark the enum as complete
+                existing->is_complete = true;
+                
+                // === ADD THIS: Associate existing symbol with AST node ===
+                node->symbol = existing;
+                
+                std::cout << "[Enum] Completed: " << enum_name << " with " 
+                          << enumerators.size() << " enumerators" << std::endl;
             }
-            
-            // Mark the enum as complete
-            existing->is_complete = true;
-            std::cout << "[Enum] Completed: " << enum_name << " with " 
-                      << enumerators.size() << " enumerators" << std::endl;
+        } else {
+            // Another forward declaration - ignore
+            // === ADD THIS: Still associate the existing symbol ===
+            node->symbol = existing;
+            std::cout << "[Info] Using existing enum '" << enum_name << "'" << std::endl;
         }
-    } else {
-        // Another forward declaration - ignore
-        std::cout << "[Info] Using existing enum '" << enum_name << "'" << std::endl;
+        std::cout << "[DEBUG] process_enum END (existing enum)" << std::endl;
+        return;
     }
-    std::cout << "[DEBUG] process_enum END (existing enum)" << std::endl;
-    return;
-}
     
     if (!has_enumerators) {
         std::cout << "[DEBUG] Creating forward declaration for enum '" << enum_name << "'" << std::endl;
@@ -884,6 +892,8 @@ void SemanticAnalyzer::process_enum(ASTNode* node) {
             reportError("Failed to add enum '" + enum_name + "' to symbol table", node);
             delete enum_sym;
         } else {
+            // === ADD THIS: Associate symbol with AST node on success ===
+            node->symbol = enum_sym;
             std::cout << "[Enum] Forward declared: " << enum_name << std::endl;
         }
         std::cout << "[DEBUG] process_enum END (forward declaration)" << std::endl;
@@ -925,6 +935,8 @@ void SemanticAnalyzer::process_enum(ASTNode* node) {
         reportError("Failed to add enum '" + enum_name + "' to symbol table", node);
         delete enum_sym;
     } else {
+        // === ADD THIS: Associate symbol with AST node on success ===
+        node->symbol = enum_sym;
         std::cout << "[Enum] Created: " << enum_name << " with " 
                   << enumerators.size() << " enumerators" << std::endl;
     }
@@ -1063,12 +1075,17 @@ void SemanticAnalyzer::process_typedef(ASTNode* declaration) {
             
             // Extract name from this declarator
             std::string typedef_name = "unknown";
+            ASTNode* declarator_node = nullptr;  // === ADD THIS ===
+            
             for (size_t k = 0; k < init_decl->children.size(); k++) {
                 ASTNode* decl = init_decl->children[k];
                 if (!decl) continue;
                 
                 typedef_name = extract_declarator_name(decl);
-                if (typedef_name != "unknown") break;
+                if (typedef_name != "unknown") {
+                    declarator_node = decl;  // === ADD THIS: Save the declarator node ===
+                    break;
+                }
             }
             
             if (typedef_name != "unknown") {
@@ -1078,17 +1095,17 @@ void SemanticAnalyzer::process_typedef(ASTNode* declaration) {
                                                declaration->line_number);
                 
                 // Extract type info if needed
-                for (size_t k = 0; k < init_decl->children.size(); k++) {
-                    ASTNode* decl = init_decl->children[k];
-                    if (decl && (decl->name == "Declarator" || decl->name == "ArrayDeclarator" || decl->name == "DirectDeclarator")) {
-                        extract_type_info(decl, typedef_sym);
-                        break;
-                    }
+                if (declarator_node) {  // === USE THE SAVED NODE ===
+                    extract_type_info(declarator_node, typedef_sym);
+
+                    declarator_node->symbol = typedef_sym;
                 }
                 
                 if (!symbol_table->add_symbol(typedef_sym)) {
                     reportError("Typedef '" + typedef_name + "' already declared", declaration);
                     delete typedef_sym;
+
+                    if (declarator_node) declarator_node->symbol = nullptr;
                 } else {
                     std::cout << "[Typedef] Added: " << typedef_name << " -> " 
                               << typedef_sym->get_full_type() << std::endl;
@@ -1125,6 +1142,7 @@ void SemanticAnalyzer::process_parameter(ASTNode* param_decl) {
     
     std::string param_type = "int";
     std::string param_name = "unknown";
+    ASTNode* declarator_node = nullptr;  // === ADD THIS ===
     
     for (size_t i = 0; i < param_decl->children.size(); i++) {
         ASTNode* child = param_decl->children[i];
@@ -1135,14 +1153,22 @@ void SemanticAnalyzer::process_parameter(ASTNode* param_decl) {
         }
         else if (child->name == "Declarator" || child->name == "DirectDeclarator") {
             param_name = extract_declarator_name(child);
+            declarator_node = child;  // === ADD THIS: Save the declarator node ===
         }
     }
     
     if (param_name != "unknown") {
         Symbol* param_sym = new Symbol(param_name, "parameter", param_type,
                                       symbol_table->get_current_scope_level(), param_decl->line_number);
+        
+        if (declarator_node) {
+            declarator_node->symbol = param_sym;
+        }
+        
         if (!symbol_table->add_symbol(param_sym)) {
             reportError("Parameter '" + param_name + "' already declared", param_decl);
+            if (declarator_node) declarator_node->symbol = nullptr;
+            delete param_sym;
         } else {
             std::cout << "[Scope " << symbol_table->get_current_scope_level() 
                       << "] Added parameter at line " << param_decl->line_number
@@ -1156,6 +1182,7 @@ void SemanticAnalyzer::process_parameter(ASTNode* param_decl, Symbol* func_sym) 
     
     std::string param_type = "int";
     std::string param_name = "unknown";
+    ASTNode* declarator_node = nullptr;  // === ADD THIS ===
     
     for (size_t i = 0; i < param_decl->children.size(); i++) {
         ASTNode* child = param_decl->children[i];
@@ -1166,6 +1193,7 @@ void SemanticAnalyzer::process_parameter(ASTNode* param_decl, Symbol* func_sym) 
         }
         else if (child->name == "Declarator" || child->name == "DirectDeclarator") {
             param_name = extract_declarator_name(child);
+            declarator_node = child;  // === ADD THIS: Save the declarator node ===
         }
     }
     
@@ -1174,9 +1202,15 @@ void SemanticAnalyzer::process_parameter(ASTNode* param_decl, Symbol* func_sym) 
         Symbol* scope_param_sym = new Symbol(param_name, "parameter", param_type,
                                            symbol_table->get_current_scope_level(), param_decl->line_number);
         
+        if (declarator_node) {
+            declarator_node->symbol = scope_param_sym;
+        }
+        
         // Add to scope for semantic checking and variable resolution
         if (!symbol_table->add_symbol(scope_param_sym)) {
             reportError("Parameter '" + param_name + "' already declared", param_decl);
+            if (declarator_node) declarator_node->symbol = nullptr;
+            delete scope_param_sym;
         } else {
             std::cout << "[Scope " << symbol_table->get_current_scope_level() 
                       << "] Added parameter at line " << param_decl->line_number
@@ -1211,6 +1245,7 @@ void SemanticAnalyzer::process_variable(ASTNode* declarator, const std::string& 
     
     // Extract enhanced type information
     extract_type_info(declarator, var_sym);
+    declarator->symbol = var_sym;
     
     std::cout << "[Scope " << symbol_table->get_current_scope_level() 
               << "] Added " << symbol_type << " at line " << declarator->line_number
@@ -1218,6 +1253,7 @@ void SemanticAnalyzer::process_variable(ASTNode* declarator, const std::string& 
     
     if (!symbol_table->add_symbol(var_sym)) {
         reportError("Variable '" + var_name + "' already declared in this scope", declarator);
+        declarator->symbol = nullptr; 
         delete var_sym;
     }
 }

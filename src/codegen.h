@@ -49,7 +49,7 @@ void process_struct_union_definition(ASTNode* node, const std::string& type_name
 
     void process_enum_declaration(ASTNode* node);
 
-    void flatten_array_initialization(const std::string &array_name, const std::vector<int> &dims, ASTNode *init_node, std::vector<std::string> indices);
+    std::string flatten_array_initialization(const std::string &array_name, const std::vector<int> &dims, ASTNode *init_node, std::vector<int> indices, std::string base_temp);
 
     // Declaration code generation
     void generate_declaration(ASTNode* node);
@@ -65,7 +65,7 @@ std::string generate_member_address(ASTNode* node);
     std::vector<int> extract_array_dimensions(ASTNode* node);
     std::string extract_type_from_decl_specifiers(ASTNode* decl_specifiers);
 
-
+ int get_type_size(const std::string& type);
 
     //  Static variable helpers
     bool is_array(ASTNode* node);

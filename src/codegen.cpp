@@ -406,87 +406,92 @@ std::string CodeGenerator::generate_expression(ASTNode* node) {
                     if (array_dims.find(base_array) != array_dims.end()) {
                         const auto& dims = array_dims[base_array];
                         
-                        std::string offset = indices[0];
-                        for (size_t i = 1; i < indices.size(); ++i) {
-                            std::string t_mul = tac->new_temp();
-                            tac->generate_binary_op("*", offset, std::to_string(dims[i]), t_mul);
+                        // ✅ CORRECT: Multi-dimensional offset calculation
+                        std::string offset = "0";
+                        
+                        for (size_t i = 0; i < indices.size(); ++i) {
+                            // Calculate stride for this dimension
+                            int stride = 1;
+                            for (size_t j = i + 1; j < dims.size(); ++j) {
+                                stride *= dims[j];
+                            }
                             
-                            std::string t_add = tac->new_temp();
-                            tac->generate_binary_op("+", t_mul, indices[i], t_add);
-                            offset = t_add;
+                            if (stride == 1) {
+                                if (offset == "0") {
+                                    offset = indices[i];
+                                } else {
+                                    std::string temp = tac->new_temp();
+                                    tac->generate_binary_op("+", offset, indices[i], temp);
+                                    offset = temp;
+                                }
+                            } else {
+                                std::string term = tac->new_temp();
+                                tac->generate_binary_op("*", indices[i], std::to_string(stride), term);
+                                
+                                if (offset == "0") {
+                                    offset = term;
+                                } else {
+                                    std::string temp = tac->new_temp();
+                                    tac->generate_binary_op("+", offset, term, temp);
+                                    offset = temp;
+                                }
+                            }
                         }
                         
+                        // Convert to byte offset
+                        std::string byte_offset = tac->new_temp();
+                        tac->generate_binary_op("*", offset, "4", byte_offset);
+                        
+                        std::string base_addr = tac->new_temp();
+                        tac->generate_address_of(base_array, base_addr);
+                        
+                        std::string final_addr = tac->new_temp();
+                        tac->generate_binary_op("+", base_addr, byte_offset, final_addr);
+                        
                         if (node->lexeme == "=") {
-                            tac->generate_array_store(base_array, offset, rhs);
+                            tac->generate_store(final_addr, rhs);
                             return base_array;
                         } else {
+                            // Compound assignment
                             std::string temp_load = tac->new_temp();
-                            tac->generate_array_access(base_array, offset, temp_load);
+                            tac->generate_load(temp_load, final_addr);
                             
                             std::string temp_result = tac->new_temp();
                             std::string op = node->lexeme.substr(0, node->lexeme.length() - 1);
                             tac->generate_binary_op(op, temp_load, rhs, temp_result);
                             
-                            tac->generate_array_store(base_array, offset, temp_result);
+                            tac->generate_store(final_addr, temp_result);
                             return base_array;
                         }
                     }
                 }
                 
-                // Array member of struct/union
-                if (lhs_node->children[0]->name == "MemberAccess" || 
-                    lhs_node->children[0]->name == "StructMemberAccess") {
-                    
-                    std::string base = generate_expression(lhs_node->children[0]->children[0]);
-                    std::string addr_temp = tac->new_temp();
-                    tac->generate_address_of(base, addr_temp);
-                    
-                    if (node->lexeme == "=") {
-                        if (index == "0") {
-                            tac->generate_store(addr_temp, rhs);
-                        } else {
-                            std::string offset_temp = tac->new_temp();
-                            tac->generate_binary_op("+", addr_temp, index, offset_temp);
-                            tac->generate_store(offset_temp, rhs);
-                        }
-                        return base;
-                    } else {
-                        std::string effective_addr;
-                        if (index == "0") {
-                            effective_addr = addr_temp;
-                        } else {
-                            effective_addr = tac->new_temp();
-                            tac->generate_binary_op("+", addr_temp, index, effective_addr);
-                        }
-                        
-                        std::string temp_load = tac->new_temp();
-                        tac->generate_load(temp_load, effective_addr);
-                        
-                        std::string temp_result = tac->new_temp();
-                        std::string op = node->lexeme.substr(0, node->lexeme.length() - 1);
-                        tac->generate_binary_op(op, temp_load, rhs, temp_result);
-                        
-                        tac->generate_store(effective_addr, temp_result);
-                        return base;
-                    }
+                // Regular 1D array
+                std::string array_base = generate_expression(lhs_node->children[0]);
+                
+                std::string byte_offset = tac->new_temp();
+                tac->generate_binary_op("*", index, "4", byte_offset);
+                
+                std::string base_addr = tac->new_temp();
+                tac->generate_address_of(array_base, base_addr);
+                
+                std::string final_addr = tac->new_temp();
+                tac->generate_binary_op("+", base_addr, byte_offset, final_addr);
+                
+                if (node->lexeme == "=") {
+                    tac->generate_store(final_addr, rhs);
+                    return array_base;
                 } else {
-                    // Regular array
-                    std::string array_base = generate_expression(lhs_node->children[0]);
+                    // Compound assignment
+                    std::string temp_load = tac->new_temp();
+                    tac->generate_load(temp_load, final_addr);
                     
-                    if (node->lexeme == "=") {
-                        tac->generate_array_store(array_base, index, rhs);
-                        return array_base;
-                    } else {
-                        std::string temp_load = tac->new_temp();
-                        tac->generate_array_access(array_base, index, temp_load);
-                        
-                        std::string temp_result = tac->new_temp();
-                        std::string op = node->lexeme.substr(0, node->lexeme.length() - 1);
-                        tac->generate_binary_op(op, temp_load, rhs, temp_result);
-                        
-                        tac->generate_array_store(array_base, index, temp_result);
-                        return array_base;
-                    }
+                    std::string temp_result = tac->new_temp();
+                    std::string op = node->lexeme.substr(0, node->lexeme.length() - 1);
+                    tac->generate_binary_op(op, temp_load, rhs, temp_result);
+                    
+                    tac->generate_store(final_addr, temp_result);
+                    return array_base;
                 }
             }
             
@@ -592,18 +597,50 @@ std::string CodeGenerator::generate_expression(ASTNode* node) {
             if (array_dims.find(base_array) != array_dims.end()) {
                 const auto& dims = array_dims[base_array];
                 
-                std::string offset = indices[0];
-                for (size_t i = 1; i < indices.size(); ++i) {
-                    std::string t_mul = tac->new_temp();
-                    tac->generate_binary_op("*", offset, std::to_string(dims[i]), t_mul);
+                // ✅ CORRECT: Multi-dimensional offset calculation
+                std::string offset = "0";
+                
+                for (size_t i = 0; i < indices.size(); ++i) {
+                    // Calculate stride for this dimension
+                    int stride = 1;
+                    for (size_t j = i + 1; j < dims.size(); ++j) {
+                        stride *= dims[j];
+                    }
                     
-                    std::string t_add = tac->new_temp();
-                    tac->generate_binary_op("+", t_mul, indices[i], t_add);
-                    offset = t_add;
+                    if (stride == 1) {
+                        if (offset == "0") {
+                            offset = indices[i];
+                        } else {
+                            std::string temp = tac->new_temp();
+                            tac->generate_binary_op("+", offset, indices[i], temp);
+                            offset = temp;
+                        }
+                    } else {
+                        std::string term = tac->new_temp();
+                        tac->generate_binary_op("*", indices[i], std::to_string(stride), term);
+                        
+                        if (offset == "0") {
+                            offset = term;
+                        } else {
+                            std::string temp = tac->new_temp();
+                            tac->generate_binary_op("+", offset, term, temp);
+                            offset = temp;
+                        }
+                    }
                 }
                 
+                // Convert to byte offset and load
+                std::string byte_offset = tac->new_temp();
+                tac->generate_binary_op("*", offset, "4", byte_offset);
+                
+                std::string base_addr = tac->new_temp();
+                tac->generate_address_of(base_array, base_addr);
+                
+                std::string final_addr = tac->new_temp();
+                tac->generate_binary_op("+", base_addr, byte_offset, final_addr);
+                
                 std::string result = tac->new_temp();
-                tac->generate_array_access(base_array, offset, result);
+                tac->generate_load(result, final_addr);
                 return result;
             }
         }
@@ -631,10 +668,19 @@ std::string CodeGenerator::generate_expression(ASTNode* node) {
             
             return result;
         } else {
-            // Regular array
             std::string array_name = generate_expression(node->children[0]);
+        
+            std::string byte_offset = tac->new_temp();
+            tac->generate_binary_op("*", index_val, "4", byte_offset);
+            
+            std::string base_addr = tac->new_temp();
+            tac->generate_address_of(array_name, base_addr);
+            
+            std::string final_addr = tac->new_temp();
+            tac->generate_binary_op("+", base_addr, byte_offset, final_addr);
+            
             std::string result = tac->new_temp();
-            tac->generate_array_access(array_name, index_val, result);
+            tac->generate_load(result, final_addr);
             return result;
         }
     }
@@ -828,42 +874,97 @@ void CodeGenerator::generate_continue_statement(ASTNode* node) {
 //  Declaration + Array Tracking
 // =======================================================
 
-void CodeGenerator::flatten_array_initialization(const std::string &array_name,
-                                                 const std::vector<int> &dims,
-                                                 ASTNode* init_node,
-                                                 std::vector<std::string> indices) {
-    if (!init_node) return;
+std::string CodeGenerator::flatten_array_initialization(const std::string &array_name,
+                                                       const std::vector<int> &dims,
+                                                       ASTNode* init_node,
+                                                       std::vector<int> indices,
+                                                       std::string base_temp) {
+    if (!init_node) return base_temp;
 
     if (init_node->name == "InitializerList") {
-        for (size_t i = 0; i < init_node->children.size(); ++i) {
-            std::vector<std::string> new_indices = indices;
-            new_indices.push_back(std::to_string(i));
-            flatten_array_initialization(array_name, dims, init_node->children[i], new_indices);
+        // Compute base address on first call
+        if (base_temp.empty()) {
+            base_temp = tac->new_temp();
+            tac->generate_address_of(array_name, base_temp);
         }
-    } else if (init_node->name == "Initializer") {
-        flatten_array_initialization(array_name, dims, init_node->children[0], indices);
-    } else {
+        
+        // ✅ FIX: Check if this InitializerList has InitializerList children or Initializer children
+        bool has_initlist_children = false;
+        bool has_initializer_children = false;
+        
+        for (auto child : init_node->children) {
+            if (child) {
+                if (child->name == "InitializerList") has_initlist_children = true;
+                if (child->name == "Initializer") has_initializer_children = true;
+            }
+        }
+        
+        // If only one InitializerList child, it's a wrapper - skip it
+        if (has_initlist_children && !has_initializer_children && init_node->children.size() == 1) {
+            return flatten_array_initialization(array_name, dims, init_node->children[0], indices, base_temp);
+        }
+        // If multiple InitializerList children (no Initializer), it's a dimension boundary
+        else if (has_initlist_children && !has_initializer_children) {
+            for (size_t i = 0; i < init_node->children.size(); ++i) {
+                if (init_node->children[i]->name == "InitializerList") {
+                    std::vector<int> new_indices = indices;
+                    new_indices.push_back(i);
+                    base_temp = flatten_array_initialization(array_name, dims, init_node->children[i], new_indices, base_temp);
+                }
+            }
+        }
+        // If has Initializer children, it's the value level
+        else if (has_initializer_children) {
+            for (size_t i = 0; i < init_node->children.size(); ++i) {
+                std::vector<int> new_indices = indices;
+                new_indices.push_back(i);
+                base_temp = flatten_array_initialization(array_name, dims, init_node->children[i], new_indices, base_temp);
+            }
+        }
+        
+        return base_temp;
+    }
+    else if (init_node->name == "Initializer") {
+        // ✅ Initializer is just a wrapper - don't add index, just recurse
+        return flatten_array_initialization(array_name, dims, init_node->children[0], indices, base_temp);
+    }
+    else {
+        // Leaf - actual value
         std::string value = generate_expression(init_node);
-
-        std::string offset;
-        for (size_t i = 0; i < indices.size(); ++i) {
-            std::string term = indices[i];
-            for (size_t j = i + 1; j < dims.size(); ++j) {
-                term = tac->new_temp();
-                tac->generate_binary_op("*", indices[i], std::to_string(dims[j]), term);
-            }
-            if (offset.empty())
-                offset = term;
-            else {
-                std::string tmp = tac->new_temp();
-                tac->generate_binary_op("+", offset, term, tmp);
-                offset = tmp;
-            }
+        
+        // ✅ FIX: Use only the last dims.size() indices
+        std::vector<int> actual_indices;
+        if (indices.size() >= dims.size()) {
+            actual_indices.assign(indices.end() - dims.size(), indices.end());
+        } else {
+            actual_indices = indices;
         }
-
-        tac->generate_array_store(array_name, offset, value);
+        
+        // Calculate flat offset using row-major order
+        int flat_index = 0;
+        for (size_t i = 0; i < actual_indices.size(); ++i) {
+            int stride = 1;
+            for (size_t j = i + 1; j < dims.size(); ++j) {
+                stride *= dims[j];
+            }
+            flat_index += actual_indices[i] * stride;
+        }
+        
+        // Store using base + offset
+        int byte_offset = flat_index * 4; // sizeof(int) = 4
+        
+        if (byte_offset == 0) {
+            tac->generate_store(base_temp, value);
+        } else {
+            std::string element_addr = tac->new_temp();
+            tac->generate_binary_op("+", base_temp, std::to_string(byte_offset), element_addr);
+            tac->generate_store(element_addr, value);
+        }
+        
+        return base_temp;
     }
 }
+
 
 void CodeGenerator::generate_declaration(ASTNode* node) {
     if (!node) return;
@@ -935,7 +1036,9 @@ void CodeGenerator::generate_declaration(ASTNode* node) {
                         array_dims[static_var] = dims;
                         
                         if (init_node) {
-                            flatten_array_initialization(static_var, dims, init_node, {});
+                            std::vector<int> empty_indices;
+std::string empty_base;
+flatten_array_initialization(var_name, dims, init_node, empty_indices, empty_base);
                         } else {
                             int total_size = 1;
                             for (int d : dims) total_size *= d;
@@ -957,7 +1060,9 @@ void CodeGenerator::generate_declaration(ASTNode* node) {
                         array_dims[var_name] = dims;
                         
                         if (init_node) {
-                            flatten_array_initialization(var_name, dims, init_node, {});
+                            std::vector<int> empty_indices;
+std::string empty_base;
+flatten_array_initialization(var_name, dims, init_node, empty_indices, empty_base);
                         }
                     } else {
                         if (init_node) {
@@ -1081,7 +1186,14 @@ bool CodeGenerator::is_array(ASTNode* node) {
     
     return false;
 }
-
+// Add this in codegen.cpp (after the existing functions)
+int CodeGenerator::get_type_size(const std::string& type) {
+    if (type == "char") return 1;
+    if (type == "short") return 2;
+    if (type == "int") return 4;
+    if (type == "long") return 8;
+    return 4; // default
+}
 bool CodeGenerator::is_void_function(const std::string& func_name) {
     if (func_name == "printf" || func_name == "scanf") return false;
     auto it = function_return_types.find(func_name);
