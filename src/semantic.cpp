@@ -189,7 +189,7 @@ void SemanticAnalyzer::traverse(ASTNode* node) {
     }
 
     // Handle scope-changing constructs
-    if (node->name == "WhileStatement" || node->name == "DoWhileStatement" || 
+    if (node->name == "WhileStatement" || node->name == "DoWhileStatement" ||node->name == "UntilStatement" || 
         node->name == "ForStatement") {
         loop_depth++;
         if (node->children.size() > 0) {
@@ -326,7 +326,7 @@ void SemanticAnalyzer::traverse(ASTNode* node) {
     }
 
     // Decrement depths when leaving loop/switch nodes
-    if ((node->name == "WhileStatement" || node->name == "DoWhileStatement" || 
+    if ((node->name == "WhileStatement" || node->name == "DoWhileStatement" ||node->name == "UntilStatement" || 
          node->name == "ForStatement") && loop_depth > 0) {
         loop_depth--;
     }
@@ -2359,7 +2359,14 @@ void SemanticAnalyzer::check_case_statement(ASTNode* node) {
 
 void SemanticAnalyzer::check_loop_condition(ASTNode* node) {
     if (!node) return;
-    
+    std::cout << "[DEBUG] check_loop_condition called for: " << node->name;
+
+    if (node->name == "AssignmentExpression") {
+        report_warning("Assignment in loop condition - did you mean '=='?", node);
+    }
+    for (auto child : node->children) {
+        check_loop_condition(child); // Recursive call
+    }
     std::string cond_type = get_expression_type(node);
     if (cond_type != "unknown" && !is_numeric_type(cond_type) && cond_type != "bool") {
         report_warning("Loop condition should be boolean or numeric type", node);
@@ -2368,7 +2375,9 @@ void SemanticAnalyzer::check_loop_condition(ASTNode* node) {
 
 void SemanticAnalyzer::check_if_condition(ASTNode* node) {
     if (!node) return;
-    
+    if (node->name == "AssignmentExpression") {
+        report_warning("Assignment in if condition - did you mean '=='?", node);
+    }
     std::string cond_type = get_expression_type(node);
     if (cond_type != "unknown" && !is_numeric_type(cond_type) && cond_type != "bool") {
         report_warning("Condition should be boolean or numeric type", node);

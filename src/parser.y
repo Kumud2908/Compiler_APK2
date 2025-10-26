@@ -157,6 +157,7 @@ int in_typedef_declaration = 0;
 %token <str> BIT_AND BIT_OR BIT_XOR BIT_NOT LSHIFT RSHIFT
 %token <str> AND_EQ OR_EQ XOR_EQ LSHIFT_EQ RSHIFT_EQ
 %token <str> ARROW DOT SCOPE
+%token <str> UNTIL
 
 /* Punctuation */
 %token <str> SEMI COMMA QUESTION COLON
@@ -757,6 +758,11 @@ iteration_statement:
     | DO statement WHILE LPAREN expression RPAREN SEMI {
         $$ = create_node("DoWhileStatement");
         $$->addChild($2);
+        $$->addChild($5);
+    }
+    | UNTIL LPAREN expression RPAREN statement {  
+        $$ = create_node("UntilStatement");
+        $$->addChild($3);
         $$->addChild($5);
     }
     | FOR LPAREN for_init_statement expression_statement RPAREN statement {

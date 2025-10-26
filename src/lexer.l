@@ -121,6 +121,9 @@ ID_PATTERN      {LETTER}{ALNUM}*
 
 "volatile"      { add_token(yytext, "KEYWORD"); move(yytext); yylval.str = make_string(yytext); return VOLATILE; }
 "while"         { add_token(yytext, "KEYWORD"); move(yytext); yylval.str = make_string(yytext); return WHILE; }
+"until"         { add_token(yytext, "KEYWORD"); move(yytext); yylval.str = make_string(yytext); return UNTIL; }
+
+
 
     /* C++ Keywords */
 "class"         { add_token(yytext, "KEYWORD"); move(yytext); yylval.str = make_string(yytext); return CLASS; }

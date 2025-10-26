@@ -79,6 +79,7 @@ public:
     void generate(ASTNode* root);
     void generate_node(ASTNode* node);
     void generate_do_while_statement(ASTNode* node);
+    void generate_until_statement(ASTNode* node);
     void generate_switch_statement(ASTNode* node);
     void generate_case_statement(ASTNode* node);
     void generate_default_statement(ASTNode* node);
