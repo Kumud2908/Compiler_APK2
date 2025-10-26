@@ -55,10 +55,28 @@ Symbol::Symbol(const std::string& name, const std::string& sym_type,
       has_return_statement(false),
       is_recursive(false),
       in_call_chain(false),
-      offset(0) {}
+      offset(0),
+       is_function_pointer(false),  
+      return_type(""),              
+      function_signature("")   {}     
 
 std::string Symbol::get_full_type() const {
     std::stringstream ss;
+    
+    // Handle function pointers specially
+    if (is_function_pointer) {
+        ss << return_type << "(";
+        for (size_t i = 0; i < parameters.size(); i++) {
+            if (i > 0) ss << ", ";
+            ss << parameters[i]->base_type;
+            // Add pointer indicators if parameter is a pointer
+            for (int j = 0; j < parameters[i]->pointer_level; j++) {
+                ss << "*";
+            }
+        }
+        ss << ")";
+        return ss.str();
+    }
     
     // Add base type
     ss << base_type;
@@ -170,6 +188,68 @@ void Symbol::print(int depth) {
     
     for (auto member : members) {
         member->print(depth + 1);
+    }
+    
+     if (isFunctionPointer()) {
+        std::cout << " (function pointer)";
+        if (!return_type.empty()) {
+            std::cout << " returns " << return_type;
+        }
+        if (!parameters.empty()) {
+            std::cout << " (";
+            for (size_t i = 0; i < parameters.size(); ++i) {
+                std::cout << parameters[i]->base_type;
+                if (parameters[i]->is_pointer) {
+                    std::cout << std::string(parameters[i]->pointer_level, '*');
+                }
+                if (i < parameters.size() - 1) std::cout << ", ";
+            }
+            std::cout << ")";
+        }
+    }
+    
+    // Function parameters
+    if (symbol_type == "function" && !parameters.empty()) {
+        std::cout << " (";
+        for (size_t i = 0; i < parameters.size(); ++i) {
+            std::cout << parameters[i]->base_type;
+            if (parameters[i]->is_pointer) {
+                std::cout << std::string(parameters[i]->pointer_level, '*');
+            }
+            if (!parameters[i]->name.empty()) {
+                std::cout << " " << parameters[i]->name;
+            }
+            if (i < parameters.size() - 1) std::cout << ", ";
+        }
+        std::cout << ")";
+    }
+    
+    std::cout << " (scope: " << scope_level << ", line: " << line_number << ")";
+    
+    if (has_return_statement && symbol_type == "function") {
+        std::cout << " [has_return]";
+    }
+    
+    if (is_recursive) {
+        std::cout << " [recursive]";
+    }
+    
+    std::cout << std::endl;
+    
+    // Print struct/union members
+    if (!members.empty()) {
+        std::cout << indent << "  Members:" << std::endl;
+        for (auto member : members) {
+            member->print(depth + 1);
+        }
+    }
+    
+    // Print enum values
+    if (!enumerators.empty()) {
+        std::cout << indent << "  Enumerators:" << std::endl;
+        for (const auto& e : enumerators) {
+            std::cout << indent << "    " << e.first << " = " << e.second << std::endl;
+        }
     }
 }
 

@@ -29,6 +29,24 @@ private:
     std::unordered_set<std::string> case_values_in_switch;
     bool has_default_in_switch = false;
     int warning_count = 0;
+    void check_function_pointer_operations(ASTNode* node);
+    void check_function_pointer_arithmetic(ASTNode* node);
+    void validate_function_pointer_type(ASTNode* node, const std::string& func_ptr_name);
+    
+    void check_null_function_pointer_call(ASTNode* node);
+    void check_function_pointer_comparison(ASTNode* node);
+    void check_function_pointer_array(ASTNode* node, const std::string& type_name);
+     
+     void check_void_function_pointer(Symbol* func_ptr_sym);
+     void check_function_pointer_parameter(Symbol* param_sym, ASTNode* param_node);
+     void check_function_pointer_dereference(ASTNode* node) ;
+     void check_function_pointer_return(ASTNode* node) ;
+     void check_function_pointer_assignment(ASTNode* node);
+     
+
+    
+
+
 
 public:
     SemanticAnalyzer(SymbolTable* table);

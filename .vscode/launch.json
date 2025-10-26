@@ -8,8 +8,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": false,
-      "cwd": "/home/kumud/Downloads/ast_14oct/src",
-      "program": "/home/kumud/Downloads/ast_14oct/src/build/Debug/outDebug",
+      "cwd": "/home/kumud/Downloads/ast_14oct/test_passed",
+      "program": "/home/kumud/Downloads/ast_14oct/test_passed/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [

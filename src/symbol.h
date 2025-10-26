@@ -52,6 +52,9 @@ public:
     bool is_recursive;
     bool in_call_chain;
     int offset;
+    bool is_function_pointer;
+    std::string return_type;  // For functions and function pointers
+    std::string function_signature;  // Full signature string
 
     Symbol(const std::string& name, const std::string& sym_type, 
            const std::string& base_type, int scope, int line);
@@ -63,6 +66,15 @@ public:
     void add_member(Symbol* member);
     void add_enumerator(const std::string& name, int value);
     void print(int depth = 0);
+    bool isFunctionPointer() const {
+        return is_function_pointer || symbol_type == "function_pointer";
+    }
+    
+    bool isFunction() const {
+        return symbol_type == "function";
+    }
+     // Check if two function signatures match (for function pointer assignment)
+     bool matches_function_signature(const Symbol* func) const;
 };
 
 class SymbolTable {
@@ -86,6 +98,19 @@ public:
     
     int get_current_scope_level() const { 
         return current_scope ? current_scope->level : 0; 
+    }
+
+    
+    int get_current_scope() const {
+        return get_current_scope_level();
+    }
+    
+    Symbol* lookup(const std::string& name) {
+        return find_symbol(name);
+    }
+    
+    Symbol* lookup_in_current_scope(const std::string& name) {
+        return find_symbol_current_scope(name);
     }
 
     void check_unused_variables();
