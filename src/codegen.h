@@ -24,6 +24,11 @@ private:
     std::unordered_map<std::string, std::string> enum_constants;
     std::unordered_map<std::string, std::vector<int>> array_dims;
 
+std::unordered_map<std::string, int> member_offsets;        // "TypeName.member" -> offset
+std::unordered_map<std::string, std::string> variable_types; // "var" -> "TypeName"
+
+void process_struct_union_definition(ASTNode* node, const std::string& type_name);
+
     // Expression code generation - returns the variable holding the result
     std::string generate_expression(ASTNode* node);
   
@@ -49,6 +54,7 @@ private:
     // Declaration code generation
     void generate_declaration(ASTNode* node);
     void generate_function_definition(ASTNode* node);
+std::string generate_member_address(ASTNode* node);
 
     // Helper functions
     std::string get_identifier_name(ASTNode* node);
