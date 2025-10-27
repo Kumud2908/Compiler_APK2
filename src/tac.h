@@ -88,7 +88,8 @@ public:
     void generate_address_of(const std::string &var, const std::string &target) ;
      void generate_struct_load(const std::string &target, const std::string &base, const std::string &member);
     void generate_struct_store(const std::string &base, const std::string &member, const std::string &value);
-
+// Add to TACGenerator class:
+void generate_reference_decl(const std::string& ref_name, const std::string& target_var);
 void generate_indirect_call(const std::string& func_ptr, int num_params, const std::string& result = "");
     
     // Print all instructions

@@ -495,6 +495,15 @@ declarator:
     | direct_declarator {
         $$ = $1;
     }
+    | BIT_AND direct_declarator {    
+        $$ = create_node("ReferenceDeclarator");
+        $$->addChild($2);
+    }
+    | pointer BIT_AND direct_declarator {    
+        $$ = create_node("ReferenceDeclarator");
+        $$->addChild($1);
+        $$->addChild($3);
+    }
     ;
 
 pointer:
@@ -583,6 +592,22 @@ abstract_declarator:
     | direct_abstract_declarator {
         $$ = create_node("AbstractDeclarator");
         $$->addChild($1);
+    }
+    | BIT_AND {    /* ADD THIS RULE */
+        $$ = create_node("ReferenceDeclarator");
+    }
+    | BIT_AND direct_abstract_declarator {   
+        $$ = create_node("ReferenceDeclarator");
+        $$->addChild($2);
+    }
+    | pointer BIT_AND {    /* ADD THIS RULE */
+        $$ = create_node("ReferenceDeclarator");
+        $$->addChild($1);
+    }
+    | pointer BIT_AND direct_abstract_declarator {   
+        $$ = create_node("ReferenceDeclarator");
+        $$->addChild($1);
+        $$->addChild($3);
     }
     ;
 
@@ -1206,6 +1231,8 @@ int main(int argc, char* argv[]) {
         
         // Print symbol table
         symbol_table->print_table();
+
+	if(root) root->printTree();
         
         // ✅ CHECK THE FLAG
         if (has_semantic_errors) {
@@ -1236,8 +1263,8 @@ int main(int argc, char* argv[]) {
         
         // Print AST
         if (root) {
-            printf("\n=== ABSTRACT SYNTAX TREE ===\n");
-            root->printTree();
+            //printf("\n=== ABSTRACT SYNTAX TREE ===\n");
+            //root->printTree();
             
             // Generate DOT file
             std::ofstream dotFile("ast.dot");

@@ -250,6 +250,12 @@ std::string CodeGenerator::generate_expression(ASTNode* node) {
     // Identifier
     if (node->name == "Identifier") {
         std::string var_name = node->lexeme;
+        auto ref_it = references.find(var_name);
+        if (ref_it != references.end()) {
+            std::string result = tac->new_temp();
+            tac->generate_load(result, var_name);
+            return result;
+        }
         std::string static_var = get_static_variable_name(var_name);
         
         if (static_variables.find(static_var) != static_variables.end()) {
@@ -323,6 +329,15 @@ std::string CodeGenerator::generate_expression(ASTNode* node) {
         if (node->children.size() >= 2) {
             ASTNode* lhs_node = node->children[0];
             std::string rhs = generate_expression(node->children[1]);
+
+            if (lhs_node->name == "Identifier") {
+                std::string lhs_name = lhs_node->lexeme;
+                auto ref_it = references.find(lhs_name);
+                if (ref_it != references.end()) {
+                    tac->generate_store(lhs_name, rhs);
+                    return rhs;
+                }
+            }
 
             // Handle pointer dereference assignment
             if (lhs_node->name == "UnaryExpression" && lhs_node->lexeme == "*") {
@@ -616,7 +631,7 @@ if (node->name == "FunctionCall") {
             if (array_dims.find(base_array) != array_dims.end()) {
                 const auto& dims = array_dims[base_array];
                 
-                // ✅ CORRECT: Multi-dimensional offset calculation
+                // CORRECT: Multi-dimensional offset calculation
                 std::string offset = "0";
                 
                 for (size_t i = 0; i < indices.size(); ++i) {
@@ -1042,10 +1057,19 @@ void CodeGenerator::generate_declaration(ASTNode* node) {
                 std::string var_name;
                 ASTNode* init_node = nullptr;
                 bool is_array = false;
+		bool is_reference = false;
                 std::vector<int> dims;
                 
                 if (init_decl->children.size() > 0) {
                     var_name = extract_declarator_name(init_decl->children[0]);
+
+                    if (init_decl->children[0]->name == "ReferenceDeclarator") {
+                        is_reference = true;
+                        // Get the actual variable name from child
+                        if (!init_decl->children[0]->children.empty()) {
+                            var_name = extract_declarator_name(init_decl->children[0]->children[0]);
+                        }
+                    }
                     
                     dims = extract_array_dimensions(init_decl->children[0]);
                     if (!dims.empty()) {
@@ -1058,6 +1082,20 @@ void CodeGenerator::generate_declaration(ASTNode* node) {
                 }
                 
                 if (var_name.empty()) continue;
+                if (is_reference && init_node) {
+                        if (init_node->name == "MemberAccess" || init_node->name == "StructMemberAccess") {
+        std::string member_addr = generate_member_address(init_node);
+        tac->generate_assignment(var_name, member_addr);  // ref = address_of_member
+        references[var_name] = member_addr;
+    } else {
+        // For regular variables, get address
+        std::string target_addr = tac->new_temp();
+        tac->generate_address_of(generate_expression(init_node), target_addr);
+        tac->generate_assignment(var_name, target_addr);
+        references[var_name] = target_addr;
+    }
+    continue;
+                }
                 
                 // ✅ NEW: Track variable type
                 if (!type_name.empty()) {
@@ -1117,9 +1155,49 @@ flatten_array_initialization(var_name, dims, init_node, empty_indices, empty_bas
     }
 }
 
+
 // =======================================================
 //  Utility Functions
 // =======================================================
+std::string CodeGenerator::generate_member_address(ASTNode* node) {
+    if (!node || node->children.size() < 2) return "";
+    
+    // Get the base variable name DIRECTLY from AST (no generate_expression!)
+    std::string base_var;
+    if (node->children[0]->name == "Identifier") {
+        base_var = node->children[0]->lexeme;
+    } else {
+        // Handle cases where it might be a more complex expression
+        // But for references, it should be a simple identifier
+        return "";
+    }
+    
+    std::string field = node->children[1]->lexeme;
+    
+    // Get base address of the struct
+    std::string base_addr = tac->new_temp();
+    tac->generate_address_of(base_var, base_addr);
+    
+    // Get member offset
+    auto it = variable_types.find(base_var);
+    int offset = 0;
+    if (it != variable_types.end()) {
+        std::string key = it->second + "." + field;
+        auto offset_it = member_offsets.find(key);
+        if (offset_it != member_offsets.end()) {
+            offset = offset_it->second;
+        }
+    }
+    
+    // Calculate member address: base_addr + offset
+    if (offset == 0) {
+        return base_addr;
+    } else {
+        std::string member_addr = tac->new_temp();
+        tac->generate_binary_op("+", base_addr, std::to_string(offset), member_addr);
+        return member_addr;
+    }
+}
 
 std::string CodeGenerator::extract_declarator_name(ASTNode* node) {
     if (!node) return "";

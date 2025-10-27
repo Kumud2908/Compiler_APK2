@@ -83,10 +83,14 @@ else if (op == "call*") {
         // ✅ FIXED: Swap the order to match the storage format
         ss << "    " << result << "." << arg1 << " = " << arg2;
     }
+else if (op == "ref") {
+    ss << "    " << result << " = &" << arg1;
+}
     else {
         // Binary operations
         ss << "    " << result << " = " << arg1 << " " << op << " " << arg2;
     }
+
     
     return ss.str();
 }
@@ -196,4 +200,9 @@ void TACGenerator::generate_struct_store(const std::string& structVar,
 }
 void TACGenerator::generate_indirect_call(const std::string& func_ptr, int num_params, const std::string& result) {
     add_instruction("call*", func_ptr, std::to_string(num_params), result);
+}
+void TACGenerator::generate_reference_decl(const std::string& ref_name, const std::string& target_var) {
+    // Create reference: ref_name becomes alias for target_var
+    // In TAC, we'll treat references as addresses that are automatically dereferenced
+    add_instruction("ref", target_var, "", ref_name);
 }

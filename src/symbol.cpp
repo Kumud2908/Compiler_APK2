@@ -100,6 +100,9 @@ std::string Symbol::get_full_type() const {
             ss << "*";
         }
     }
+    if (is_reference) {
+        ss << "&";
+    }
     
     if (is_array && !array_dimensions.empty()) {
         for (int dim : array_dimensions) {

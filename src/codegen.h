@@ -23,6 +23,7 @@ private:
     std::unordered_map<std::string, std::string> function_return_types;
     std::unordered_map<std::string, std::string> enum_constants;
     std::unordered_map<std::string, std::vector<int>> array_dims;
+    std::unordered_map<std::string, std::string> references;
 
 std::unordered_map<std::string, int> member_offsets;        // "TypeName.member" -> offset
 std::unordered_map<std::string, std::string> variable_types; // "var" -> "TypeName"

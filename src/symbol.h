@@ -47,6 +47,7 @@ public:
 
     // ADD THESE NEW FIELDS - THEY WERE MISSING!
     bool is_initialized;
+    bool is_reference=false;
     bool is_used;
     bool has_return_statement;
     bool is_recursive;
