@@ -63,7 +63,7 @@ else if (op == "call*") {
        
         ss << "    " << result << "[" << arg1 << "] = " << arg2;
     }
-    // ✅ ADD THIS: Handle unary operators
+    //  Handle unary operators
     else if (op == "unary-" || op == "unary+" || op == "unary!" || op == "unary~") {
         ss << "    " << result << " = " << op.substr(5) << arg1;
     }
@@ -80,7 +80,7 @@ else if (op == "call*") {
     ss << "    " << result << " = " << arg1 << "." << arg2;
 }
   else if (op == ".=") {
-        // ✅ FIXED: Swap the order to match the storage format
+        //  Swap the order to match the storage format
         ss << "    " << result << "." << arg1 << " = " << arg2;
     }
 else if (op == "ref") {

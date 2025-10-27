@@ -180,12 +180,12 @@ void SemanticAnalyzer::traverse(ASTNode* node) {
         
         if (is_top_level) {
             process_struct_or_union(node);
-            // Don't return - continue to process children for struct definition
+            
         }
     }
     else if (node->name == "EnumSpecifier") {
         process_enum(node);
-        // Don't return - continue to process children for enum definition
+       
     }
 
     // Handle scope-changing constructs
@@ -1755,7 +1755,7 @@ bool SemanticAnalyzer::is_function_declaration(ASTNode* declaration_node) {
     return false;
 }
 
-// ADD THIS HELPER METHOD:
+
 bool SemanticAnalyzer::is_function_pointer(ASTNode* node) {
     if (!node) return false;
     
@@ -1821,7 +1821,7 @@ void SemanticAnalyzer::process_function_declaration(ASTNode* node) {
         if (existing->symbol_type == "function") {
             // Function already declared - this is normal for multiple declarations
             std::cout << "[Info] Function '" << func_name << "' already declared" << std::endl;
-            // Don't create a new symbol or add to table
+           
         } else {
             reportError("Symbol '" + func_name + "' already declared as different kind", node);
         }
@@ -1892,7 +1892,6 @@ void SemanticAnalyzer::extract_type_info(ASTNode* declarator, Symbol* symbol) {
     if (declarator->name == "Declarator") {
         extract_pointer_info(declarator, symbol);
         
-        // KEY FIX: Check if parent is FunctionDeclarator (function pointer case)
         if (declarator->parent && declarator->parent->name == "FunctionDeclarator") {
             std::cout << "[FUNCTION POINTER DETECTED] " << symbol->name << " (Declarator inside FunctionDeclarator)" << std::endl;
             symbol->is_function_pointer = true;

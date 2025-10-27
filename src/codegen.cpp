@@ -94,7 +94,7 @@ std::string CodeGenerator::extract_type_from_decl_specifiers(ASTNode* decl_speci
     return "int";
 }
 
-// ✅ NEW: Process struct/union definitions to track member offsets
+// Process struct/union definitions to track member offsets
 void CodeGenerator::process_struct_union_definition(ASTNode* node, const std::string& type_name) {
     if (!node || type_name.empty()) return;
     
@@ -292,7 +292,7 @@ std::string CodeGenerator::generate_expression(ASTNode* node) {
         return "";
     }
 
-    // ✅ STRUCT MEMBER ACCESS - READ (with offset support)
+    // STRUCT MEMBER ACCESS - READ (with offset support)
     if (node->name == "MemberAccess" || node->name == "StructMemberAccess") {
         std::string base = generate_expression(node->children[0]);
         std::string field = node->children[1]->lexeme;
@@ -300,7 +300,7 @@ std::string CodeGenerator::generate_expression(ASTNode* node) {
         std::string addr_temp = tac->new_temp();
         tac->generate_address_of(base, addr_temp);
         
-        // ✅ Get offset
+        // Get offset
         auto it = variable_types.find(base);
         int offset = 0;
         if (it != variable_types.end()) {
@@ -346,7 +346,7 @@ std::string CodeGenerator::generate_expression(ASTNode* node) {
                 return rhs;
             }
             
-            // ✅ STRUCT MEMBER ACCESS - WRITE (with offset support)
+            // STRUCT MEMBER ACCESS - WRITE (with offset support)
             if (lhs_node->name == "MemberAccess" || lhs_node->name == "StructMemberAccess") {
                 std::string base = generate_expression(lhs_node->children[0]);
                 std::string field = lhs_node->children[1]->lexeme;
@@ -355,7 +355,7 @@ std::string CodeGenerator::generate_expression(ASTNode* node) {
                     std::string addr_temp = tac->new_temp();
                     tac->generate_address_of(base, addr_temp);
                     
-                    // ✅ Get offset
+                    // Get offset
                     auto it = variable_types.find(base);
                     int offset = 0;
                     if (it != variable_types.end()) {
@@ -380,7 +380,7 @@ std::string CodeGenerator::generate_expression(ASTNode* node) {
                     std::string addr_temp = tac->new_temp();
                     tac->generate_address_of(base, addr_temp);
                     
-                    // ✅ Get offset
+                    //  Get offset
                     auto it = variable_types.find(base);
                     int offset = 0;
                     if (it != variable_types.end()) {
@@ -422,7 +422,7 @@ std::string CodeGenerator::generate_expression(ASTNode* node) {
                     if (array_dims.find(base_array) != array_dims.end()) {
                         const auto& dims = array_dims[base_array];
                         
-                        // ✅ CORRECT: Multi-dimensional offset calculation
+                        // CORRECT: Multi-dimensional offset calculation
                         std::string offset = "0";
                         
                         for (size_t i = 0; i < indices.size(); ++i) {
@@ -944,7 +944,7 @@ std::string CodeGenerator::flatten_array_initialization(const std::string &array
             tac->generate_address_of(array_name, base_temp);
         }
         
-        // ✅ FIX: Check if this InitializerList has InitializerList children or Initializer children
+        // Check if this InitializerList has InitializerList children or Initializer children
         bool has_initlist_children = false;
         bool has_initializer_children = false;
         
@@ -981,14 +981,14 @@ std::string CodeGenerator::flatten_array_initialization(const std::string &array
         return base_temp;
     }
     else if (init_node->name == "Initializer") {
-        // ✅ Initializer is just a wrapper - don't add index, just recurse
+        // Initializer is just a wrapper - don't add index, just recurse
         return flatten_array_initialization(array_name, dims, init_node->children[0], indices, base_temp);
     }
     else {
         // Leaf - actual value
         std::string value = generate_expression(init_node);
         
-        // ✅ FIX: Use only the last dims.size() indices
+        // Use only the last dims.size() indices
         std::vector<int> actual_indices;
         if (indices.size() >= dims.size()) {
             actual_indices.assign(indices.end() - dims.size(), indices.end());
@@ -1025,7 +1025,7 @@ std::string CodeGenerator::flatten_array_initialization(const std::string &array
 void CodeGenerator::generate_declaration(ASTNode* node) {
     if (!node) return;
     
-    // ✅ NEW: Get type name for this declaration
+    // Get type name for this declaration
     std::string type_name = "";
     for (auto child : node->children) {
         if (child->name == "DeclarationSpecifiers") {
@@ -1097,7 +1097,7 @@ void CodeGenerator::generate_declaration(ASTNode* node) {
     continue;
                 }
                 
-                // ✅ NEW: Track variable type
+                //  Track variable type
                 if (!type_name.empty()) {
                     variable_types[var_name] = type_name;
                 }

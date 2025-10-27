@@ -41,11 +41,9 @@ public:
     SemanticAnalyzer(SymbolTable* table);
     void analyze(ASTNode* root);
     
-    // Your existing methods
     int getErrorCount() const { return error_count; }
     void reportError(const std::string& message, ASTNode* node = nullptr);
-    
-    // ADD THESE NEW METHODS for advanced validation:
+  
     void print_summary();
     void report_warning(const std::string& message, ASTNode* node = nullptr);
     int get_error_count() const {

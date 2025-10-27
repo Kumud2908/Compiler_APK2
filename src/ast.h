@@ -15,11 +15,10 @@ public:
     std::vector<ASTNode*> children;
     ASTNode* parent;
     bool processed = false;
-    int line_number = 0;  // ADD THIS LINE
+    int line_number = 0; 
 
     Symbol* symbol=nullptr;
 
-    // Constructors - UPDATE to include line number
     ASTNode(const std::string &name_, const std::string &lexeme_ = "", int line = 0)
         : name(name_), lexeme(lexeme_), parent(nullptr), line_number(line) {}  // ADD line_number(line)
 
