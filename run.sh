@@ -19,7 +19,11 @@ if [ ! -f "$EXECUTABLE" ]; then
     exit 1
 fi
 
+# Create outputs directory
+mkdir -p outputs
+
 echo "Using compiler executable: $EXECUTABLE"
+echo "Console outputs saved to: outputs/"
 
 # =========================
 # Colors
@@ -61,8 +65,9 @@ run_test() {
     echo "----------------------------------------"
 
     echo -e "${BLUE}Syntax Analyzer Output:${NC}"
-    "$EXECUTABLE" "$test_file"
-    exit_code=$?
+    # ✅ Save output to file AND print to console
+    "$EXECUTABLE" "$test_file" 2>&1 | tee "outputs/${test_name}_console.txt"
+    exit_code=${PIPESTATUS[0]}
     echo "----------------------------------------"
 
     if [ $exit_code -eq 0 ]; then
@@ -93,8 +98,9 @@ run_error_test() {
     echo "----------------------------------------"
 
     echo -e "${BLUE}Syntax Analyzer Output:${NC}"
-    "$EXECUTABLE" "$test_file"
-    exit_code=$?
+    # ✅ Save output to file AND print to console
+    "$EXECUTABLE" "$test_file" 2>&1 | tee "outputs/${test_name}_console.txt"
+    exit_code=${PIPESTATUS[0]}
     echo "----------------------------------------"
 
     if [ $exit_code -ne 0 ]; then
@@ -150,6 +156,7 @@ echo -e "${BLUE}========================================${NC}"
 echo "Total tests run: $total_tests"
 echo -e "Passed: ${GREEN}$passed_tests${NC}"
 echo -e "Failed: ${RED}$failed_tests${NC}"
+echo "Console outputs saved to: outputs/"
 
 if [ $failed_tests -eq 0 ]; then
     echo -e "${GREEN}All tests passed!${NC}"
