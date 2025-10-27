@@ -1224,7 +1224,7 @@ int main(int argc, char* argv[]) {
         
         // SEMANTIC ANALYSIS
         printf("\n=== SEMANTIC ANALYSIS ===\n");
-        has_semantic_errors = false;  // ✅ Reset flag
+        has_semantic_errors = false;  // Reset flag
         
         SemanticAnalyzer analyzer(symbol_table);
         analyzer.analyze(root);
@@ -1232,13 +1232,12 @@ int main(int argc, char* argv[]) {
         // Print symbol table
         symbol_table->print_table();
 
-	if(root) root->printTree();
         
-        // ✅ CHECK THE FLAG
+        // CHECK THE FLAG
         if (has_semantic_errors) {
             printf("\n");
             printf("==================================================\n");
-            printf("❌ COMPILATION FAILED\n");
+            printf("COMPILATION FAILED\n");
             printf("==================================================\n");
             printf("Semantic errors found (see above)\n");
             printf("Code generation has been skipped.\n");
@@ -1251,7 +1250,7 @@ int main(int argc, char* argv[]) {
             return 1;
         }
         
-        printf("\n✅ Semantic analysis passed with no errors.\n");
+        printf("\n Semantic analysis passed with no errors.\n");
         
         // THREE ADDRESS CODE GENERATION
         printf("\n=== CODE GENERATION ===\n");
@@ -1263,8 +1262,8 @@ int main(int argc, char* argv[]) {
         
         // Print AST
         if (root) {
-            //printf("\n=== ABSTRACT SYNTAX TREE ===\n");
-            //root->printTree();
+            printf("\n=== ABSTRACT SYNTAX TREE ===\n");
+            root->printTree();
             
             // Generate DOT file
             std::ofstream dotFile("ast.dot");
@@ -1289,7 +1288,7 @@ int main(int argc, char* argv[]) {
             
             printf("\n");
             printf("==================================================\n");
-            printf("✅ COMPILATION SUCCESSFUL\n");
+            printf("COMPILATION SUCCESSFUL\n");
             printf("==================================================\n");
         }
     } else {
