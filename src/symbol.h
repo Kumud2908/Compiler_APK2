@@ -52,7 +52,8 @@ public:
     bool is_recursive;
     bool in_call_chain;
     int offset;
-    bool is_function_pointer;
+    bool is_function_pointer=false;
+
     std::string return_type;  // For functions and function pointers
     std::string function_signature;  // Full signature string
 
@@ -66,15 +67,10 @@ public:
     void add_member(Symbol* member);
     void add_enumerator(const std::string& name, int value);
     void print(int depth = 0);
-    bool isFunctionPointer() const {
-        return is_function_pointer || symbol_type == "function_pointer";
-    }
-    
-    bool isFunction() const {
-        return symbol_type == "function";
-    }
+    bool isFunction() const { return symbol_type == "function"; }
+    bool isFunctionPointer() const { return is_function_pointer; }
      // Check if two function signatures match (for function pointer assignment)
-     bool matches_function_signature(const Symbol* func) const;
+
 };
 
 class SymbolTable {

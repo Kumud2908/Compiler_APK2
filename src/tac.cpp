@@ -41,6 +41,13 @@ std::string TACInstruction::toString() const {
             ss << "    call " << arg1 << ", " << arg2;
         }
     }
+else if (op == "call*") {
+    if (!result.empty()) {
+        ss << "    " << result << " = call* " << arg1 << ", " << arg2;
+    } else {
+        ss << "    call* " << arg1 << ", " << arg2;
+    }
+}
     else if (op == "return") {
         if (!arg1.empty()) {
             ss << "    return " << arg1;
@@ -186,4 +193,7 @@ void TACGenerator::generate_struct_store(const std::string& structVar,
                                          const std::string& value) {
     // structVar.member = value
     add_instruction(".=", member, value, structVar);
+}
+void TACGenerator::generate_indirect_call(const std::string& func_ptr, int num_params, const std::string& result) {
+    add_instruction("call*", func_ptr, std::to_string(num_params), result);
 }

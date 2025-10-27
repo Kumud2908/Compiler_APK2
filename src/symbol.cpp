@@ -61,52 +61,52 @@ Symbol::Symbol(const std::string& name, const std::string& sym_type,
       function_signature("")   {}     
 
 std::string Symbol::get_full_type() const {
-    std::stringstream ss;
-    
-    // Handle function pointers specially
+    // Handle function pointers FIRST
     if (is_function_pointer) {
-        ss << return_type << "(";
-        for (size_t i = 0; i < parameters.size(); i++) {
-            if (i > 0) ss << ", ";
-            ss << parameters[i]->base_type;
-            // Add pointer indicators if parameter is a pointer
-            for (int j = 0; j < parameters[i]->pointer_level; j++) {
-                ss << "*";
+        std::string result = return_type + "(*)(";
+        
+        // Extract parameter types from the function pointer
+        if (!parameters.empty()) {
+            for (size_t i = 0; i < parameters.size(); i++) {
+                if (i > 0) result += ", ";
+                result += parameters[i]->base_type;
             }
         }
-        ss << ")";
-        return ss.str();
+        result += ")";
+        return result;
+    }
+
+    if (symbol_type == "function" && return_type.find("(*)") != std::string::npos) {
+        return return_type; // Already formatted as function pointer return type
     }
     
-    // Add base type
+    // Handle regular functions
+    if (symbol_type == "function" && !parameters.empty()) {
+        std::string result = base_type + "(";
+        for (size_t i = 0; i < parameters.size(); i++) {
+            if (i > 0) result += ", ";
+            result += parameters[i]->base_type;
+        }
+        result += ")";
+        return result;
+    }
+    
+    // Handle regular variables with pointers/arrays
+    std::stringstream ss;
     ss << base_type;
     
-    // Add pointer asterisks
     if (is_pointer) {
         for (int i = 0; i < pointer_level; i++) {
             ss << "*";
         }
     }
     
-    // Add array dimensions
     if (is_array && !array_dimensions.empty()) {
         for (int dim : array_dimensions) {
             ss << "[";
-            if (dim >= 0) {
-                ss << dim;
-            }
+            if (dim >= 0) ss << dim;
             ss << "]";
         }
-    }
-    
-    // For functions, add parameter types
-    if (symbol_type == "function" && !parameters.empty()) {
-        ss << "(";
-        for (size_t i = 0; i < parameters.size(); i++) {
-            if (i > 0) ss << ", ";
-            ss << parameters[i]->get_full_type();
-        }
-        ss << ")";
     }
     
     return ss.str();

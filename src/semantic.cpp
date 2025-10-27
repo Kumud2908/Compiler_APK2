@@ -213,13 +213,13 @@ void SemanticAnalyzer::traverse(ASTNode* node) {
     }
     else if (node->name == "FunctionCall") {
         check_function_call(node);
-        check_null_function_pointer_call(node);
+        check_function_pointer_call(node);
+
     }
     else if (node->name == "ReturnStatement") {
         std::cout << "[Return Context] Current function: '" << current_function_name 
                   << "', return type: '" << current_function_return_type << "'" << std::endl;
         check_return_statement(node);
-        check_function_pointer_return(node);
     }
     else if (node->name == "BreakStatement" || node->name == "ContinueStatement") {
         check_break_continue(node);
@@ -243,7 +243,7 @@ void SemanticAnalyzer::traverse(ASTNode* node) {
     }
     else if (node->name == "UnaryExpression") {
         check_unary_operation(node);
-        check_function_pointer_dereference(node);
+        
     }
     else if (node->name == "IfStatement" && node->children.size() > 0) {
         check_if_condition(node->children[0]);
@@ -336,11 +336,6 @@ void SemanticAnalyzer::traverse(ASTNode* node) {
         has_default_in_switch = false;
     }
 
-    // ONLY check generic function pointer operations here
-    // (specific checks are already done above in the main semantic checks section)
-    check_function_pointer_operations(node);
-    check_function_pointer_arithmetic(node);
-    check_function_pointer_comparison(node);
 }
 
 void SemanticAnalyzer::process_declaration(ASTNode* node) {
@@ -426,6 +421,10 @@ void SemanticAnalyzer::process_function(ASTNode* node) {
     std::string func_name = "unknown";
     std::string return_type = "int";
     bool return_type_found = false;
+    bool returns_function_pointer = false;
+
+    
+    std::cout << "[PROCESS FUNCTION] Analyzing function definition at line " << node->line_number << std::endl;
     
     // Extract return type and function name
     for (size_t i = 0; i < node->children.size(); i++) {
@@ -435,6 +434,7 @@ void SemanticAnalyzer::process_function(ASTNode* node) {
         if (child->name == "DeclarationSpecifiers") {
             return_type = extract_base_type(child);
             return_type_found = true;
+            std::cout << "[PROCESS FUNCTION] Return type: " << return_type << std::endl;
             
             if (!is_valid_type(return_type)) {
                 reportError("Invalid return type: '" + return_type + "'", child);
@@ -442,6 +442,28 @@ void SemanticAnalyzer::process_function(ASTNode* node) {
         }
         else if (child->name == "Declarator" || child->name == "FunctionDeclarator") {
             func_name = extract_function_name(child);
+ 
+            std::cout << "[PROCESS FUNCTION] Extracted name: " << func_name << std::endl;
+            
+            if (child->name == "FunctionDeclarator") {
+                // Check if this is a function returning a function pointer
+                for (size_t j = 0; j < child->children.size(); j++) {
+                    ASTNode* grandchild = child->children[j];
+                    if (!grandchild) continue;
+                    
+                    if (grandchild->name == "Declarator") {
+                        // This is a function returning a function pointer
+                        returns_function_pointer = true;
+                        std::cout << "[FUNCTION RETURNING FUNCTION POINTER] " << func_name << std::endl;
+                        
+                        // Use the OUTER FunctionDeclarator (the current child) to build the return type
+                        // NOT the inner one
+                        return_type = build_function_pointer_return_type(child, return_type);
+                        std::cout << "[UPDATED RETURN TYPE] " << func_name << " returns " << return_type << std::endl;
+                        break;
+                    }
+                }
+            }
         }
     }
     
@@ -450,6 +472,34 @@ void SemanticAnalyzer::process_function(ASTNode* node) {
     }
     
     if (func_name == "unknown") {
+        // Debug: print the AST structure to see what's wrong
+        std::cout << "[DEBUG] Could not extract function name. AST structure:" << std::endl;
+        for (size_t i = 0; i < node->children.size(); i++) {
+            ASTNode* child = node->children[i];
+            if (!child) continue;
+            
+            if (child->name == "Declarator" || child->name == "FunctionDeclarator") {
+                std::cout << "  " << child->name << " children:" << std::endl;
+                for (size_t j = 0; j < child->children.size(); j++) {
+                    ASTNode* grandchild = child->children[j];
+                    if (!grandchild) continue;
+                    std::cout << "    " << grandchild->name;
+                    if (!grandchild->lexeme.empty()) std::cout << " lexeme: '" << grandchild->lexeme << "'";
+                    std::cout << std::endl;
+                    
+                    // Go one level deeper if needed
+                    if (grandchild->name == "Declarator" || grandchild->name == "FunctionDeclarator") {
+                        for (size_t k = 0; k < grandchild->children.size(); k++) {
+                            ASTNode* great_grandchild = grandchild->children[k];
+                            if (!great_grandchild) continue;
+                            std::cout << "      " << great_grandchild->name;
+                            if (!great_grandchild->lexeme.empty()) std::cout << " lexeme: '" << great_grandchild->lexeme << "'";
+                            std::cout << std::endl;
+                        }
+                    }
+                }
+            }
+        }
         reportError("Function has no name", node);
         return;
     }
@@ -475,10 +525,20 @@ void SemanticAnalyzer::process_function(ASTNode* node) {
         // Function already declared - use existing symbol
         std::cout << "[Info] Function '" << func_name << "' definition found for declaration" << std::endl;
         func_sym = existing;
+        
+        // Update return type if this is a function pointer return
+        if (returns_function_pointer) {
+            func_sym->return_type = return_type;
+        }
     } else {
         // Create new function symbol
         func_sym = new Symbol(func_name, "function", return_type, 
                              symbol_table->get_current_scope_level(), node->line_number);
+        
+        // Store the full return type for function pointer returns
+        if (returns_function_pointer) {
+            func_sym->return_type = return_type;
+        }
         
         // Add to CURRENT scope (should be global)
         if (!symbol_table->add_symbol(func_sym)) {
@@ -531,7 +591,72 @@ void SemanticAnalyzer::process_function(ASTNode* node) {
     current_function_name = previous_function;
     current_function_return_type = previous_return_type;
 }
-
+std::string SemanticAnalyzer::build_function_pointer_return_type(ASTNode* func_declarator, const std::string& base_type) {
+    if (!func_declarator || func_declarator->name != "FunctionDeclarator") {
+        return base_type;
+    }
+    
+    std::cout << "[BUILD FUNCTION POINTER TYPE] Building for base type: " << base_type << std::endl;
+    
+    // Build function pointer type: int(*)(params)
+    std::string result = base_type + "(*)(";
+    
+    bool has_parameters = false;
+    
+    // Extract parameters from ParameterList
+    for (size_t i = 0; i < func_declarator->children.size(); i++) {
+        ASTNode* child = func_declarator->children[i];
+        if (!child) continue;
+        
+        std::cout << "[BUILD FUNCTION POINTER TYPE] Child: " << child->name << std::endl;
+        
+        if (child->name == "ParameterList") {
+            has_parameters = true;
+            std::cout << "[BUILD FUNCTION POINTER TYPE] Found ParameterList with " << child->children.size() << " parameters" << std::endl;
+            
+            // Handle empty parameter list - should be empty, not "void"
+            if (child->children.empty()) {
+                // Empty parameter list means it takes no parameters
+                // Leave it empty: int(*)()
+                std::cout << "[BUILD FUNCTION POINTER TYPE] Empty parameter list" << std::endl;
+            } else {
+                // Extract each parameter
+                for (size_t j = 0; j < child->children.size(); j++) {
+                    ASTNode* param_node = child->children[j];
+                    if (!param_node || param_node->name != "ParameterDeclaration") continue;
+                    
+                    if (j > 0) result += ", ";
+                    
+                    // Extract parameter type from DeclarationSpecifiers
+                    std::string param_type = "int";
+                    for (size_t k = 0; k < param_node->children.size(); k++) {
+                        ASTNode* param_child = param_node->children[k];
+                        if (!param_child) continue;
+                        
+                        if (param_child->name == "DeclarationSpecifiers") {
+                            param_type = extract_base_type(param_child);
+                            std::cout << "[BUILD FUNCTION POINTER TYPE] Parameter type: " << param_type << std::endl;
+                            break;
+                        }
+                    }
+                    result += param_type;
+                }
+            }
+            break;
+        }
+    }
+    
+    // If no ParameterList found at all, it means no parameters specified
+    // In C, this means it takes an unspecified number of parameters, not void
+    // So we leave it empty: int(*)()
+    if (!has_parameters) {
+        std::cout << "[BUILD FUNCTION POINTER TYPE] No ParameterList found" << std::endl;
+    }
+    
+    result += ")";
+    std::cout << "[BUILD FUNCTION POINTER TYPE] Final type: " << result << std::endl;
+    return result;
+}
 void SemanticAnalyzer::process_function_parameters(ASTNode* declarator) {
     if (!declarator) return;
     
@@ -607,32 +732,77 @@ void SemanticAnalyzer::process_function_parameters(ASTNode* declarator, Symbol* 
 std::string SemanticAnalyzer::extract_function_name(ASTNode* declarator) {
     if (!declarator) return "unknown";
     
+    std::cout << "[EXTRACT FUNCTION NAME] Searching in: " << declarator->name;
+    if (!declarator->lexeme.empty()) std::cout << " lexeme: '" << declarator->lexeme << "'";
+    std::cout << std::endl;
+    
     // Check current node first
     if (!declarator->lexeme.empty() && declarator->lexeme != "default") {
         return declarator->lexeme;
     }
     
-    // Look for DirectDeclarator with lexeme
-    for (size_t i = 0; i < declarator->children.size(); i++) {
-        ASTNode* child = declarator->children[i];
-        if (!child) continue;
-        
-        if (child->name == "DirectDeclarator") {
-            if (!child->lexeme.empty() && child->lexeme != "default") {
-                return child->lexeme;
-            }
+    // Handle FunctionDeclarator - search for DirectDeclarator with name
+    if (declarator->name == "FunctionDeclarator") {
+        for (size_t i = 0; i < declarator->children.size(); i++) {
+            ASTNode* child = declarator->children[i];
+            if (!child) continue;
             
-            // Search recursively in DirectDeclarator's children
-            for (size_t j = 0; j < child->children.size(); j++) {
-                ASTNode* grandchild = child->children[j];
-                if (!grandchild) continue;
-                
-                if (!grandchild->lexeme.empty() && grandchild->lexeme != "default") {
-                    return grandchild->lexeme;
+            // Look for DirectDeclarator with name
+            if (child->name == "DirectDeclarator") {
+                if (!child->lexeme.empty() && child->lexeme != "default") {
+                    return child->lexeme;
+                }
+            }
+            // Look for Declarator that contains DirectDeclarator
+            else if (child->name == "Declarator") {
+                for (size_t j = 0; j < child->children.size(); j++) {
+                    ASTNode* grandchild = child->children[j];
+                    if (!grandchild) continue;
+                    
+                    if (grandchild->name == "DirectDeclarator" && 
+                        !grandchild->lexeme.empty() && grandchild->lexeme != "default") {
+                        return grandchild->lexeme;
+                    }
+                    // Handle nested FunctionDeclarator
+                    else if (grandchild->name == "FunctionDeclarator") {
+                        std::string name = extract_function_name(grandchild);
+                        if (name != "unknown") return name;
+                    }
                 }
             }
         }
     }
+    
+    // Handle Declarator node
+    if (declarator->name == "Declarator") {
+        for (size_t i = 0; i < declarator->children.size(); i++) {
+            ASTNode* child = declarator->children[i];
+            if (!child) continue;
+            
+            if (child->name == "DirectDeclarator") {
+                if (!child->lexeme.empty() && child->lexeme != "default") {
+                    return child->lexeme;
+                }
+            }
+            // Handle nested FunctionDeclarator inside Declarator
+            else if (child->name == "FunctionDeclarator") {
+                std::string name = extract_function_name(child);
+                if (name != "unknown") return name;
+            }
+        }
+    }
+    
+    // Search recursively in children
+    for (size_t i = 0; i < declarator->children.size(); i++) {
+        ASTNode* child = declarator->children[i];
+        if (!child) continue;
+        
+        std::string result = extract_function_name(child);
+        if (result != "unknown") {
+            return result;
+        }
+    }
+    
     return "unknown";
 }
 
@@ -1245,6 +1415,12 @@ void SemanticAnalyzer::process_variable(ASTNode* declarator, const std::string& 
     
     // Extract enhanced type information
     extract_type_info(declarator, var_sym);
+    
+    // If this is a FunctionDeclarator, extract parameters for function pointers
+    if (declarator->name == "FunctionDeclarator" && var_sym->is_function_pointer) {
+        extract_function_pointer_parameters(declarator, var_sym);
+    }
+    
     declarator->symbol = var_sym;
     
     std::cout << "[Scope " << symbol_table->get_current_scope_level() 
@@ -1255,6 +1431,44 @@ void SemanticAnalyzer::process_variable(ASTNode* declarator, const std::string& 
         reportError("Variable '" + var_name + "' already declared in this scope", declarator);
         declarator->symbol = nullptr; 
         delete var_sym;
+    }
+}
+void SemanticAnalyzer::extract_function_pointer_parameters(ASTNode* func_declarator, Symbol* func_ptr_sym) {
+    if (!func_declarator || !func_ptr_sym || func_declarator->name != "FunctionDeclarator") return;
+    
+    // Look for ParameterList in the FunctionDeclarator
+    for (size_t i = 0; i < func_declarator->children.size(); i++) {
+        ASTNode* child = func_declarator->children[i];
+        if (!child) continue;
+        
+        if (child->name == "ParameterList") {
+            // Process parameters
+            for (size_t j = 0; j < child->children.size(); j++) {
+                ASTNode* param_node = child->children[j];
+                if (!param_node || param_node->name != "ParameterDeclaration") continue;
+                
+                std::string param_type = "int";
+                
+                // Extract parameter type from DeclarationSpecifiers
+                for (size_t k = 0; k < param_node->children.size(); k++) {
+                    ASTNode* param_child = param_node->children[k];
+                    if (!param_child) continue;
+                    
+                    if (param_child->name == "DeclarationSpecifiers") {
+                        param_type = extract_base_type(param_child);
+                        break;
+                    }
+                }
+                
+                // Create parameter symbol
+                Symbol* param_sym = new Symbol("", "parameter", param_type,
+                                              func_ptr_sym->scope_level, 0);
+                func_ptr_sym->add_parameter(param_sym);
+                
+                std::cout << "[FUNCTION POINTER PARAM] " << param_type << std::endl;
+            }
+            break;
+        }
     }
 }
 
@@ -1588,14 +1802,23 @@ bool SemanticAnalyzer::has_parameter_list(ASTNode* node) {
 void SemanticAnalyzer::extract_type_info(ASTNode* declarator, Symbol* symbol) {
     if (!declarator || !symbol) return;
     
-    // Handle Declarator node (contains Pointer + DirectDeclarator)
+    std::cout << "[DEBUG] extract_type_info: " << declarator->name << " for " << symbol->name << std::endl;
+    
     if (declarator->name == "Declarator") {
         extract_pointer_info(declarator, symbol);
         
-        // Find the inner DirectDeclarator or ArrayDeclarator
+        // KEY FIX: Check if parent is FunctionDeclarator (function pointer case)
+        if (declarator->parent && declarator->parent->name == "FunctionDeclarator") {
+            std::cout << "[FUNCTION POINTER DETECTED] " << symbol->name << " (Declarator inside FunctionDeclarator)" << std::endl;
+            symbol->is_function_pointer = true;
+            symbol->return_type = symbol->base_type;
+        }
+        
         for (size_t i = 0; i < declarator->children.size(); i++) {
             ASTNode* child = declarator->children[i];
             if (!child) continue;
+            
+            std::cout << "[DEBUG] Declarator child: " << child->name << std::endl;
             
             if (child->name == "DirectDeclarator" || child->name == "ArrayDeclarator") {
                 extract_type_info(child, symbol);
@@ -1604,58 +1827,17 @@ void SemanticAnalyzer::extract_type_info(ASTNode* declarator, Symbol* symbol) {
     }
     // Handle ArrayDeclarator
     else if (declarator->name == "ArrayDeclarator") {
-    // Check if this is pointer-to-array (has Declarator with Pointer inside ArrayDeclarator)
-    	bool is_pointer_to_array = false;
-    
-    	for (size_t i = 0; i < declarator->children.size(); i++) {
-        	ASTNode* child = declarator->children[i];
-        	if (!child) continue;
+        // Check if this is pointer-to-array (has Declarator with Pointer inside ArrayDeclarator)
+        bool is_pointer_to_array = false;
         
-        	if (child->name == "Declarator") {
-            // This is pointer-to-array case: int (*arr_ptr)[10]
-           	 extract_pointer_info(child, symbol);
-           	 is_pointer_to_array = true;
-            
-            // Extract the name from inner DirectDeclarator
-           	 for (size_t j = 0; j < child->children.size(); j++) {
-            	    if (child->children[j] && child->children[j]->name == "DirectDeclarator") {
-              	      extract_type_info(child->children[j], symbol);
-                	}
-            	}
-        	}
-    	}
-    
-    	if (!is_pointer_to_array) {
-        // Normal array case
-        	symbol->is_array = true;
-        	extract_array_dimensions(declarator, symbol);
-        
-        // Find the inner declarator
-    	    for (size_t i = 0; i < declarator->children.size(); i++) {
-        	    ASTNode* child = declarator->children[i];
-        	    if (!child) continue;
-            
-            	if (child->name == "DirectDeclarator" || child->name == "ArrayDeclarator") {
-                	extract_type_info(child, symbol);
-            	}
-        	}
-    } else {
-        // For pointer-to-array, extract array dimensions from the ArrayDeclarator itself
-        symbol->is_array = true;
-        extract_array_dimensions(declarator, symbol);
-    }
-}
-    // Handle FunctionDeclarator (for function pointers)
-    else if (declarator->name == "FunctionDeclarator") {
-        // Check if this is a function pointer (has Pointer inside Declarator)
-        bool is_func_ptr = false;
         for (size_t i = 0; i < declarator->children.size(); i++) {
             ASTNode* child = declarator->children[i];
             if (!child) continue;
             
             if (child->name == "Declarator") {
+                // This is pointer-to-array case: int (*arr_ptr)[10]
                 extract_pointer_info(child, symbol);
-                is_func_ptr = symbol->is_pointer; // Will be true if we found pointers
+                is_pointer_to_array = true;
                 
                 // Extract the name from inner DirectDeclarator
                 for (size_t j = 0; j < child->children.size(); j++) {
@@ -1666,16 +1848,67 @@ void SemanticAnalyzer::extract_type_info(ASTNode* declarator, Symbol* symbol) {
             }
         }
         
-        if (is_func_ptr) {
-            // This is a function pointer variable
-            symbol->symbol_type = "variable";
-            // TODO: Extract function parameter types for the function pointer
+        if (!is_pointer_to_array) {
+            // Normal array case
+            symbol->is_array = true;
+            extract_array_dimensions(declarator, symbol);
+            
+            // Find the inner declarator
+            for (size_t i = 0; i < declarator->children.size(); i++) {
+                ASTNode* child = declarator->children[i];
+                if (!child) continue;
+                
+                if (child->name == "DirectDeclarator" || child->name == "ArrayDeclarator") {
+                    extract_type_info(child, symbol);
+                }
+            }
         } else {
-            // This is a function declaration
+            // For pointer-to-array, extract array dimensions from the ArrayDeclarator itself
+            symbol->is_array = true;
+            extract_array_dimensions(declarator, symbol);
+        }
+    }
+    // Handle FunctionDeclarator (for function pointers AND regular functions)
+    else if (declarator->name == "FunctionDeclarator") {
+        std::cout << "[FUNCTION DECLARATOR] " << symbol->name << std::endl;
+        
+        // Check if this FunctionDeclarator contains a Declarator with Pointer (function pointer)
+        bool has_pointer_declarator = false;
+        for (size_t i = 0; i < declarator->children.size(); i++) {
+            ASTNode* child = declarator->children[i];
+            if (!child) continue;
+            
+            if (child->name == "Declarator") {
+                // This is a function pointer: int (*func_ptr)(int, int)
+                has_pointer_declarator = true;
+                extract_type_info(child, symbol); // Process the inner Declarator
+                break;
+            }
+        }
+        
+        if (!has_pointer_declarator) {
+            // This is a regular function declaration: int add(int, int)
             symbol->symbol_type = "function";
+            std::cout << "[REGULAR FUNCTION] " << symbol->name << std::endl;
+            
+            // Extract parameters for the function
+            extract_function_pointer_parameters(declarator, symbol);
+        } else {
+            // Function pointer - parameters will be extracted separately
+            std::cout << "[FUNCTION POINTER DECLARATOR] " << symbol->name << std::endl;
+        }
+    }
+    // Handle DirectDeclarator
+    else if (declarator->name == "DirectDeclarator") {
+        // Just extract the name if needed
+        std::string name = extract_declarator_name(declarator);
+        if (name != "unknown" && symbol->name == "unknown") {
+            symbol->name = name;
         }
     }
 }
+
+
 
 // Extract pointer information from nested Pointer nodes
 void SemanticAnalyzer::extract_pointer_info(ASTNode* declarator, Symbol* symbol) {
@@ -1840,6 +2073,10 @@ void SemanticAnalyzer::check_assignment(ASTNode* node) {
     // Check pointer level compatibility
     int lhs_ptr_level = get_pointer_level(lhs_type);
     int rhs_ptr_level = get_pointer_level(rhs_type);
+
+    if (lhs_type.find('(') != std::string::npos && rhs_type.find('(') != std::string::npos) {
+        return; // Allow all function pointer assignments for now
+    }
     
     if (lhs_ptr_level != rhs_ptr_level) {
         bool is_address_of = false;
@@ -1892,6 +2129,14 @@ void SemanticAnalyzer::check_function_call(ASTNode* node) {
     
     std::string func_name = func_id->lexeme;
     Symbol* func_sym = symbol_table->find_symbol(func_name);
+
+    if (func_sym && func_sym->is_function_pointer) {
+        return; // Allow function pointer calls
+    }
+    if (func_sym && func_sym->symbol_type == "function" && 
+        func_sym->get_full_type().find("(*)") != std::string::npos) {
+        return;
+    }
 
     if (!func_sym && builtin_functions.find(func_name) == builtin_functions.end()) {
         reportError("Undeclared function '" + func_name + "'", node);
@@ -2168,6 +2413,15 @@ bool SemanticAnalyzer::types_compatible(const std::string& type1, const std::str
     if (is_struct_union_type(type1) && is_struct_union_type(type2)) {
         return type1 == type2; // Only same exact types are compatible
     }
+
+// FUNCTION TO FUNCTION POINTER COMPATIBILITY (FIX)
+if ((resolved_type1.find("(*)") != std::string::npos && 
+     resolved_type2.find('(') != std::string::npos) ||
+    (resolved_type2.find("(*)") != std::string::npos && 
+     resolved_type1.find('(') != std::string::npos)) {
+    return true; // Allow all function to function pointer assignments
+}
+
     if (resolved_type1.find("enum ") == 0 && resolved_type2.find("enum ") == 0) {
         // Extract enum names and compare
         std::string enum1_name = resolved_type1.substr(5); // Remove "enum "
@@ -2215,6 +2469,7 @@ std::string SemanticAnalyzer::resolve_typedef(const std::string& type_name) {
     // If it's not a simple identifier, return as-is
     if (type_name.find(' ') != std::string::npos || 
         type_name.find('*') != std::string::npos ||
+        type_name.find('(') != std::string::npos ||
         type_name.find('[') != std::string::npos) {
         return type_name;
     }
@@ -2222,9 +2477,16 @@ std::string SemanticAnalyzer::resolve_typedef(const std::string& type_name) {
     // Check if this is a typedef
     Symbol* sym = symbol_table->find_symbol(type_name);
     if (sym && sym->symbol_type == "typedef") {
+        // For function pointers, use get_full_type() to preserve the function signature
+        if (sym->is_function_pointer) {
+            std::string full_type = sym->get_full_type();
+            std::cout << "[Typedef Resolution] '" << type_name << "' -> '" << full_type << "'" << std::endl;
+            return full_type;
+        }
+        
+        // For regular typedefs, use base_type
         std::cout << "[Typedef Resolution] '" << type_name << "' -> '" << sym->base_type << "'" << std::endl;
-        // Recursively resolve nested typedefs
-        return resolve_typedef(sym->base_type);
+        return sym->base_type;
     }
     
     return type_name;
@@ -2473,276 +2735,31 @@ void SemanticAnalyzer::print_summary() {
 // ADDITIONAL SEMANTIC CHECKS FOR FUNCTION POINTERS
 // ============================================
 
-// 1. Check invalid operations on function pointers
-void SemanticAnalyzer::check_function_pointer_operations(ASTNode* node) {
-    if (!node) return;
-    
-    // Function pointers cannot be used in arithmetic operations
-    if (node->name == "AdditiveExpression" || 
-        node->name == "MultiplicativeExpression" ||
-        node->name == "RelationalExpression") {
-        
-        if (node->children.size() >= 2) {
-            std::string type1 = get_expression_type(node->children[0]);
-            std::string type2 = get_expression_type(node->children[1]);
-            
-            // Check if either operand is a function pointer
-            for (auto child : node->children) {
-                if (child->name == "Identifier") {
-                    Symbol* sym = symbol_table->lookup(child->lexeme);
-                    if (sym && sym->isFunctionPointer()) {
-                        reportError("ERROR: Invalid operation on function pointer '" + 
-                                   child->lexeme + "'", node);
-                        return;
-                    }
-                }
-            }
-        }
-    }
-}
-
-// 2. Check function pointer arithmetic (not allowed except assignment)
-void SemanticAnalyzer::check_function_pointer_arithmetic(ASTNode* node) {
-    if (!node) return;
-    
-    // Check for invalid increment/decrement on function pointers
-    if (node->name == "UnaryExpression" && 
-        (node->lexeme == "++" || node->lexeme == "--")) {
-        
-        if (node->children.size() > 0 && node->children[0]->name == "Identifier") {
-            Symbol* sym = symbol_table->lookup(node->children[0]->lexeme);
-            if (sym && sym->isFunctionPointer()) {
-                reportError("ERROR: Cannot increment/decrement function pointer '" + 
-                           sym->name + "'", node);
-            }
-        }
-    }
-    
-    // Check postfix increment/decrement
-    if (node->name == "PostfixExpression" && 
-        (node->lexeme == "++" || node->lexeme == "--")) {
-        
-        if (node->children.size() > 0 && node->children[0]->name == "Identifier") {
-            Symbol* sym = symbol_table->lookup(node->children[0]->lexeme);
-            if (sym && sym->isFunctionPointer()) {
-                reportError("ERROR: Cannot increment/decrement function pointer '" + 
-                           sym->name + "'", node);
-            }
-        }
-    }
-}
-
-// 3. Validate function pointer type in expressions
-void SemanticAnalyzer::validate_function_pointer_type(ASTNode* node, const std::string& func_ptr_name) {
-    Symbol* sym = symbol_table->lookup(func_ptr_name);
-    if (!sym || !sym->isFunctionPointer()) return;
-    
-    // Function pointers must be called or assigned, not used in other contexts
-    if (node->name != "FunctionCall" && 
-        node->name != "AssignmentExpression" &&
-        node->name != "UnaryExpression") {  // Allow & operator
-        
-        reportError("ERROR: Function pointer '" + func_ptr_name + 
-                   "' must be called or assigned, not used in expression", node);
-    }
-}
-
-// 4. Check for NULL function pointer calls
-void SemanticAnalyzer::check_null_function_pointer_call(ASTNode* node) {
-    if (!node || node->name != "FunctionCall") return;
-    
-    ASTNode* func_node = node->children[0];
-    
-    if (func_node->name == "Identifier") {
-        Symbol* sym = symbol_table->lookup(func_node->lexeme);
-        if (sym && sym->isFunctionPointer() && !sym->is_initialized) {
-            report_warning("WARNING: Function pointer '" + func_node->lexeme + 
-                          "' may not be initialized before call", node);
-        }
-    }
-}
-
-// 5. Check function pointer comparison (only equality/inequality allowed)
-void SemanticAnalyzer::check_function_pointer_comparison(ASTNode* node) {
-    if (!node) return;
-    
-    if (node->name == "RelationalExpression" && 
-        (node->lexeme == "<" || node->lexeme == ">" || 
-         node->lexeme == "<=" || node->lexeme == ">=")) {
-        
-        if (node->children.size() >= 2) {
-            for (auto child : node->children) {
-                if (child->name == "Identifier") {
-                    Symbol* sym = symbol_table->lookup(child->lexeme);
-                    if (sym && sym->isFunctionPointer()) {
-                        reportError("ERROR: Relational comparison not allowed on function pointer '" + 
-                                   child->lexeme + "'. Only == and != are allowed", node);
-                        return;
-                    }
-                }
-            }
-        }
-    }
-}
-
-
-// 6. Check array of function pointers
-void SemanticAnalyzer::check_function_pointer_array(ASTNode* declarator, const std::string& base_type) {
-    // This would be called when processing declarations
-    // Array of function pointers: int (*arr[10])(int, int);
-    
-    bool is_array = false;
-    bool is_func_ptr = false;
-    
-    // Check if it's both array and function pointer
-    std::function<void(ASTNode*)> check_node = [&](ASTNode* node) {
-        if (!node) return;
-        
-        if (node->name == "ArrayDeclarator") {
-            is_array = true;
-        }
-        if (node->name == "FunctionDeclarator") {
-            is_func_ptr = true;
-        }
-        
-        for (auto child : node->children) {
-            check_node(child);
-        }
-    };
-    
-    
-    check_node(declarator);
-    
-    if (is_array && is_func_ptr) {
-        std::cout << "[INFO] Detected array of function pointers" << std::endl;
-        // This is valid in C, just informational
-    }
-}
-
-// 7. Check return of function pointer from function
-void SemanticAnalyzer::check_function_pointer_return(ASTNode* node) {
-    if (!node || node->name != "ReturnStatement") return;
-    
-    if (!current_function_name.empty()) {
-        Symbol* func_sym = symbol_table->lookup(current_function_name);
-        if (func_sym && func_sym->isFunctionPointer()) {
-            // Function returns a function pointer
-            if (node->children.size() > 0) {
-                std::string ret_type = get_expression_type(node->children[0]);
-                
-                // Validate the returned value is compatible
-                if (node->children[0]->name == "Identifier") {
-                    Symbol* ret_sym = symbol_table->lookup(node->children[0]->lexeme);
-                    if (ret_sym && !ret_sym->isFunctionPointer() && !ret_sym->isFunction()) {
-                        reportError("ERROR: Cannot return non-function as function pointer", node);
-                    }
-                }
-            }
-        }
-    }
-}
-
-// 8. Check function pointer as parameter
-void SemanticAnalyzer::check_function_pointer_parameter(Symbol* param_sym, ASTNode* param_node) {
-    if (!param_sym || !param_node) return;
-    
-    if (param_sym->isFunctionPointer()) {
-        std::cout << "[INFO] Function parameter '" << param_sym->name 
-                  << "' is a function pointer" << std::endl;
-        
-        // Ensure it has proper parameter list
-        if (param_sym->parameters.empty()) {
-            report_warning("WARNING: Function pointer parameter '" + param_sym->name + 
-                          "' has no parameters specified", param_node);
-        }
-    }
-}
-
-// 9. Check function pointer dereferencing
-void SemanticAnalyzer::check_function_pointer_dereference(ASTNode* node) {
-    if (!node || node->name != "UnaryExpression") return;
-    
-    if (node->lexeme == "*" && node->children.size() > 0) {
-        if (node->children[0]->name == "Identifier") {
-            Symbol* sym = symbol_table->lookup(node->children[0]->lexeme);
-            
-            // Dereferencing a function pointer is only valid in function calls
-            if (sym && sym->isFunctionPointer()) {
-                // Check if parent is a function call
-                // This is typically okay: (*func_ptr)(args)
-                std::cout << "[INFO] Dereferencing function pointer '" << sym->name << "'" << std::endl;
-            }
-        }
-    }
-}
-
-// 10. Check void function pointer (uncommon but valid)
-void SemanticAnalyzer::check_void_function_pointer(Symbol* func_ptr_sym) {
-    if (!func_ptr_sym || !func_ptr_sym->isFunctionPointer()) return;
-    
-    if (func_ptr_sym->return_type == "void") {
-        std::cout << "[INFO] Function pointer '" << func_ptr_sym->name 
-                  << "' returns void" << std::endl;
-        // This is valid, just informational
-    }
-}
-
-// Add this function - it's completely missing!
 void SemanticAnalyzer::check_function_pointer_assignment(ASTNode* node) {
-    if (!node || node->name != "AssignmentExpression") return;
-    
-    // Assignment has at least 2 children: LHS and RHS
-    if (node->children.size() < 2) return;
+    if (!node || node->name != "AssignmentExpression" || node->children.size() < 2) return;
     
     ASTNode* lhs = node->children[0];
-    ASTNode* rhs = node->children[1];
     
-    if (!lhs || !rhs) return;
-    
-    // Check if LHS is a function pointer variable
     if (lhs->name == "Identifier") {
         Symbol* lhs_sym = symbol_table->find_symbol(lhs->lexeme);
         
-        if (lhs_sym && lhs_sym->isFunctionPointer()) {
-            std::cout << "[INFO] Assigning to function pointer '" << lhs_sym->name << "'" << std::endl;
-            
-            // Check RHS compatibility
-            if (rhs->name == "Identifier") {
-                Symbol* rhs_sym = symbol_table->find_symbol(rhs->lexeme);
-                
-                if (!rhs_sym) {
-                    reportError("Undefined identifier '" + rhs->lexeme + "' in assignment", rhs);
-                    return;
-                }
-                
-                // RHS must be a function or function pointer
-                if (!rhs_sym->isFunction() && !rhs_sym->isFunctionPointer()) {
-                    reportError("Cannot assign non-function to function pointer '" + 
-                               lhs_sym->name + "'", node);
-                    return;
-                }
-                
-                // Check return type compatibility
-                if (lhs_sym->return_type != rhs_sym->return_type) {
-                    reportError("Incompatible return types in function pointer assignment. Expected '" + 
-                               lhs_sym->return_type + "' but got '" + rhs_sym->return_type + "'", node);
-                }
-            }
-            else if (rhs->name == "UnaryExpression" && rhs->lexeme == "&") {
-                // Address-of operator: fp = &func
-                if (rhs->children.size() > 0 && rhs->children[0]->name == "Identifier") {
-                    Symbol* func_sym = symbol_table->find_symbol(rhs->children[0]->lexeme);
-                    
-                    if (func_sym && !func_sym->isFunction()) {
-                        reportError("Cannot take address of non-function '" + 
-                                   func_sym->name + "'", rhs);
-                    }
-                }
-            }
-            else if (rhs->lexeme == "NULL" || (rhs->name == "Constant" && rhs->lexeme == "0")) {
-                // NULL assignment is valid
-                std::cout << "[INFO] Assigning NULL to function pointer" << std::endl;
-            }
+        if (lhs_sym && lhs_sym->is_function_pointer) {
+            // Mark as initialized
+            lhs_sym->is_initialized = true;
+            std::cout << "[Function Pointer] " << lhs_sym->name << " initialized" << std::endl;
+        }
+    }
+}
+
+// 3. Simple function pointer call check
+void SemanticAnalyzer::check_function_pointer_call(ASTNode* node) {
+    if (!node || node->name != "FunctionCall" || node->children.empty()) return;
+    
+    ASTNode* func_node = node->children[0];
+    if (func_node->name == "Identifier") {
+        Symbol* sym = symbol_table->find_symbol(func_node->lexeme);
+        if (sym && sym->is_function_pointer && !sym->is_initialized) {
+            report_warning("Function pointer '" + func_node->lexeme + "' may be uninitialized", node);
         }
     }
 }

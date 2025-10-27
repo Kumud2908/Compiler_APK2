@@ -88,6 +88,8 @@ public:
     void generate_address_of(const std::string &var, const std::string &target) ;
      void generate_struct_load(const std::string &target, const std::string &base, const std::string &member);
     void generate_struct_store(const std::string &base, const std::string &member, const std::string &value);
+
+void generate_indirect_call(const std::string& func_ptr, int num_params, const std::string& result = "");
     
     // Print all instructions
     void print() const;

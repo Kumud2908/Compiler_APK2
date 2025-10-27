@@ -565,27 +565,45 @@ std::string CodeGenerator::generate_expression(ASTNode* node) {
     }
 
     // Function call
-    if (node->name == "FunctionCall") {
-        std::string func_name = generate_expression(node->children[0]);
-        int param_count = 0;
-        
-        if (node->children.size() > 1 && node->children[1]->name == "ArgumentList") {
-            for (auto arg : node->children[1]->children) {
-                std::string param = generate_expression(arg);
-                tac->generate_param(param);
-                param_count++;
-            }
-        }
-        
-        if (is_void_function(func_name)) {
-            tac->generate_call(func_name, param_count);
-            return "";
-        } else {
-            std::string result = tac->new_temp();
-            tac->generate_call(func_name, param_count, result);
-            return result;
+// Function call
+// Function call
+if (node->name == "FunctionCall") {
+    std::string func_name = generate_expression(node->children[0]);
+    int param_count = 0;
+    
+    if (node->children.size() > 1 && node->children[1]->name == "ArgumentList") {
+        for (auto arg : node->children[1]->children) {
+            std::string param = generate_expression(arg);
+            tac->generate_param(param);
+            param_count++;
         }
     }
+    
+    // SIMPLE FIX: Check if it's a direct function name or indirect
+    bool is_indirect_call = true;
+    
+    // Direct function calls: if child[0] is an Identifier and it's a known function
+    if (node->children[0]->name == "Identifier") {
+        std::string called_name = node->children[0]->lexeme;
+        if (function_return_types.find(called_name) != function_return_types.end() || 
+            called_name == "printf" || called_name == "scanf") {
+            is_indirect_call = false;
+        }
+    }
+    
+    if (is_void_function(func_name) && !is_indirect_call) {
+        tac->generate_call(func_name, param_count);
+        return "";
+    } else {
+        std::string result = tac->new_temp();
+        if (is_indirect_call) {
+            tac->generate_indirect_call(func_name, param_count, result);
+        } else {
+            tac->generate_call(func_name, param_count, result);
+        }
+        return result;
+    }
+}
 
     // Array subscript
     if (node->name == "ArraySubscript") {
