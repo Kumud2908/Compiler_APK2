@@ -16,7 +16,7 @@ TARGET = compiler
 # Object files
 OBJS = $(BUILD_DIR)/lexer.o $(BUILD_DIR)/parser.tab.o $(BUILD_DIR)/ast.o \
        $(BUILD_DIR)/symbol.o $(BUILD_DIR)/semantic.o $(BUILD_DIR)/tac.o \
-       $(BUILD_DIR)/codegen.o
+       $(BUILD_DIR)/codegen.o $(BUILD_DIR)/mips.o
 
 # Default target
 all: $(TARGET)
@@ -37,7 +37,7 @@ $(BUILD_DIR)/lexer.cpp: $(SRC_DIR)/lexer.l $(BUILD_DIR)/parser.tab.h
 
 # Compile object files
 $(BUILD_DIR)/lexer.o: $(BUILD_DIR)/lexer.cpp $(BUILD_DIR)/parser.tab.h $(SRC_DIR)/ast.h
-	$(CXX) $(CXXFLAGS) -I$(BUILD_DIR) -c $< -o $@
+	$(CXX) $(CXXFLAGS) -Wno-unused-function -I$(BUILD_DIR) -c $< -o $@
 
 $(BUILD_DIR)/parser.tab.o: $(BUILD_DIR)/parser.tab.cpp $(SRC_DIR)/ast.h $(SRC_DIR)/symbol.h \
                           $(SRC_DIR)/semantic.h $(SRC_DIR)/tac.h $(SRC_DIR)/codegen.h
@@ -56,6 +56,9 @@ $(BUILD_DIR)/tac.o: $(SRC_DIR)/tac.cpp $(SRC_DIR)/tac.h
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/codegen.o: $(SRC_DIR)/codegen.cpp $(SRC_DIR)/codegen.h $(SRC_DIR)/tac.h $(SRC_DIR)/ast.h
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/mips.o: $(SRC_DIR)/mips.cpp $(SRC_DIR)/mips.h $(SRC_DIR)/tac.h
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 # Clean target
