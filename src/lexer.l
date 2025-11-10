@@ -156,12 +156,6 @@ ID_PATTERN      {LETTER}{ALNUM}*
 "bool"          { add_token(yytext, "KEYWORD"); move(yytext); yylval.str = make_string(yytext); return BOOL; }
 "true"          { add_token(yytext, "BOOLEAN_CONSTANT"); move(yytext); yylval.str = make_string(yytext); return TRUE; }
 "false"         { add_token(yytext, "BOOLEAN_CONSTANT"); move(yytext); yylval.str = make_string(yytext); return FALSE; }
-"~"{ID_PATTERN} {
-    add_token(yytext, "DESTRUCTOR");
-    move(yytext);
-    yylval.str = make_string(yytext);
-    return DESTRUCTOR;
-}
 
 
 {ID_PATTERN}    { 

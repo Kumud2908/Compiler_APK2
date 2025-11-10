@@ -10,11 +10,17 @@
 #include <unordered_set>
 
 class CodeGenerator {
+public:
+    // Public members for MIPS generator to access
+    std::unordered_map<std::string, std::vector<int>> array_dims;
+    std::unordered_map<std::string, std::string> array_element_types; // array name -> element type (int, char, etc)
+    
 private:
     TACGenerator* tac;
 
     //  Track static variables
     std::unordered_set<std::string> static_variables;
+    std::unordered_set<std::string> address_taken_vars; // Variables whose address is taken
     std::string current_function_name;
 
 
@@ -22,11 +28,11 @@ private:
     // Store array dimensions: array name -> list of dimensions
     std::unordered_map<std::string, std::string> function_return_types;
     std::unordered_map<std::string, std::string> enum_constants;
-    std::unordered_map<std::string, std::vector<int>> array_dims;
     std::unordered_map<std::string, std::string> references;
 
 std::unordered_map<std::string, int> member_offsets;        // "TypeName.member" -> offset
 std::unordered_map<std::string, std::string> variable_types; // "var" -> "TypeName"
+std::unordered_map<std::string, std::string> member_types;   // "TypeName.member" -> member type
 
 void process_struct_union_definition(ASTNode* node, const std::string& type_name);
 
@@ -72,6 +78,9 @@ std::string generate_member_address(ASTNode* node);
     bool is_array(ASTNode* node);
     bool is_static_declaration(ASTNode* node);
     std::string get_static_variable_name(const std::string& var_name);
+    
+    // Address-taken variable tracking
+    void collect_address_taken_vars(ASTNode* node);
 
 public:
     CodeGenerator(TACGenerator* generator) 

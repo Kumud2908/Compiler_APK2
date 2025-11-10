@@ -84,7 +84,9 @@ public:
 
 
     void generate_load(const std::string &target, const std::string &addr);
+    void generate_load(const std::string &target, const std::string &addr, int element_size);
     void generate_store(const std::string& address, const std::string& value);
+    void generate_store(const std::string& address, const std::string& value, int element_size);
     void generate_address_of(const std::string &var, const std::string &target) ;
      void generate_struct_load(const std::string &target, const std::string &base, const std::string &member);
     void generate_struct_store(const std::string &base, const std::string &member, const std::string &value);

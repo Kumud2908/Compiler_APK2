@@ -86,8 +86,10 @@ private:
     void check_identifier_usage(ASTNode* node);
     void check_member_access(ASTNode* node);
     bool is_valid_type(const std::string& type);
+    bool contains_node(ASTNode* root, ASTNode* target);
     bool is_function_declaration(ASTNode* declaration_node);
     void process_function_declaration(ASTNode* node);
+    void extract_function_parameters_for_declaration(ASTNode* declarator, Symbol* func_sym);
     bool has_parameter_list(ASTNode* node);
     void extract_type_info(ASTNode* declarator, Symbol* symbol);
     void extract_pointer_info(ASTNode* declarator, Symbol* symbol);

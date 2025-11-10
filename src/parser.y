@@ -4,6 +4,7 @@
 #include "semantic.h"
 #include "tac.h"
 #include "codegen.h"
+#include "mips.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -674,6 +675,10 @@ initializer:
         $$ = create_node("InitializerList");
         $$->addChild($2);
     }
+    | LBRACE RBRACE {
+        $$ = create_node("InitializerList");
+        /* Empty initializer list */
+    }
 
     ;
 
@@ -739,9 +744,22 @@ labeled_statement:
         $$->addChild($2);
         $$->addChild($4);
     }
+    | CASE assignment_expression COLON declaration {
+        $$ = create_node("CaseStatement");
+        $$->addChild($2);
+        ASTNode* blockItem = create_node("BlockItem");
+        blockItem->addChild($4);
+        $$->addChild(blockItem);
+    }
     | DEFAULT COLON statement {
         $$ = create_node("DefaultStatement");
         $$->addChild($3);
+    }
+    | DEFAULT COLON declaration {
+        $$ = create_node("DefaultStatement");
+        ASTNode* blockItem = create_node("BlockItem");
+        blockItem->addChild($3);
+        $$->addChild(blockItem);
     }
     ;
 
@@ -1285,6 +1303,13 @@ int main(int argc, char* argv[]) {
                 tacFile.close();
                 printf("TAC file generated: output.tac\n");
             }
+            
+            // Generate MIPS assembly
+            printf("\n=== MIPS ASSEMBLY GENERATION ===\n");
+            MIPSGenerator mips_gen(tac_gen.get_instructions());
+            // Pass array metadata from codegen to MIPS generator
+            mips_gen.set_array_metadata(code_gen.array_dims, code_gen.array_element_types);
+            mips_gen.generate("output.s");
             
             printf("\n");
             printf("==================================================\n");

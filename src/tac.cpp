@@ -120,8 +120,21 @@ void TACGenerator::add_label(const std::string& label) {
 void TACGenerator::generate_load(const std::string &target, const std::string &addr) {
     add_instruction("*", addr, "", target);  
 }
+
+void TACGenerator::generate_load(const std::string &target, const std::string &addr, int element_size) {
+    TACInstruction instr("*", addr, "", target);
+    instr.comment = "size=" + std::to_string(element_size);
+    instructions.push_back(instr);
+}
+
 void TACGenerator::generate_store(const std::string& address, const std::string& value) {
     add_instruction("*=", value, "", address);
+}
+
+void TACGenerator::generate_store(const std::string& address, const std::string& value, int element_size) {
+    TACInstruction instr("*=", value, "", address);
+    instr.comment = "size=" + std::to_string(element_size);
+    instructions.push_back(instr);
 }
 
 void TACGenerator::generate_address_of(const std::string &var, const std::string &target) {

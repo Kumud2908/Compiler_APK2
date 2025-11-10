@@ -56,6 +56,11 @@ void SemanticAnalyzer::check_identifier_usage(ASTNode* node) {
     
     Symbol* symbol = symbol_table->find_symbol(identifier);
 
+    // Attach symbol to node for codegen to use
+    if (symbol) {
+        node->symbol = symbol;
+    }
+
     // ADD STANDARD LIBRARY CHECK
     if (!symbol && builtin_functions.find(identifier) != builtin_functions.end()) {
 
@@ -64,7 +69,77 @@ void SemanticAnalyzer::check_identifier_usage(ASTNode* node) {
 
     if (symbol) {
         if (symbol->symbol_type == "variable" && !symbol->is_initialized) {
-            report_warning("Variable '" + identifier + "' may be uninitialized", node);
+            // Don't warn for arrays - they can be initialized element by element
+            if (symbol->is_array) {
+                return;
+            }
+            
+            // Check if this identifier is being written to (not read from)
+            bool is_being_written = false;
+            ASTNode* parent = node->parent;
+            
+            // 1. Check if it's in a ForInitStatement (for loop initializer)
+            ASTNode* ancestor = parent;
+            while (ancestor) {
+                if (ancestor->name == "ForInitStatement") {
+                    is_being_written = true;
+                    break;
+                }
+                ancestor = ancestor->parent;
+            }
+            
+            // 2. Check if it's the operand of ++/-- (unary increment/decrement)
+            if (!is_being_written && parent && parent->name == "UnaryExpression") {
+                if (parent->lexeme == "++" || parent->lexeme == "--") {
+                    is_being_written = true;
+                }
+                // Also check for postfix increment/decrement (PostfixExpression)
+            }
+            if (!is_being_written && parent && parent->name == "PostfixExpression") {
+                if (parent->lexeme == "++" || parent->lexeme == "--") {
+                    is_being_written = true;
+                }
+            }
+            
+            // 3. Check if it's the LHS of any assignment (=, +=, -=, etc.)
+            if (!is_being_written && parent && parent->name == "AssignmentExpression") {
+                if (parent->children.size() >= 2 && parent->children[0] == node) {
+                    is_being_written = true;
+                }
+            }
+            
+            // 4. Check if it's part of an array subscript on the LHS of assignment
+            if (!is_being_written && parent && parent->name == "ArraySubscript") {
+                // Traverse up to find if this ArraySubscript is on LHS of assignment
+                ancestor = parent;
+                while (ancestor && ancestor->name == "ArraySubscript") {
+                    ancestor = ancestor->parent;
+                }
+                if (ancestor && ancestor->name == "AssignmentExpression" && 
+                    ancestor->children.size() >= 2) {
+                    ASTNode* lhs = ancestor->children[0];
+                    // Check if our node is part of the LHS subtree
+                    if (lhs == parent || contains_node(lhs, node)) {
+                        is_being_written = true;
+                    }
+                }
+            }
+            
+            // 5. Check if it's in a declaration with initializer
+            if (!is_being_written) {
+                ancestor = parent;
+                while (ancestor) {
+                    if (ancestor->name == "InitDeclarator" && ancestor->children.size() > 1) {
+                        is_being_written = true;
+                        break;
+                    }
+                    ancestor = ancestor->parent;
+                }
+            }
+            
+            if (!is_being_written) {
+                report_warning("Variable '" + identifier + "' may be uninitialized", node);
+            }
         }
 
     } else {
@@ -116,6 +191,18 @@ bool SemanticAnalyzer::is_valid_type(const std::string& type) {
         return true; // Allow enum types
     }
     
+    return false;
+}
+
+bool SemanticAnalyzer::contains_node(ASTNode* root, ASTNode* target) {
+    if (!root || !target) return false;
+    if (root == target) return true;
+    
+    for (auto child : root->children) {
+        if (contains_node(child, target)) {
+            return true;
+        }
+    }
     return false;
 }
 
@@ -385,6 +472,9 @@ void SemanticAnalyzer::process_declaration(ASTNode* node) {
                 if (!init_decl) continue;
                 
                 if (init_decl->name == "InitDeclarator") {
+                    // Check if this InitDeclarator has an initializer
+                    bool has_init = (init_decl->children.size() > 1);
+                    
                     for (size_t k = 0; k < init_decl->children.size(); k++) {
                         ASTNode* decl = init_decl->children[k];
                         if (!decl) continue;
@@ -393,7 +483,17 @@ void SemanticAnalyzer::process_declaration(ASTNode* node) {
                         if (decl->name == "DirectDeclarator" || decl->name == "ArrayDeclarator" || 
                             decl->name == "Declarator" || decl->name == "FunctionDeclarator"||decl->name == "ReferenceDeclarator") {
                             process_variable(decl, base_type);
+                            
+                            // Mark as initialized if has initializer
+                            if (has_init && decl->symbol) {
+                                decl->symbol->is_initialized = true;
+                            }
                         }
+                    }
+                    
+                    // Also check initialization compatibility
+                    if (has_init) {
+                        check_initialization(init_decl, base_type);
                     }
                 }
             }
@@ -1712,13 +1812,25 @@ void SemanticAnalyzer::process_function_declaration(ASTNode* node) {
         Symbol* func_sym = new Symbol(func_name, "function", return_type,
                                      symbol_table->get_current_scope_level(), node->line_number);
         
-        // Process parameters for type information ONLY
+        // Process parameters for type information and store them in function symbol
         for (size_t i = 0; i < node->children.size(); i++) {
             ASTNode* child = node->children[i];
             if (!child) continue;
             
             if (child->name == "InitDeclaratorList") {
-                process_function_parameters(child);  // Use the version that doesn't add to symbol table
+                // Find the declarator with parameters
+                for (size_t j = 0; j < child->children.size(); j++) {
+                    ASTNode* init_decl = child->children[j];
+                    if (!init_decl) continue;
+                    
+                    for (size_t k = 0; k < init_decl->children.size(); k++) {
+                        ASTNode* decl = init_decl->children[k];
+                        if (!decl) continue;
+                        
+                        // Extract parameters WITHOUT adding to symbol table (just for function signature)
+                        extract_function_parameters_for_declaration(decl, func_sym);
+                    }
+                }
             }
         }
         
@@ -1727,6 +1839,60 @@ void SemanticAnalyzer::process_function_declaration(ASTNode* node) {
             reportError("Failed to add function declaration '" + func_name + "'", node);
             delete func_sym;
         } 
+    }
+}
+
+void SemanticAnalyzer::extract_function_parameters_for_declaration(ASTNode* declarator, Symbol* func_sym) {
+    if (!declarator || !func_sym) return;
+    
+    // Navigate through declarator to find ParameterList
+    if (declarator->name == "Declarator" || declarator->name == "DirectDeclarator" ||
+        declarator->name == "FunctionDeclarator") {
+        for (size_t i = 0; i < declarator->children.size(); i++) {
+            ASTNode* child = declarator->children[i];
+            if (!child) continue;
+            
+            if (child->name == "ParameterList") {
+                // Process each parameter and add to function symbol
+                for (size_t j = 0; j < child->children.size(); j++) {
+                    ASTNode* param = child->children[j];
+                    if (!param || param->name != "ParameterDeclaration") continue;
+                    
+                    std::string param_type = "int";
+                    std::string param_name = "";
+                    
+                    // Extract parameter type
+                    for (size_t k = 0; k < param->children.size(); k++) {
+                        ASTNode* param_child = param->children[k];
+                        if (!param_child) continue;
+                        
+                        if (param_child->name == "DeclarationSpecifiers") {
+                            param_type = extract_base_type(param_child);
+                        }
+                        else if (param_child->name == "Declarator" || 
+                                 param_child->name == "DirectDeclarator" ||
+                                 param_child->name == "AbstractDeclarator") {
+                            param_name = extract_declarator_name(param_child);
+                            
+                            // Extract pointer info
+                            Symbol temp_sym(param_name.empty() ? "param" : param_name, 
+                                          "parameter", param_type, 0, 0);
+                            extract_type_info(param_child, &temp_sym);
+                            param_type = temp_sym.get_full_type();
+                        }
+                    }
+                    
+                    // Add parameter to function symbol
+                    Symbol* param_sym = new Symbol(param_name.empty() ? "param" : param_name, 
+                                                   "parameter", param_type, 0, 0);
+                    func_sym->add_parameter(param_sym);
+                }
+            }
+            else {
+                // Recursively search in children
+                extract_function_parameters_for_declaration(child, func_sym);
+            }
+        }
     }
 }
 
@@ -2171,6 +2337,23 @@ void SemanticAnalyzer::check_assignment(ASTNode* node) {
         Symbol* sym = symbol_table->find_symbol(var_name);
         if (sym) sym->is_initialized = true;
     }
+    // Also mark arrays as initialized when assigning to array elements
+    else if (node->children[0]->name == "ArraySubscript") {
+        ASTNode* array_node = node->children[0];
+        // Find the base array identifier
+        while (array_node && array_node->name == "ArraySubscript") {
+            if (array_node->children.size() > 0) {
+                array_node = array_node->children[0];
+            } else {
+                break;
+            }
+        }
+        if (array_node && array_node->name == "Identifier") {
+            std::string var_name = array_node->lexeme;
+            Symbol* sym = symbol_table->find_symbol(var_name);
+            if (sym) sym->is_initialized = true;
+        }
+    }
 }
 
 
@@ -2371,6 +2554,14 @@ void SemanticAnalyzer::check_unary_operation(ASTNode* node) {
         if (!is_numeric_type(operand_type) && !is_pointer_type(operand_type)) {
             reportError("Increment/decrement requires numeric or pointer type", node);
         }
+        // Mark variable as initialized after increment/decrement
+        if (node->children[0]->name == "Identifier") {
+            std::string var_name = node->children[0]->lexeme;
+            Symbol* sym = symbol_table->find_symbol(var_name);
+            if (sym) {
+                sym->is_initialized = true;
+            }
+        }
     }
 }
 
@@ -2428,14 +2619,11 @@ std::string SemanticAnalyzer::get_expression_type(ASTNode* expr) {
             if (sym->symbol_type == "enum_constant" && !sym->enum_type.empty()) {
                 return "enum " + sym->enum_type;  // "enum Color", not "int"
             }
+        // For arrays, return the full array type with dimensions
+        // This allows ArraySubscript handling to properly strip dimensions
+        // e.g., "int[2][3]" subscripted becomes "int[3]", then "int"
         if (sym->is_array) {
-            // Arrays decay to pointers in expressions (except sizeof, &)
-            std::string base_type = sym->base_type;
-            for (int i = 0; i < sym->pointer_level; i++) {
-                base_type += "*";
-            }
-            base_type += "*";  // Array becomes pointer
-            return base_type;
+            return sym->get_full_type();  // Returns "int[2][3]" format
         }
 
             if (sym->symbol_type == "function") {
@@ -2515,12 +2703,29 @@ std::string SemanticAnalyzer::get_expression_type(ASTNode* expr) {
             }
         }
         
-        // Handle direct array types like "int[3]"
+        // Handle direct array types like "int[3]" or "int[2][3]"
         if (array_type.find('[') != std::string::npos) {
-            // Extract base type before the brackets
-            size_t bracket_pos = array_type.find('[');
-            std::string base_type = array_type.substr(0, bracket_pos);
-            return base_type;
+            // Find the first bracket
+            size_t first_bracket = array_type.find('[');
+            // Find the matching closing bracket
+            size_t closing_bracket = array_type.find(']', first_bracket);
+            
+            if (closing_bracket != std::string::npos) {
+                // Extract base type before brackets
+                std::string base_type = array_type.substr(0, first_bracket);
+                
+                // Check if there are more dimensions after this one
+                if (closing_bracket + 1 < array_type.length() && array_type[closing_bracket + 1] == '[') {
+                    // Multi-dimensional: remove first dimension, keep the rest
+                    // e.g., "int[2][3]" becomes "int[3]"
+                    std::string remaining_dims = array_type.substr(closing_bracket + 1);
+                    return base_type + remaining_dims;
+                } else {
+                    // Single dimension remaining: just return base type
+                    // e.g., "int[3]" becomes "int"
+                    return base_type;
+                }
+            }
         }
         
         return "unknown";
@@ -2588,6 +2793,28 @@ if (expr->name == "MemberAccess" && expr->children.size() >= 2) {
         std::string right_type = expr->children.size() > 1 ? get_expression_type(expr->children[1]) : "unknown";
 
         if (expr->name == "AdditiveExpression" || expr->name == "MultiplicativeExpression") {
+            // Handle pointer arithmetic: ptr + int = ptr, ptr - int = ptr
+            if (expr->name == "AdditiveExpression") {
+                bool left_is_pointer = is_pointer_type(left_type);
+                bool right_is_pointer = is_pointer_type(right_type);
+                
+                if (left_is_pointer && !right_is_pointer) {
+                    // ptr + int or ptr - int = ptr
+                    return left_type;
+                } else if (!left_is_pointer && right_is_pointer) {
+                    // int + ptr = ptr (only for addition)
+                    if (expr->lexeme == "+") {
+                        return right_type;
+                    }
+                } else if (left_is_pointer && right_is_pointer) {
+                    // ptr - ptr = int (ptrdiff_t)
+                    if (expr->lexeme == "-") {
+                        return "int";
+                    }
+                }
+            }
+            
+            // Regular arithmetic
             if (left_type == "float" || right_type == "float") return "float";
             if (left_type == "double" || right_type == "double") return "double";
             return "int";
