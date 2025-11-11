@@ -29,6 +29,7 @@ private:
     std::unordered_map<std::string, int> array_sizes;         // Array name -> Total size
     std::unordered_map<std::string, std::vector<int>> array_dims; // Array -> dimensions
     std::unordered_map<std::string, std::string> array_element_types; // Array -> element type (int, char, etc)
+    std::unordered_map<std::string, std::string> variable_types; // Variable -> type (int, char, etc)
     
     // ===== Function Management =====
     std::string current_function;
@@ -49,6 +50,7 @@ private:
     
     // ===== Label Tracking =====
     std::unordered_set<std::string> defined_labels;
+    std::unordered_set<std::string> function_names;  // Function names for proper label handling
     
     // ===== Data Section =====
     std::vector<std::string> data_section;                     // Global/static data
@@ -62,6 +64,8 @@ public:
     void generate(const std::string& output_filename);
     void set_array_metadata(const std::unordered_map<std::string, std::vector<int>>& dims,
                             const std::unordered_map<std::string, std::string>& types);
+    void set_variable_types(const std::unordered_map<std::string, std::string>& types);
+    void set_function_names(const std::unordered_set<std::string>& names);
     
 private:
     // ===== Core Generation =====
@@ -111,7 +115,7 @@ private:
     // ===== Function Handling =====
     void emit_function_prologue(const std::string& func_name);
     void emit_function_epilogue();
-    void pass_arguments();
+    void pass_arguments(int num_params);
     void save_callee_saved_regs();
     void restore_callee_saved_regs();
     
@@ -131,11 +135,13 @@ private:
     void add_string_literal(const std::string& str);
     void add_global_variable(const std::string& var, int size);
     void add_static_variable(const std::string& var, int size);
+    std::string get_variable_type(const std::string& var);
     
     // ===== Special Instruction Handlers =====
     void handle_printf();
     void handle_scanf();
     void handle_syscall(const std::string& func_name);
+    void print_literal_string(const std::string& text);
 };
 
 #endif // MIPS_H

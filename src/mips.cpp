@@ -196,12 +196,12 @@ void MIPSGenerator::translate_instruction(const TACInstruction& instr) {
     
     // Handle labels (including function labels)
     if (!instr.label.empty()) {
-        // Check if it's a function label (like "main") or jump label (like "L0")
-        if (instr.label.length() > 0 && instr.label[0] != 'L') {
+        // Check if it's a function label using the function_names set
+        if (function_names.find(instr.label) != function_names.end()) {
             // Function label
             translate_function_label(instr);
         } else {
-            // Jump label
+            // Jump label (goto target or compiler-generated)
             translate_label(instr);
         }
         return;
@@ -236,7 +236,8 @@ void MIPSGenerator::translate_instruction(const TACInstruction& instr) {
     else if (instr.op == "<<" || instr.op == ">>") {
         translate_shift_op(instr);
     }
-    else if (instr.op == "~" || instr.op == "!" || instr.op == "uminus") {
+    else if (instr.op == "~" || instr.op == "!" || instr.op == "uminus" ||
+             instr.op == "unary-" || instr.op == "unary+" || instr.op == "unary!") {
         translate_unary_op(instr);
     }
     else if (instr.op == "<" || instr.op == ">" || instr.op == "<=" || 
@@ -261,6 +262,40 @@ void MIPSGenerator::translate_instruction(const TACInstruction& instr) {
     else if (instr.op == "return") {
         translate_return(instr);
     }
+    else if (instr.op == "return_struct_word") {
+        // Store a word of the struct being returned
+        // arg1 = temp with value, arg2 = word index (0, 1, 2...)
+        std::string src_reg = get_register(instr.arg1);
+        int word_index = std::stoi(instr.arg2);
+        // Use $v0, $v1 for first two words, then stack for more
+        if (word_index == 0) {
+            emit("move $v0, " + src_reg);
+        } else if (word_index == 1) {
+            emit("move $v1, " + src_reg);
+        } else {
+            // Store to stack (caller should allocate space)
+            int offset = (word_index - 2) * 4;
+            emit("sw " + src_reg + ", " + std::to_string(offset) + "($sp)");
+        }
+    }
+    else if (instr.op == "param_decl") {
+        // Parameter declaration - add to current_func_params in order
+        if (!instr.arg1.empty()) {
+            current_func_params.push_back(instr.arg1);
+            
+            // If this is a struct parameter by value, we need to initialize it from multiple args
+            // arg2 contains the type
+            if (!instr.arg2.empty() && instr.arg2.find("struct ") == 0 && instr.arg2.back() != '*') {
+                // This is a struct by value - it was passed as multiple words
+                // We need to reconstruct it as a local variable
+                std::string param_name = instr.arg1;
+                
+                // For now, mark it as a special case - it will be loaded from argument registers
+                // when first accessed (just like regular parameters)
+                emit_comment("Parameter " + param_name + " is struct " + instr.arg2);
+            }
+        }
+    }
     else if (instr.op == "[]" || instr.op == "[]=") {
         translate_array_access(instr);
     }
@@ -283,10 +318,64 @@ void MIPSGenerator::translate_function_label(const TACInstruction& instr) {
     spilled_to_stack.clear();  // Clear spill tracking
     stack_offset = 0;
     spill_offset = 0;  // Reset spill offset for new function
+    current_func_params.clear();  // Clear parameters
+    
+    // Detect function parameters: variables used before being assigned in this function
+    // Scan forward from current instruction to find parameters
+    if (func_name != "main") {
+        std::unordered_set<std::string> assigned;
+        for (size_t i = current_instruction_index + 1; i < tac_instructions.size(); i++) {
+            const auto& inst = tac_instructions[i];
+            // Stop at next function label
+            if (!inst.label.empty() && inst.op.empty()) break;
+            
+            // Check if arg1 is used before assigned
+            if (!inst.arg1.empty() && !is_number(inst.arg1) && !is_temporary(inst.arg1) && 
+                inst.arg1.front() != '"' && inst.arg1.front() != '\'') {
+                if (assigned.find(inst.arg1) == assigned.end()) {
+                    // Used before assigned - it's a parameter
+                    if (std::find(current_func_params.begin(), current_func_params.end(), inst.arg1) == current_func_params.end()) {
+                        current_func_params.push_back(inst.arg1);
+                    }
+                }
+            }
+            
+            // Check if arg2 is used before assigned
+            if (!inst.arg2.empty() && !is_number(inst.arg2) && !is_temporary(inst.arg2) && 
+                inst.arg2.front() != '"' && inst.arg2.front() != '\'') {
+                if (assigned.find(inst.arg2) == assigned.end()) {
+                    if (std::find(current_func_params.begin(), current_func_params.end(), inst.arg2) == current_func_params.end()) {
+                        current_func_params.push_back(inst.arg2);
+                    }
+                }
+            }
+            
+            // For pointer stores (*=), check the result as a parameter too
+            if (inst.op == "*=" && !inst.result.empty() && !is_number(inst.result) && 
+                !is_temporary(inst.result) && inst.result.front() != '"' && inst.result.front() != '\'') {
+                if (assigned.find(inst.result) == assigned.end()) {
+                    if (std::find(current_func_params.begin(), current_func_params.end(), inst.result) == current_func_params.end()) {
+                        current_func_params.push_back(inst.result);
+                    }
+                }
+            }
+            
+            // Mark result as assigned
+            if (!inst.result.empty() && !is_temporary(inst.result)) {
+                assigned.insert(inst.result);
+            }
+        }
+    }
     
     output_file << std::endl;
     emit_comment("Function: " + func_name);
-    output_file << func_name << ":" << std::endl;
+    
+    // Add prefix to user functions to avoid conflicts with MIPS instructions
+    std::string label_name = func_name;
+    if (func_name != "main") {
+        label_name = "func_" + func_name;
+    }
+    output_file << label_name << ":" << std::endl;
     
     // Allocate stack space for potential spills (reserve 256 bytes for spill area)
     if (func_name == "main") {
@@ -298,30 +387,56 @@ void MIPSGenerator::translate_function_label(const TACInstruction& instr) {
     if (func_name != "main") {
         emit_function_prologue(func_name);
         
-        // For now, we'll handle parameters in the binary operations
-        // by checking if the variable is a known parameter name
-        // This is a simplified approach - proper solution would track
-        // function signatures from semantic analysis
+        // Map parameters to saved stack locations
+        // We'll detect parameter usage and save them as needed
+        // For now, mark that $a0-$a3 are on stack at offsets
+        // This will be loaded on first use of parameter variables
     }
 }
 
 void MIPSGenerator::emit_function_prologue(const std::string& func_name) {
     emit_comment("Function prologue");
     
-    // Allocate stack frame (will adjust later if needed)
-    emit("addi $sp, $sp, -32");  // Reserve space
-    emit("sw $ra, 28($sp)");     // Save return address
-    emit("sw $fp, 24($sp)");     // Save frame pointer
-    emit("addi $fp, $sp, 32");   // Set new frame pointer
+    // Allocate stack frame - need more space for callee-saved registers
+    emit("addi $sp, $sp, -56");  // 32 + 24 for $s0-$s7
+    emit("sw $ra, 52($sp)");     // Save return address
+    emit("sw $fp, 48($sp)");     // Save frame pointer
+    emit("addi $fp, $sp, 56");   // Set new frame pointer
     
-    frame_size = 32;
+    // Save parameter registers $a0-$a3 (in case function is recursive)
+    emit("sw $a0, 44($sp)");
+    emit("sw $a1, 40($sp)");
+    emit("sw $a2, 36($sp)");
+    emit("sw $a3, 32($sp)");
+    
+    // Save callee-saved registers $s0-$s7 (they may be used and must be preserved)
+    emit("sw $s0, 28($sp)");
+    emit("sw $s1, 24($sp)");
+    emit("sw $s2, 20($sp)");
+    emit("sw $s3, 16($sp)");
+    emit("sw $s4, 12($sp)");
+    emit("sw $s5, 8($sp)");
+    emit("sw $s6, 4($sp)");
+    emit("sw $s7, 0($sp)");
+    
+    frame_size = 56;
 }
 
 void MIPSGenerator::emit_function_epilogue() {
     emit_comment("Function epilogue");
-    emit("lw $fp, 24($sp)");
-    emit("lw $ra, 28($sp)");
-    emit("addi $sp, $sp, 32");
+    // Restore callee-saved registers
+    emit("lw $s0, 28($sp)");
+    emit("lw $s1, 24($sp)");
+    emit("lw $s2, 20($sp)");
+    emit("lw $s3, 16($sp)");
+    emit("lw $s4, 12($sp)");
+    emit("lw $s5, 8($sp)");
+    emit("lw $s6, 4($sp)");
+    emit("lw $s7, 0($sp)");
+    
+    emit("lw $fp, 48($sp)");
+    emit("lw $ra, 52($sp)");
+    emit("addi $sp, $sp, 56");
     emit("jr $ra");
 }
 
@@ -344,9 +459,24 @@ void MIPSGenerator::translate_assignment(const TACInstruction& instr) {
         int bits = *reinterpret_cast<int*>(&f);
         emit("li " + dest_reg + ", " + std::to_string(bits));
     } else {
-        // Variable assignment
+        // Variable assignment - may need type conversion
         std::string src_reg = get_register(instr.arg1);
+        std::string dest_type = get_variable_type(instr.result);
+        std::string src_type = get_variable_type(instr.arg1);
+        
         emit("move " + dest_reg + ", " + src_reg);
+        
+        // Handle type conversions
+        if (dest_type == "char" && src_type != "char") {
+            // Truncate to 8 bits: mask with 0xFF
+            emit_comment("Truncate int to char");
+            emit("andi " + dest_reg + ", " + dest_reg + ", 0xFF");
+        } else if (dest_type != "char" && src_type == "char") {
+            // Sign extend from 8 bits: shift left 24, shift right 24 (arithmetic)
+            emit_comment("Sign extend char to int");
+            emit("sll " + dest_reg + ", " + dest_reg + ", 24");
+            emit("sra " + dest_reg + ", " + dest_reg + ", 24");
+        }
     }
 }
 
@@ -471,7 +601,15 @@ void MIPSGenerator::translate_shift_op(const TACInstruction& instr) {
 
 void MIPSGenerator::translate_unary_op(const TACInstruction& instr) {
     std::string dest_reg = get_register(instr.result);
-    std::string src_reg = get_register(instr.arg1);
+    
+    // Handle operand - could be number or variable
+    std::string src_reg;
+    if (is_number(instr.arg1)) {
+        src_reg = allocate_temp_register();
+        emit("li " + src_reg + ", " + instr.arg1);
+    } else {
+        src_reg = get_register(instr.arg1);
+    }
     
     if (instr.op == "~") {
         emit("nor " + dest_reg + ", " + src_reg + ", $zero");
@@ -479,8 +617,11 @@ void MIPSGenerator::translate_unary_op(const TACInstruction& instr) {
     else if (instr.op == "!") {
         emit("seq " + dest_reg + ", " + src_reg + ", $zero");
     }
-    else if (instr.op == "uminus") {
+    else if (instr.op == "unary-" || instr.op == "uminus") {
         emit("sub " + dest_reg + ", $zero, " + src_reg);
+    }
+    else if (instr.op == "unary+") {
+        emit("move " + dest_reg + ", " + src_reg);
     }
     else if (instr.op == "++") {
         emit("addi " + dest_reg + ", " + src_reg + ", 1");
@@ -581,6 +722,9 @@ void MIPSGenerator::translate_param(const TACInstruction& instr) {
     if (is_number(param_val)) {
         // For immediate values, just store the value itself
         param_regs.push_back("");  // Empty string means use immediate
+    } else if (is_char_literal(param_val)) {
+        // Character literal - store the value itself
+        param_regs.push_back("");  // Empty string means use immediate
     } else if (param_val.front() == '"') {
         // String literal - load its address
         auto it = string_literals.find(param_val);
@@ -594,6 +738,21 @@ void MIPSGenerator::translate_param(const TACInstruction& instr) {
             // Fallback if not found
             param_regs.push_back("");
         }
+    } else if (array_dims.find(param_val) != array_dims.end()) {
+        // Array parameter - pass address of array
+        std::string save_reg = allocate_saved_register();
+        if (var_offsets.find(param_val) != var_offsets.end()) {
+            // Stack-allocated array
+            int offset = var_offsets[param_val];
+            emit("addi " + save_reg + ", $sp, " + std::to_string(offset));
+            emit_comment("Save array address " + param_val + " to " + save_reg);
+        } else if (global_vars.find(param_val) != global_vars.end() || 
+                   static_vars.find(param_val) != static_vars.end()) {
+            // Global/static array
+            emit("la " + save_reg + ", " + param_val);
+            emit_comment("Save array address " + param_val + " to " + save_reg);
+        }
+        param_regs.push_back(save_reg);
     } else {
         src_reg = get_register(param_val);
         // Allocate a saved register to hold this parameter
@@ -607,6 +766,7 @@ void MIPSGenerator::translate_param(const TACInstruction& instr) {
 void MIPSGenerator::translate_call(const TACInstruction& instr) {
     // result = call func, arg_count
     std::string func_name = instr.arg1;
+    int num_params = std::stoi(instr.arg2);  // Number of parameters to use
     
     emit_comment("Call " + func_name);
     
@@ -618,31 +778,73 @@ void MIPSGenerator::translate_call(const TACInstruction& instr) {
         handle_scanf();
     }
     else {
-        // Pass arguments
-        pass_arguments();
+        // Pass only the LAST num_params arguments (ignore earlier accumulated ones)
+        pass_arguments(num_params);
         
-        // Call function
-        emit("jal " + func_name);
+        // Call function - add prefix for user functions
+        std::string call_label = func_name;
+        if (func_name != "main" && func_name != "printf" && func_name != "scanf") {
+            call_label = "func_" + func_name;
+        }
+        emit("jal " + call_label);
         
-        // Get return value if needed
+        // After function call, invalidate temporary register mappings
+        // since $t registers are caller-saved and may be modified
+        std::vector<std::string> to_remove;
+        for (const auto& entry : var_to_reg) {
+            if (entry.second[1] == 't') {  // $t0-$t9 registers
+                to_remove.push_back(entry.first);
+            }
+        }
+        for (const auto& var : to_remove) {
+            std::string reg = var_to_reg[var];
+            var_to_reg.erase(var);
+            reg_contents.erase(reg);
+        }
+        
+        // Store return value - use saved register to preserve across future calls
         if (!instr.result.empty()) {
-            std::string dest_reg = get_register(instr.result);
-            emit("move " + dest_reg + ", $v0");
+            std::string result_reg = allocate_saved_register();
+            var_to_reg[instr.result] = result_reg;
+            reg_contents[result_reg] = instr.result;
+            emit("move " + result_reg + ", $v0");
+        }
+        
+        // Remove the params that were just used (last num_params)
+        if (num_params > 0 && param_list.size() >= (size_t)num_params) {
+            param_list.erase(param_list.end() - num_params, param_list.end());
+            if (param_regs.size() >= (size_t)num_params) {
+                param_regs.erase(param_regs.end() - num_params, param_regs.end());
+            }
         }
     }
     
-    // Clear parameter list
-    param_list.clear();
-    param_regs.clear();
+    // For printf/scanf, also remove their used params
+    if (func_name == "printf" || func_name == "scanf") {
+        if (num_params > 0 && param_list.size() >= (size_t)num_params) {
+            param_list.erase(param_list.end() - num_params, param_list.end());
+            if (param_regs.size() >= (size_t)num_params) {
+                param_regs.erase(param_regs.end() - num_params, param_regs.end());
+            }
+        }
+    }
 }
 
-void MIPSGenerator::pass_arguments() {
+void MIPSGenerator::pass_arguments(int num_params) {
+    // Only use the LAST num_params from param_list
+    int start_index = param_list.size() > (size_t)num_params ? param_list.size() - num_params : 0;
+    
     // Pass up to 4 arguments in $a0-$a3
-    for (size_t i = 0; i < param_list.size() && i < 4; i++) {
-        std::string arg_reg = "$a" + std::to_string(i);
+    for (size_t i = start_index; i < param_list.size() && (i - start_index) < 4; i++) {
+        std::string arg_reg = "$a" + std::to_string(i - start_index);
         
         if (is_number(param_list[i])) {
             emit("li " + arg_reg + ", " + param_list[i]);
+        }
+        else if (is_char_literal(param_list[i])) {
+            // Character literal - load its ASCII value
+            int char_val = get_char_value(param_list[i]);
+            emit("li " + arg_reg + ", " + std::to_string(char_val));
         }
         else if (param_list[i].front() == '"') {
             // String literal
@@ -659,14 +861,72 @@ void MIPSGenerator::pass_arguments() {
     // TODO: Handle more than 4 arguments
 }
 
+void MIPSGenerator::print_literal_string(const std::string& text) {
+    // Print literal text character by character, handling escape sequences
+    for (size_t i = 0; i < text.length(); i++) {
+        char c = text[i];
+        
+        // Check for escape sequences
+        if (c == '\\' && i + 1 < text.length()) {
+            char next = text[i + 1];
+            if (next == 'n') {
+                // Print newline
+                emit("li $v0, 11");  // print_char
+                emit("li $a0, 10");  // newline character
+                emit("syscall");
+                i++;  // Skip the 'n'
+                continue;
+            } else if (next == 't') {
+                // Print tab
+                emit("li $v0, 11");  // print_char
+                emit("li $a0, 9");   // tab character
+                emit("syscall");
+                i++;  // Skip the 't'
+                continue;
+            } else if (next == '\\') {
+                // Print backslash
+                emit("li $v0, 11");  // print_char
+                emit("li $a0, 92");  // backslash character
+                emit("syscall");
+                i++;  // Skip the second backslash
+                continue;
+            }
+        }
+        
+        // Print regular character
+        emit("li $v0, 11");  // syscall for print_char
+        emit("li $a0, " + std::to_string(static_cast<int>(c)));
+        emit("syscall");
+    }
+}
+
 void MIPSGenerator::handle_printf() {
     // For SPIM, use syscalls
     if (param_list.empty()) return;
     
-    std::string format = param_list[0];
+    // Format string should be the FIRST of the params for this printf call
+    // We need to figure out how many params this printf has
+    // For now, assume format string is at param_list[0] if it's a string literal
+    std::string format;
+    int format_index = -1;
     
-    // Count how many %d, %s, %c format specifiers
-    int param_index = 1;  // Start from param_list[1] (after format string)
+    // Find the format string (should be a string literal starting with ")
+    for (int i = param_list.size() - 1; i >= 0; i--) {
+        if (!param_list[i].empty() && param_list[i].front() == '"') {
+            format = param_list[i];
+            format_index = i;
+            break;
+        }
+    }
+    
+    if (format_index < 0) return;  // No format string found
+    
+    // Remove surrounding quotes from format string
+    if (format.front() == '"' && format.back() == '"') {
+        format = format.substr(1, format.length() - 2);
+    }
+    
+    int param_index = format_index + 1;  // Start from after format string
     
     // Parse format string and print accordingly
     size_t pos = 0;
@@ -675,16 +935,18 @@ void MIPSGenerator::handle_printf() {
         size_t percent_pos = format.find('%', pos);
         
         if (percent_pos == std::string::npos) {
-            // No more format specifiers, print any remaining literal text
+            // No more format specifiers, print remaining literal text
             if (pos < format.length()) {
                 std::string remaining = format.substr(pos);
-                if (remaining.find("\\n") != std::string::npos) {
-                    emit("li $v0, 4");
-                    emit("la $a0, newline");
-                    emit("syscall");
-                }
+                print_literal_string(remaining);
             }
             break;
+        }
+        
+        // Print literal text before this format specifier
+        if (percent_pos > pos) {
+            std::string literal = format.substr(pos, percent_pos - pos);
+            print_literal_string(literal);
         }
         
         // Check what comes after %
@@ -699,6 +961,9 @@ void MIPSGenerator::handle_printf() {
                 if (param_index < param_list.size()) {
                     if (is_number(param_list[param_index])) {
                         emit("li $a0, " + param_list[param_index]);
+                    } else if (is_char_literal(param_list[param_index])) {
+                        // Character literal - print its ASCII value
+                        emit("li $a0, " + std::to_string(get_char_value(param_list[param_index])));
                     } else {
                         // Use the saved register from param_regs
                         if (param_index < param_regs.size() && !param_regs[param_index].empty()) {
@@ -712,13 +977,6 @@ void MIPSGenerator::handle_printf() {
                     param_index++;
                 }
                 emit("syscall");
-                
-                // Print space if there's more to print
-                if (param_index < param_list.size() && format.find("%d", percent_pos + 2) != std::string::npos) {
-                    emit("li $v0, 11");  // print_char
-                    emit("li $a0, 32");  // space
-                    emit("syscall");
-                }
                 
                 pos = percent_pos + 2;
             }
@@ -745,6 +1003,8 @@ void MIPSGenerator::handle_printf() {
                 if (param_index < param_list.size()) {
                     if (is_number(param_list[param_index])) {
                         emit("li $a0, " + param_list[param_index]);
+                    } else if (is_char_literal(param_list[param_index])) {
+                        emit("li $a0, " + std::to_string(get_char_value(param_list[param_index])));
                     } else {
                         if (param_index < param_regs.size() && !param_regs[param_index].empty()) {
                             emit("move $a0, " + param_regs[param_index]);
@@ -765,42 +1025,106 @@ void MIPSGenerator::handle_printf() {
             break;
         }
     }
-    
-    // Print newline if in format
-    if (format.find("\\n") != std::string::npos) {
-        emit("li $v0, 4");
-        emit("la $a0, newline");
-        emit("syscall");
-    }
 }
 
 void MIPSGenerator::handle_scanf() {
-    // For SPIM scanf
+    // For SPIM scanf - reads input and stores to addresses
     if (param_list.size() < 2) return;
     
     std::string format = param_list[0];
+    // Remove surrounding quotes from format string
+    if (format.front() == '"' && format.back() == '"') {
+        format = format.substr(1, format.length() - 2);
+    }
     
-    if (format.find("%d") != std::string::npos) {
-        emit_comment("Read integer");
-        emit("li $v0, 5");  // Syscall for read_int
-        emit("syscall");
+    int param_index = 1;  // Start from param_list[1] (after format string)
+    
+    // Parse format string for input specifiers
+    size_t pos = 0;
+    while (pos < format.length() && param_index < param_list.size()) {
+        size_t percent_pos = format.find('%', pos);
         
-        // Store result
-        if (param_list.size() > 1) {
-            std::string var = param_list[1];
-            // Remove & if present
-            if (var.front() == '&') {
-                var = var.substr(1);
+        if (percent_pos == std::string::npos) {
+            break;
+        }
+        
+        // Check what comes after %
+        if (percent_pos + 1 < format.length()) {
+            char spec = format[percent_pos + 1];
+            
+            if (spec == 'd') {
+                // Read integer
+                emit_comment("Read integer from user");
+                emit("li $v0, 5");  // Syscall for read_int
+                emit("syscall");
+                
+                // Store to address - param should be a register holding address
+                if (param_index < param_regs.size() && !param_regs[param_index].empty()) {
+                    emit("sw $v0, 0(" + param_regs[param_index] + ")");
+                } else if (param_index < param_list.size()) {
+                    // Fallback - shouldn't happen with proper param handling
+                    std::string addr_reg = get_register(param_list[param_index]);
+                    emit("sw $v0, 0(" + addr_reg + ")");
+                }
+                param_index++;
+                pos = percent_pos + 2;
             }
-            std::string dest_reg = get_register(var);
-            emit("move " + dest_reg + ", $v0");
+            else if (spec == 'c') {
+                // Read character
+                emit_comment("Read character from user");
+                emit("li $v0, 12");  // Syscall for read_char
+                emit("syscall");
+                
+                // Store to address
+                if (param_index < param_regs.size() && !param_regs[param_index].empty()) {
+                    emit("sb $v0, 0(" + param_regs[param_index] + ")");
+                } else if (param_index < param_list.size()) {
+                    std::string addr_reg = get_register(param_list[param_index]);
+                    emit("sb $v0, 0(" + addr_reg + ")");
+                }
+                param_index++;
+                pos = percent_pos + 2;
+            }
+            else if (spec == 's') {
+                // Read string - more complex, need buffer address and max length
+                emit_comment("Read string from user");
+                emit("li $v0, 8");  // Syscall for read_string
+                
+                // Address in $a0, max length in $a1
+                if (param_index < param_regs.size() && !param_regs[param_index].empty()) {
+                    emit("move $a0, " + param_regs[param_index]);
+                } else if (param_index < param_list.size()) {
+                    std::string addr_reg = get_register(param_list[param_index]);
+                    emit("move $a0, " + addr_reg);
+                }
+                emit("li $a1, 256");  // Max 256 characters
+                emit("syscall");
+                
+                param_index++;
+                pos = percent_pos + 2;
+            }
+            else {
+                pos = percent_pos + 1;
+            }
+        } else {
+            break;
         }
     }
 }
 
 void MIPSGenerator::translate_return(const TACInstruction& instr) {
     if (current_function == "main") {
-        // For main function in SPIM, restore stack and exit
+        // For main function in SPIM, put return value in $v0 first, then exit
+        if (!instr.arg1.empty()) {
+            if (is_number(instr.arg1)) {
+                emit("li $v0, " + instr.arg1);
+            } else if (is_char_literal(instr.arg1)) {
+                emit("li $v0, " + std::to_string(get_char_value(instr.arg1)));
+            } else {
+                std::string src_reg = get_register(instr.arg1);
+                emit("move $v0, " + src_reg);
+            }
+        }
         emit_comment("Restore stack and exit program");
         emit("addi $sp, $sp, 256");  // Restore stack pointer
         emit("li $v0, 10");  // Exit syscall
@@ -810,6 +1134,8 @@ void MIPSGenerator::translate_return(const TACInstruction& instr) {
         if (!instr.arg1.empty()) {
             if (is_number(instr.arg1)) {
                 emit("li $v0, " + instr.arg1);
+            } else if (is_char_literal(instr.arg1)) {
+                emit("li $v0, " + std::to_string(get_char_value(instr.arg1)));
             } else {
                 std::string src_reg = get_register(instr.arg1);
                 emit("move $v0, " + src_reg);
@@ -978,12 +1304,32 @@ void MIPSGenerator::translate_address_of(const TACInstruction& instr) {
     std::string result_reg = get_register(instr.result);
     std::string var_name = instr.arg1;
     
+    // Check if this is a stack variable (local variable)
+    if (var_offsets.find(var_name) != var_offsets.end()) {
+        // It's a local variable on the stack
+        int offset = var_offsets[var_name];
+        // Load address: result = $sp + offset
+        if (offset == 0) {
+            emit("move " + result_reg + ", $sp");
+        } else if (offset > 0) {
+            emit("addi " + result_reg + ", $sp, " + std::to_string(offset));
+        } else {
+            emit("addi " + result_reg + ", $sp, " + std::to_string(offset));
+        }
+        return;
+    }
+    
+    // Check if this is a known array with size already calculated
+    int alloc_size = 4; // default for scalar variables
+    if (array_sizes.find(var_name) != array_sizes.end()) {
+        alloc_size = array_sizes[var_name];
+    }
+    
     // Allocate the array/variable in data section if not already done
-    if (array_sizes.find(var_name) == array_sizes.end()) {
-        // Treat as array - allocate space in data section
-        // Default size: 100 words (400 bytes) for unspecified arrays
-        array_sizes[var_name] = 400;
-        add_global_variable(var_name, 400);
+    // (for global/static variables only)
+    if (global_vars.find(var_name) == global_vars.end() && 
+        static_vars.find(var_name) == static_vars.end()) {
+        add_global_variable(var_name, alloc_size);
     }
     
     // Load address of the array/variable
@@ -1069,30 +1415,25 @@ std::string MIPSGenerator::get_register(const std::string& var) {
         return reg;
     }
     
-    // For non-main functions, assign argument registers to first few NON-TEMPORARY variables
-    if (current_function != "main" && in_function) {
-        // Count non-temporary variables assigned so far
-        int param_count = 0;
-        for (const auto& entry : var_to_reg) {
-            if (!is_temporary(entry.first) && entry.second[1] == 'a') {
-                param_count++;
+    // Check if this variable is a function parameter by checking current_func_params
+    if (current_function != "main" && in_function && !is_temporary(var)) {
+        // Check if var is in current_func_params list
+        auto it = std::find(current_func_params.begin(), current_func_params.end(), var);
+        if (it != current_func_params.end()) {
+            // This is a parameter - load from saved stack location
+            int param_index = std::distance(current_func_params.begin(), it);
+            if (param_index < 4) {
+                std::string reg = allocate_temp_register();
+                var_to_reg[var] = reg;
+                reg_contents[reg] = var;
+                
+                // Load from saved parameter location on stack (adjusted for new frame size)
+                int stack_offset = 44 - (param_index * 4);  // $a0 at 44($sp), $a1 at 40($sp), etc.
+                emit_comment("Loading parameter " + var + " from stack");
+                emit("lw " + reg + ", " + std::to_string(stack_offset) + "($sp)");
+                
+                return reg;
             }
-        }
-        
-        // Assign to argument registers for first 4 non-temporary variables
-        if (param_count < 4) {
-            std::string arg_reg = "$a" + std::to_string(param_count);
-            var_to_reg[var] = arg_reg;
-            reg_contents[arg_reg] = var;  // Track what's in this register
-            
-            // If this variable was spilled to stack, reload it
-            if (was_spilled) {
-                emit_comment("Reloading " + var + " from stack");
-                emit("lw " + arg_reg + ", " + std::to_string(spill_stack_offset) + "($sp)");
-                spilled_to_stack.erase(var);  // No longer spilled
-            }
-            
-            return arg_reg;
         }
     }
     
@@ -1310,6 +1651,10 @@ void MIPSGenerator::add_global_variable(const std::string& var, int size) {
         // Add to data section
         std::string data_line = var + ": .space " + std::to_string(size);
         data_section.push_back(data_line);
+        // Add alignment after each variable to ensure proper alignment
+        if (size % 4 != 0) {
+            data_section.push_back(".align 2");
+        }
     }
 }
 
@@ -1345,5 +1690,34 @@ void MIPSGenerator::set_array_metadata(const std::unordered_map<std::string, std
         
         // Total size in bytes
         array_sizes[array_name] = total_elements * element_size;
+        
+        // Pre-allocate global arrays in data section
+        // Arrays will be global if they're not allocated on stack (checked later)
+        // For now, add all arrays to data section; local ones will be allocated on stack instead
+        if (global_vars.find(array_name) == global_vars.end() && 
+            static_vars.find(array_name) == static_vars.end()) {
+            add_global_variable(array_name, total_elements * element_size);
+        }
     }
 }
+
+void MIPSGenerator::set_variable_types(const std::unordered_map<std::string, std::string>& types) {
+    this->variable_types = types;
+}
+
+void MIPSGenerator::set_function_names(const std::unordered_set<std::string>& names) {
+    this->function_names = names;
+}
+
+std::string MIPSGenerator::get_variable_type(const std::string& var) {
+    if (variable_types.find(var) != variable_types.end()) {
+        return variable_types[var];
+    }
+    // Check if it's an array element type
+    if (array_element_types.find(var) != array_element_types.end()) {
+        return array_element_types[var];
+    }
+    return "int"; // default
+}
+
+

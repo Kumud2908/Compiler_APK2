@@ -493,7 +493,12 @@ void SemanticAnalyzer::process_declaration(ASTNode* node) {
                     
                     // Also check initialization compatibility
                     if (has_init) {
-                        check_initialization(init_decl, base_type);
+                        // Get the full type including pointer level from the symbol
+                        std::string full_type = base_type;
+                        if (init_decl->children.size() > 0 && init_decl->children[0]->symbol) {
+                            full_type = init_decl->children[0]->symbol->get_full_type();
+                        }
+                        check_initialization(init_decl, full_type);
                     }
                 }
             }
@@ -604,6 +609,24 @@ void SemanticAnalyzer::process_function(ASTNode* node) {
         }
     }
     node->symbol = func_sym;
+    
+    // Check if this is a function definition (has CompoundStatement body)
+    bool has_body = false;
+    for (size_t i = 0; i < node->children.size(); i++) {
+        if (node->children[i] && node->children[i]->name == "CompoundStatement") {
+            has_body = true;
+            break;
+        }
+    }
+    
+    // If this is a definition and parameters already exist (from forward declaration),
+    // clear them so we don't add duplicates
+    if (has_body && !func_sym->parameters.empty()) {
+        for (Symbol* param : func_sym->parameters) {
+            delete param;
+        }
+        func_sym->parameters.clear();
+    }
     
     // NOW enter function scope for parameters
     symbol_table->enter_scope();
@@ -738,6 +761,7 @@ void SemanticAnalyzer::process_function_parameters(ASTNode* declarator) {
 
 void SemanticAnalyzer::process_function_parameters(ASTNode* declarator, Symbol* func_sym) {
     if (!declarator) return;
+    
     if (declarator->name == "ReferenceDeclarator") {
         for (size_t i = 0; i < declarator->children.size(); i++) {
             ASTNode* child = declarator->children[i];
@@ -756,6 +780,9 @@ void SemanticAnalyzer::process_function_parameters(ASTNode* declarator, Symbol* 
         if (!child) continue;
         
         if (child->name == "DirectDeclarator") {
+            process_function_parameters(child, func_sym);
+        }
+        else if (child->name == "FunctionDeclarator") {
             process_function_parameters(child, func_sym);
         }
         else if (child->name == "ParameterList") {
@@ -1199,6 +1226,26 @@ std::vector<std::pair<std::string, int>> SemanticAnalyzer::extract_enumerators(A
                     enumerator_value = next_value;
                 }
             }
+            // Handle unary expressions like -1, +5
+            else if (child->name == "UnaryExpression") {
+                if ((child->lexeme == "-" || child->lexeme == "uminus") && 
+                    !child->children.empty() && 
+                    child->children[0]->name == "Constant") {
+                    try {
+                        enumerator_value = -std::stoi(child->children[0]->lexeme);
+                    } catch (const std::exception& e) {
+                        enumerator_value = next_value;
+                    }
+                } else if (child->lexeme == "+" && 
+                           !child->children.empty() && 
+                           child->children[0]->name == "Constant") {
+                    try {
+                        enumerator_value = std::stoi(child->children[0]->lexeme);
+                    } catch (const std::exception& e) {
+                        enumerator_value = next_value;
+                    }
+                }
+            }
         }
         
         enumerators.push_back(std::make_pair(enumerator_name, enumerator_value));
@@ -1431,13 +1478,12 @@ void SemanticAnalyzer::process_parameter(ASTNode* param_decl, Symbol* func_sym) 
             reportError("Parameter '" + param_name + "' already declared", param_decl);
             declarator_node->symbol = nullptr;
             delete param_sym;
-        } 
+        }
         // Add to function parameter list with FULL type
         if (func_sym) {
             Symbol* func_param_sym = new Symbol(param_name, "parameter", full_type,
                                               func_sym->scope_level, 0);
             func_sym->add_parameter(func_param_sym);
-
         }
     }
 }
@@ -1887,6 +1933,7 @@ void SemanticAnalyzer::extract_function_parameters_for_declaration(ASTNode* decl
                                                    "parameter", param_type, 0, 0);
                     func_sym->add_parameter(param_sym);
                 }
+                // Don't recurse into ParameterList children - we already processed them above
             }
             else {
                 // Recursively search in children
@@ -2541,7 +2588,9 @@ void SemanticAnalyzer::check_unary_operation(ASTNode* node) {
     std::string op = node->lexeme;
 
     if (op == "*") {
-        if (!is_pointer_type(operand_type)) {
+        // Resolve typedef before checking if it's a pointer
+        std::string resolved_type = resolve_typedef(operand_type);
+        if (!is_pointer_type(resolved_type)) {
             reportError("Cannot dereference non-pointer type '" + operand_type + "'", node);
         }
     } else if (op == "&") {
@@ -2736,9 +2785,23 @@ std::string SemanticAnalyzer::get_expression_type(ASTNode* expr) {
 if (expr->name == "MemberAccess" && expr->children.size() >= 2) {
     std::string struct_type = get_expression_type(expr->children[0]);
     std::string member_name = expr->children[1]->lexeme;
+    std::string operator_used = expr->lexeme;  // "." or "->"
     
     // Resolve typedef
     std::string resolved_type = resolve_typedef(struct_type);
+    
+    // If using -> operator, dereference the pointer type
+    if (operator_used == "->" && is_pointer_type(resolved_type)) {
+        // Remove trailing '*' to get the base type
+        size_t last_star = resolved_type.rfind('*');
+        if (last_star != std::string::npos) {
+            resolved_type = resolved_type.substr(0, last_star);
+            // Trim any trailing whitespace
+            while (!resolved_type.empty() && resolved_type.back() == ' ') {
+                resolved_type.pop_back();
+            }
+        }
+    }
     
     // Try to find the struct symbol
     Symbol* struct_sym = nullptr;
@@ -2748,8 +2811,12 @@ if (expr->name == "MemberAccess" && expr->children.size() >= 2) {
         std::string struct_name = resolved_type.substr(resolved_type.find(' ') + 1);
         struct_sym = symbol_table->find_symbol(struct_name);
     } else {
-        // Direct struct name (typedef'd)
-        struct_sym = symbol_table->find_symbol(struct_type);
+        // Direct struct name (typedef'd or already resolved)
+        struct_sym = symbol_table->find_symbol(resolved_type);
+        if (!struct_sym) {
+            // Try with "struct " prefix
+            struct_sym = symbol_table->find_symbol("struct " + resolved_type);
+        }
     }
     
     if (struct_sym) {
@@ -2892,11 +2959,37 @@ if ((resolved_type1.find("(*)") != std::string::npos &&
     
     // POINTER COMPATIBILITY CHECK
     if (is_pointer_type(resolved_type1) && is_pointer_type(resolved_type2)) {
-        // Pointers to different types are NOT compatible (except void*)
+        // void* is compatible with any pointer
         if (resolved_type1 == "void*" || resolved_type2 == "void*") {
-            return true; // void* can be assigned to/from any pointer
+            return true;
         }
-        return false; // Different pointer types are incompatible
+        
+        // Strip trailing '*' to get base types
+        std::string base1 = resolved_type1;
+        std::string base2 = resolved_type2;
+        
+        while (!base1.empty() && base1.back() == '*') {
+            base1.pop_back();
+        }
+        while (!base2.empty() && base2.back() == '*') {
+            base2.pop_back();
+        }
+        
+        // Trim trailing whitespace
+        while (!base1.empty() && base1.back() == ' ') {
+            base1.pop_back();
+        }
+        while (!base2.empty() && base2.back() == ' ') {
+            base2.pop_back();
+        }
+        
+        // Check if base types are the same
+        if (base1 == base2) {
+            return true; // Same pointer types (e.g., struct Point* and struct Point*)
+        }
+        
+        // Different pointer types are incompatible
+        return false;
     }
     
     // Handle numeric conversions
@@ -2918,7 +3011,8 @@ bool SemanticAnalyzer::is_struct_union_type(const std::string& type) {
 
 std::string SemanticAnalyzer::resolve_typedef(const std::string& type_name) {
     // If it's not a simple identifier, return as-is
-    if (type_name.find(' ') != std::string::npos || 
+    if (type_name.empty() ||
+        type_name.find(' ') != std::string::npos || 
         type_name.find('*') != std::string::npos ||
         type_name.find('(') != std::string::npos ||
         type_name.find('[') != std::string::npos) {
@@ -2934,8 +3028,16 @@ std::string SemanticAnalyzer::resolve_typedef(const std::string& type_name) {
             return full_type;
         }
         
-        // For regular typedefs, use base_type
-
+        // For pointer typedefs, include the pointer level
+        if (sym->is_pointer && sym->pointer_level > 0) {
+            std::string result = sym->base_type;
+            for (int i = 0; i < sym->pointer_level; i++) {
+                result += "*";
+            }
+            return result;
+        }
+        
+        // For regular typedefs, just return base_type
         return sym->base_type;
     }
     

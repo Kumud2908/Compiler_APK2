@@ -14,6 +14,8 @@ public:
     // Public members for MIPS generator to access
     std::unordered_map<std::string, std::vector<int>> array_dims;
     std::unordered_map<std::string, std::string> array_element_types; // array name -> element type (int, char, etc)
+    std::unordered_map<std::string, std::string> variable_types; // "var" -> "int"/"char"/etc
+    std::unordered_set<std::string> function_names; // Set of all function names
     
 private:
     TACGenerator* tac;
@@ -31,8 +33,8 @@ private:
     std::unordered_map<std::string, std::string> references;
 
 std::unordered_map<std::string, int> member_offsets;        // "TypeName.member" -> offset
-std::unordered_map<std::string, std::string> variable_types; // "var" -> "TypeName"
 std::unordered_map<std::string, std::string> member_types;   // "TypeName.member" -> member type
+std::unordered_map<std::string, int> struct_sizes;           // "TypeName" -> total size in bytes
 
 void process_struct_union_definition(ASTNode* node, const std::string& type_name);
 
@@ -71,6 +73,7 @@ std::string generate_member_address(ASTNode* node);
     int getArrayNumCols(const std::string &name);
     std::vector<int> extract_array_dimensions(ASTNode* node);
     std::string extract_type_from_decl_specifiers(ASTNode* decl_specifiers);
+    int count_initializer_elements(ASTNode* init_node);
 
  int get_type_size(const std::string& type);
 

@@ -111,6 +111,7 @@ void CodeGenerator::process_struct_union_definition(ASTNode* node, const std::st
     }
     
     int offset = 0;
+    int max_member_size = 0;  // Track largest member for unions
     
     // Process members
     for (auto child : node->children) {
@@ -135,7 +136,12 @@ void CodeGenerator::process_struct_union_definition(ASTNode* node, const std::st
                             for (auto sub : spec->children) {
                                 if (sub->name == "Identifier") {
                                     member_type = sub->lexeme;
-                                    member_size = 4; // struct/union reference size (could calculate actual size)
+                                    // Look up the size of the nested struct
+                                    if (struct_sizes.find(member_type) != struct_sizes.end()) {
+                                        member_size = struct_sizes[member_type];
+                                    } else {
+                                        member_size = 4; // fallback if size not yet computed
+                                    }
                                     break;
                                 }
                             }
@@ -154,7 +160,7 @@ void CodeGenerator::process_struct_union_definition(ASTNode* node, const std::st
                                     // Store member type for nested struct lookups
                                     variable_types[type_name + "." + member_name] = member_type;
                                     
-                                    // Only increment offset for structs
+                                    // For structs, increment offset
                                     if (!is_union) {
                                         // Handle arrays
                                         std::vector<int> dims = extract_array_dimensions(declarator);
@@ -162,6 +168,15 @@ void CodeGenerator::process_struct_union_definition(ASTNode* node, const std::st
                                         for (int dim : dims) total_size *= dim;
                                         
                                         offset += total_size;
+                                    } else {
+                                        // For unions, track the maximum member size
+                                        std::vector<int> dims = extract_array_dimensions(declarator);
+                                        int total_size = member_size;
+                                        for (int dim : dims) total_size *= dim;
+                                        
+                                        if (total_size > max_member_size) {
+                                            max_member_size = total_size;
+                                        }
                                     }
                                 }
                             }
@@ -170,6 +185,14 @@ void CodeGenerator::process_struct_union_definition(ASTNode* node, const std::st
                 }
             }
         }
+    }
+    
+    // Store the total size of this struct/union
+    if (!is_union) {
+        struct_sizes[type_name] = offset;
+    } else {
+        // For unions, size is the largest member
+        struct_sizes[type_name] = max_member_size;
     }
 }
 
@@ -188,6 +211,7 @@ void CodeGenerator::generate_function_definition(ASTNode* node) {
     }
     
     current_function_name = func_name;
+    function_names.insert(func_name);  // Track this function name
     
     // Pre-pass: collect variables whose addresses are taken
     address_taken_vars.clear();
@@ -199,10 +223,31 @@ void CodeGenerator::generate_function_definition(ASTNode* node) {
     
     tac->add_label(func_name);
     
+    // Extract and emit parameter list for MIPS generator
+    if (node->symbol && node->symbol->symbol_type == "function") {
+        for (const auto& param : node->symbol->parameters) {
+            // Emit a special instruction indicating parameter declaration order
+            TACInstruction param_decl;
+            param_decl.op = "param_decl";
+            param_decl.arg1 = param->name;
+            param_decl.arg2 = param->base_type; // Include type info
+            tac->add_instruction(param_decl);
+            
+            // Store parameter types for later lookup (e.g., struct member access)
+            variable_types[param->name] = param->base_type;
+        }
+    }
+    
     for (auto child : node->children) {
         if (child->name == "CompoundStatement") {
             generate_compound_statement(child);
         }
+    }
+    
+    // Add implicit return for void functions without explicit return
+    // This ensures all functions have proper epilogues
+    if (is_void_function(func_name)) {
+        tac->generate_return();
     }
 }
 
@@ -806,6 +851,49 @@ if (node->name == "FunctionCall") {
     if (node->children.size() > 1 && node->children[1]->name == "ArgumentList") {
         for (auto arg : node->children[1]->children) {
             std::string param = generate_expression(arg);
+            
+            // Check if this parameter is a struct being passed by value
+            std::string param_type = "";
+            if (arg->symbol) {
+                param_type = arg->symbol->base_type;
+            } else if (variable_types.find(param) != variable_types.end()) {
+                param_type = variable_types[param];
+            }
+            
+            // If it's a struct type (not a pointer), we need to copy members
+            if (!param_type.empty() && param_type.find("struct ") == 0 && param_type.back() != '*') {
+                // Extract struct type name
+                std::string struct_type = param_type.substr(7); // Remove "struct "
+                
+                // Check if this struct has members we know about
+                bool has_members = false;
+                for (const auto& entry : member_offsets) {
+                    if (entry.first.find(struct_type + ".") == 0) {
+                        has_members = true;
+                        break;
+                    }
+                }
+                
+                if (has_members && struct_sizes.find(struct_type) != struct_sizes.end()) {
+                    // Pass each member individually
+                    int struct_size = struct_sizes[struct_type];
+                    int num_words = (struct_size + 3) / 4; // Round up to word count
+                    
+                    for (int i = 0; i < num_words; ++i) {
+                        std::string member_temp = tac->new_temp();
+                        std::string addr_temp = tac->new_temp();
+                        tac->generate_address_of(param, addr_temp);
+                        std::string offset_temp = tac->new_temp();
+                        tac->generate_binary_op("+", addr_temp, std::to_string(i * 4), offset_temp);
+                        tac->generate_load(offset_temp, member_temp);
+                        tac->generate_param(member_temp);
+                        param_count++;
+                    }
+                    continue;
+                }
+            }
+            
+            // Normal parameter (not a struct or is a struct pointer)
             tac->generate_param(param);
             param_count++;
         }
@@ -815,13 +903,26 @@ if (node->name == "FunctionCall") {
     bool is_indirect_call = true;
     
     // Direct function calls: if child[0] is an Identifier and it's a known function
+    std::string called_name = "";
     if (node->children[0]->name == "Identifier") {
-        std::string called_name = node->children[0]->lexeme;
+        called_name = node->children[0]->lexeme;
         if (function_return_types.find(called_name) != function_return_types.end() || 
             called_name == "printf" || called_name == "scanf") {
             is_indirect_call = false;
         }
+        // Also check if it's a function symbol (covers forward declarations)
+        if (node->children[0]->symbol && node->children[0]->symbol->symbol_type == "function") {
+            is_indirect_call = false;
+        }
     }
+    
+    // Check if function returns a struct by value
+    std::string return_type = "";
+    if (!called_name.empty() && function_return_types.find(called_name) != function_return_types.end()) {
+        return_type = function_return_types[called_name];
+    }
+    
+    bool returns_struct = (!return_type.empty() && return_type.find("struct ") == 0 && return_type.back() != '*');
     
     if (is_void_function(func_name) && !is_indirect_call) {
         tac->generate_call(func_name, param_count);
@@ -833,6 +934,12 @@ if (node->name == "FunctionCall") {
         } else {
             tac->generate_call(func_name, param_count, result);
         }
+        
+        // If function returns a struct by value, result is a struct variable
+        if (returns_struct) {
+            variable_types[result] = return_type;
+        }
+        
         return result;
     }
 }
@@ -1101,6 +1208,47 @@ void CodeGenerator::generate_return_statement(ASTNode* node) {
     if (!node) return;
     if (node->children.size() > 0) {
         std::string ret_val = generate_expression(node->children[0]);
+        
+        // Check if we're returning a struct by value
+        std::string ret_type = "";
+        if (node->children[0]->symbol) {
+            ret_type = node->children[0]->symbol->base_type;
+        } else if (variable_types.find(ret_val) != variable_types.end()) {
+            ret_type = variable_types[ret_val];
+        }
+        
+        // If returning a struct by value, copy its members to return area
+        if (!ret_type.empty() && ret_type.find("struct ") == 0 && ret_type.back() != '*') {
+            std::string struct_type = ret_type.substr(7); // Remove "struct "
+            
+            if (struct_sizes.find(struct_type) != struct_sizes.end()) {
+                int struct_size = struct_sizes[struct_type];
+                int num_words = (struct_size + 3) / 4; // Round up to word count
+                
+                // Copy each word of the struct to temporary return area
+                // We'll use a special TAC instruction for struct return
+                for (int i = 0; i < num_words; ++i) {
+                    std::string member_temp = tac->new_temp();
+                    std::string addr_temp = tac->new_temp();
+                    tac->generate_address_of(ret_val, addr_temp);
+                    std::string offset_temp = tac->new_temp();
+                    tac->generate_binary_op("+", addr_temp, std::to_string(i * 4), offset_temp);
+                    tac->generate_load(offset_temp, member_temp);
+                    
+                    // Store this word in return position i
+                    TACInstruction instr;
+                    instr.op = "return_struct_word";
+                    instr.arg1 = member_temp;
+                    instr.arg2 = std::to_string(i);
+                    tac->add_instruction(instr);
+                }
+                
+                // Final return instruction
+                tac->generate_return();
+                return;
+            }
+        }
+        
         tac->generate_return(ret_val);
     } else {
         tac->generate_return();
@@ -1402,6 +1550,73 @@ std::string CodeGenerator::flatten_array_initialization(const std::string &array
         // Initializer is just a wrapper - don't add index, just recurse
         return flatten_array_initialization(array_name, dims, init_node->children[0], indices, base_temp);
     }
+    else if (init_node->name == "StringLiteral") {
+        // Special handling for string literal initialization: "Hello" -> 'H', 'e', 'l', 'l', 'o', '\0'
+        std::string str_lit = init_node->lexeme;
+        
+        // Remove surrounding quotes
+        if (str_lit.length() >= 2 && str_lit.front() == '"' && str_lit.back() == '"') {
+            str_lit = str_lit.substr(1, str_lit.length() - 2);
+        }
+        
+        // Compute base address on first call
+        if (base_temp.empty()) {
+            base_temp = tac->new_temp();
+            tac->generate_address_of(array_name, base_temp);
+        }
+        
+        // Get element size
+        int element_size = 1; // char array
+        if (array_element_types.find(array_name) != array_element_types.end()) {
+            element_size = get_type_size(array_element_types[array_name]);
+        }
+        
+        // Store each character
+        for (size_t i = 0; i < str_lit.length(); ++i) {
+            char c = str_lit[i];
+            int byte_offset = i * element_size;
+            
+            // Handle escape sequences
+            if (c == '\\' && i + 1 < str_lit.length()) {
+                char next = str_lit[i + 1];
+                if (next == 'n') {
+                    c = '\n';
+                    i++;
+                } else if (next == 't') {
+                    c = '\t';
+                    i++;
+                } else if (next == '\\') {
+                    c = '\\';
+                    i++;
+                } else if (next == '0') {
+                    c = '\0';
+                    i++;
+                }
+            }
+            
+            std::string char_value = std::to_string(static_cast<int>(c));
+            
+            if (byte_offset == 0) {
+                tac->generate_store(base_temp, char_value, element_size);
+            } else {
+                std::string element_addr = tac->new_temp();
+                tac->generate_binary_op("+", base_temp, std::to_string(byte_offset), element_addr);
+                tac->generate_store(element_addr, char_value, element_size);
+            }
+        }
+        
+        // Add null terminator
+        int null_offset = str_lit.length() * element_size;
+        if (null_offset == 0) {
+            tac->generate_store(base_temp, "0", element_size);
+        } else {
+            std::string element_addr = tac->new_temp();
+            tac->generate_binary_op("+", base_temp, std::to_string(null_offset), element_addr);
+            tac->generate_store(element_addr, "0", element_size);
+        }
+        
+        return base_temp;
+    }
     else {
         // Leaf - actual value
         std::string value = generate_expression(init_node);
@@ -1512,10 +1727,29 @@ void CodeGenerator::generate_declaration(ASTNode* node) {
                     if (!dims.empty()) {
                         is_array = true;
                     }
+                    // Check if declarator is an ArrayDeclarator (even with empty brackets)
+                    if (init_decl->children[0]->name == "ArrayDeclarator") {
+                        is_array = true;
+                    }
                 }
                 
                 if (init_decl->children.size() > 1) {
                     init_node = init_decl->children[1];
+                }
+                
+                // If array with empty dimensions, infer size from initializer
+                if (is_array && dims.empty() && init_node && init_node->name == "InitializerList") {
+                    int count = count_initializer_elements(init_node);
+                    if (count > 0) {
+                        dims.push_back(count);
+                    }
+                } else if (is_array && dims.empty() && init_node && init_node->name == "StringLiteral") {
+                    // For string literals, infer size from string length + 1 (null terminator)
+                    std::string str_lit = init_node->lexeme;
+                    if (str_lit.length() >= 2 && str_lit.front() == '"' && str_lit.back() == '"') {
+                        str_lit = str_lit.substr(1, str_lit.length() - 2);
+                    }
+                    dims.push_back(str_lit.length() + 1); // +1 for null terminator
                 }
                 
                 if (var_name.empty()) continue;
@@ -1542,6 +1776,9 @@ void CodeGenerator::generate_declaration(ASTNode* node) {
                 //  Track variable type
                 if (!type_name.empty()) {
                     variable_types[var_name] = type_name;
+                } else {
+                    // Track base type for non-struct variables
+                    variable_types[var_name] = base_type;
                 }
                 
                 if (is_static) {
@@ -1661,17 +1898,35 @@ std::string CodeGenerator::generate_member_address(ASTNode* node) {
         // Simple case: base is just an identifier
         std::string base_var = node->children[0]->lexeme;
         
-        // Get base address of the struct
-        base_addr = tac->new_temp();
-        tac->generate_address_of(base_var, base_addr);
+        // Check if this is pointer dereference (->) or direct access (.)
+        bool is_arrow = (node->lexeme == "->");
+        
+        if (is_arrow) {
+            // For p->x, p is a pointer, so its value is already an address
+            // We need to use the value of p, not its address
+            base_addr = base_var;  // This will be loaded as a value, not &p
+        } else {
+            // For p.x, p is a struct, so get its address
+            base_addr = tac->new_temp();
+            tac->generate_address_of(base_var, base_addr);
+        }
         
         // Get the type from symbol or variable_types map
         if (node->children[0]->symbol) {
             base_type = node->children[0]->symbol->base_type;
+            // For pointers, strip the * to get the pointed-to type
+            if (is_arrow && !base_type.empty() && base_type.back() == '*') {
+                base_type = base_type.substr(0, base_type.length() - 1);
+            }
         } else {
+            // Try variable_types map or use semantic analyzer inference
             auto it = variable_types.find(base_var);
             if (it != variable_types.end()) {
                 base_type = it->second;
+                // For pointers, strip the * to get the pointed-to type
+                if (is_arrow && !base_type.empty() && base_type.back() == '*') {
+                    base_type = base_type.substr(0, base_type.length() - 1);
+                }
             }
         }
     }
@@ -1683,7 +1938,15 @@ std::string CodeGenerator::generate_member_address(ASTNode* node) {
     // Get member offset using base_type
     int offset = 0;
     if (!base_type.empty()) {
-        std::string key = base_type + "." + field;
+        // Strip "struct " prefix if present (member_offsets uses short names)
+        std::string lookup_type = base_type;
+        if (lookup_type.find("struct ") == 0) {
+            lookup_type = lookup_type.substr(7); // Remove "struct "
+        } else if (lookup_type.find("union ") == 0) {
+            lookup_type = lookup_type.substr(6); // Remove "union "
+        }
+        
+        std::string key = lookup_type + "." + field;
         auto offset_it = member_offsets.find(key);
         if (offset_it != member_offsets.end()) {
             offset = offset_it->second;
@@ -1767,6 +2030,23 @@ std::vector<int> CodeGenerator::extract_array_dimensions(ASTNode* node) {
     return dims;
 }
 
+int CodeGenerator::count_initializer_elements(ASTNode* init_node) {
+    if (!init_node) return 0;
+    
+    if (init_node->name == "InitializerList") {
+        // Count direct initializer children
+        int count = 0;
+        for (auto child : init_node->children) {
+            if (child && (child->name == "Initializer" || child->name == "InitializerList")) {
+                count++;
+            }
+        }
+        return count;
+    }
+    
+    return 0;
+}
+
 // =======================================================
 //  Static Variable Helpers
 // =======================================================
@@ -1812,6 +2092,16 @@ int CodeGenerator::get_type_size(const std::string& type) {
     if (type == "short") return 2;
     if (type == "int") return 4;
     if (type == "long") return 8;
+    
+    // Check if it's a struct type
+    std::string struct_type = type;
+    if (struct_type.find("struct ") == 0) {
+        struct_type = struct_type.substr(7); // Remove "struct " prefix
+    }
+    if (struct_sizes.find(struct_type) != struct_sizes.end()) {
+        return struct_sizes[struct_type];
+    }
+    
     return 4; // default
 }
 bool CodeGenerator::is_void_function(const std::string& func_name) {
@@ -1852,9 +2142,27 @@ void CodeGenerator::process_enum_declaration(ASTNode* node) {
                 if (enumerator->name == "Enumerator") {
                     std::string enum_name = enumerator->lexeme;
                     
-                    if (!enumerator->children.empty() && 
-                        enumerator->children[0]->name == "Constant") {
-                        current_value = std::stoi(enumerator->children[0]->lexeme);
+                    // Check if there's an explicit value
+                    if (!enumerator->children.empty()) {
+                        ASTNode* value_node = enumerator->children[0];
+                        
+                        if (value_node->name == "Constant") {
+                            current_value = std::stoi(value_node->lexeme);
+                        }
+                        // Handle unary expressions like -1
+                        else if (value_node->name == "UnaryExpression") {
+                            if (value_node->lexeme == "-" || value_node->lexeme == "uminus") {
+                                if (!value_node->children.empty() && 
+                                    value_node->children[0]->name == "Constant") {
+                                    current_value = -std::stoi(value_node->children[0]->lexeme);
+                                }
+                            } else if (value_node->lexeme == "+") {
+                                if (!value_node->children.empty() && 
+                                    value_node->children[0]->name == "Constant") {
+                                    current_value = std::stoi(value_node->children[0]->lexeme);
+                                }
+                            }
+                        }
                     }
                     
                     enum_constants[enum_name] = std::to_string(current_value);

@@ -1309,6 +1309,10 @@ int main(int argc, char* argv[]) {
             MIPSGenerator mips_gen(tac_gen.get_instructions());
             // Pass array metadata from codegen to MIPS generator
             mips_gen.set_array_metadata(code_gen.array_dims, code_gen.array_element_types);
+            // Pass variable types for type conversions
+            mips_gen.set_variable_types(code_gen.variable_types);
+            // Pass function names to distinguish from goto labels
+            mips_gen.set_function_names(code_gen.function_names);
             mips_gen.generate("output.s");
             
             printf("\n");
