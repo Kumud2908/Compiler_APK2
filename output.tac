@@ -1,22 +1,19 @@
-add:
-     = a param_decl int
-     = b param_decl int
-    t0 = a + b
-    return t0
-mul:
-     = a param_decl int
-     = b param_decl int
-    t1 = a * b
-    return t1
 main:
-    param 2
-    param 3
-    t2 = call mul, 2
-    param t2
-    param 5
-    t3 = call add, 2
-    result = t3
-    param "%d\n"
-    param result
-    t4 = call printf, 2
-    return 0
+    i = 0
+    a = 0
+    i = 0
+L0:
+    a = a + 1
+    t0 = a
+    t1 = 5 + t0
+    t2 = i < t1
+    ifFalse t2 goto L1
+    param "%d %d\n"
+    param i
+    param a
+    t3 = call printf, 3
+L2:
+    t4 = i + a
+    i = t4
+    goto L0
+L1:

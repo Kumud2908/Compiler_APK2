@@ -820,6 +820,14 @@ std::string CodeGenerator::generate_expression(ASTNode* node) {
             std::string arg = generate_expression(node->children[0]);
             tac->generate_unary_op("unary" + node->lexeme, arg, result);
         }
+        else if (node->lexeme == "++" || node->lexeme == "--") {
+            // Prefix increment/decrement: increment first, then return new value
+            std::string var = generate_expression(node->children[0]);
+            std::string one = "1";
+            std::string op = (node->lexeme == "++") ? "+" : "-";
+            tac->generate_binary_op(op, var, one, var);  // var = var + 1
+            tac->generate_assignment(result, var);  // result = var
+        }
         else {
             std::string arg = generate_expression(node->children[0]);
             tac->generate_binary_op(node->lexeme, arg, "", result);
@@ -1776,8 +1784,8 @@ void CodeGenerator::generate_declaration(ASTNode* node) {
                 //  Track variable type
                 if (!type_name.empty()) {
                     variable_types[var_name] = type_name;
-                } else {
-                    // Track base type for non-struct variables
+                } else if (!is_pointer) {
+                    // Track base type for non-struct, non-pointer variables
                     variable_types[var_name] = base_type;
                 }
                 
@@ -1914,6 +1922,13 @@ std::string CodeGenerator::generate_member_address(ASTNode* node) {
         // Get the type from symbol or variable_types map
         if (node->children[0]->symbol) {
             base_type = node->children[0]->symbol->base_type;
+            // For typedef'd types, the symbol's base_type might be the typedef name
+            // Check if it's a struct/union type; if not, it might be a typedef
+            if (base_type.find("struct ") != 0 && base_type.find("union ") != 0) {
+                // This might be a typedef - try to find the underlying struct
+                // by checking if there's a member_offsets entry that matches
+                // We'll handle this in the offset lookup section below
+            }
             // For pointers, strip the * to get the pointed-to type
             if (is_arrow && !base_type.empty() && base_type.back() == '*') {
                 base_type = base_type.substr(0, base_type.length() - 1);
@@ -1946,8 +1961,27 @@ std::string CodeGenerator::generate_member_address(ASTNode* node) {
             lookup_type = lookup_type.substr(6); // Remove "union "
         }
         
+        // First try with the type as-is
         std::string key = lookup_type + "." + field;
         auto offset_it = member_offsets.find(key);
+        
+        // If not found, this might be a typedef pointing to a struct
+        // Try to find the actual struct by matching the member name
+        if (offset_it == member_offsets.end()) {
+            for (const auto& pair : member_offsets) {
+                size_t dot_pos = pair.first.find('.');
+                if (dot_pos != std::string::npos) {
+                    std::string member_name = pair.first.substr(dot_pos + 1);
+                    // If this member matches, use this key (assumes unique member names per struct)
+                    if (member_name == field) {
+                        key = pair.first;
+                        offset_it = member_offsets.find(key);
+                        break;
+                    }
+                }
+            }
+        }
+        
         if (offset_it != member_offsets.end()) {
             offset = offset_it->second;
         }

@@ -2848,8 +2848,9 @@ if (expr->name == "MemberAccess" && expr->children.size() >= 2) {
                 return operand_type.substr(0, star_pos);
             }
         } else if (op == "&") {
-            // Address-of
-            return operand_type + "*";
+            // Address-of: resolve typedef first to get the actual type
+            std::string resolved_type = resolve_typedef(operand_type);
+            return resolved_type + "*";
         }
         return operand_type;
     }
