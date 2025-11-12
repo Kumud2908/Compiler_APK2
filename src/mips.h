@@ -55,6 +55,7 @@ private:
     // ===== Data Section =====
     std::vector<std::string> data_section;                     // Global/static data
     std::unordered_map<std::string, std::string> string_literals; // String -> Label
+    std::unordered_map<std::string, std::string> variable_name_map; // Original var name -> Safe MIPS name
     int string_counter;
     std::unordered_set<std::string> static_vars;               // Static variable names
     std::unordered_set<std::string> global_vars;               // Global variable names
@@ -136,6 +137,7 @@ private:
     void add_global_variable(const std::string& var, int size);
     void add_static_variable(const std::string& var, int size);
     std::string get_variable_type(const std::string& var);
+    std::string get_mips_var_name(const std::string& var);  // Get safe variable name for MIPS
     
     // ===== Special Instruction Handlers =====
     void handle_printf();

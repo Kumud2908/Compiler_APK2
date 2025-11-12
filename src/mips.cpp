@@ -139,19 +139,19 @@ void MIPSGenerator::generate(const std::string& output_filename) {
 
 void MIPSGenerator::emit_data_section() {
     output_file << ".data" << std::endl;
-    output_file << ".align 2" << std::endl;  // Word-align data
     
-    // Emit string literals
+    // Emit string literals with alignment
     for (const auto& entry : string_literals) {
+        output_file << ".align 2" << std::endl;  // Word-align before each string
         output_file << entry.second << ": .asciiz " << entry.first << std::endl;
-        output_file << ".align 2" << std::endl;  // Ensure next item is word-aligned
     }
     
     // Add newline for scanf
-    output_file << "newline: .asciiz \"\\n\"" << std::endl;
     output_file << ".align 2" << std::endl;
+    output_file << "newline: .asciiz \"\\n\"" << std::endl;
     
     // Emit data section entries (arrays, global/static variables)
+    // These already have .align 2 from add_global_variable
     for (const auto& line : data_section) {
         output_file << line << std::endl;
     }
@@ -159,15 +159,18 @@ void MIPSGenerator::emit_data_section() {
     // Emit global/static variables if any (backward compatibility)
     for (const auto& var : global_vars) {
         // Only emit if not already in data_section
+        // Check both original name and safe name
+        std::string safe_name = get_mips_var_name(var);
         bool found = false;
         for (const auto& line : data_section) {
-            if (line.find(var + ":") == 0) {
+            if (line.find(var + ":") == 0 || line.find(safe_name + ":") == 0) {
                 found = true;
                 break;
             }
         }
         if (!found) {
-            output_file << var << ": .word 0" << std::endl;
+            output_file << ".align 2" << std::endl;
+            output_file << safe_name << ": .word 0" << std::endl;
         }
     }
     
@@ -1028,6 +1031,57 @@ void MIPSGenerator::handle_printf() {
                 emit("syscall");
                 pos = percent_pos + 2;
             }
+            else if (spec == 'f' || spec == '.' || (spec >= '0' && spec <= '9')) {
+                // Handle %f, %.Xf, or other float format specifiers
+                emit_comment("Print float");
+                
+                // Skip precision specifiers like .2 in %.2f
+                size_t spec_end = percent_pos + 1;
+                while (spec_end < format.length() && 
+                       (format[spec_end] == '.' || (format[spec_end] >= '0' && format[spec_end] <= '9'))) {
+                    spec_end++;
+                }
+                
+                // Check if it ends with 'f'
+                if (spec_end < format.length() && format[spec_end] == 'f') {
+                    // Print the float value using SPIM syscall 2
+                    emit_comment("Print float");
+                    emit("li $v0, 2");  // Syscall for print_float
+                    
+                    if ((size_t)param_index < param_list.size()) {
+                        if ((size_t)param_index < param_regs.size() && !param_regs[param_index].empty()) {
+                            // The value is in an integer register as IEEE 754 bits
+                            // Move to coprocessor 1 (FPU) register $f12
+                            emit("mtc1 " + param_regs[param_index] + ", $f12");
+                            // Note: mtc1 preserves bit pattern, so IEEE 754 value is now in $f12
+                        } else {
+                            std::string reg = get_register(param_list[param_index]);
+                            emit("mtc1 " + reg + ", $f12");
+                        }
+                        param_index++;
+                    }
+                    emit("syscall");
+                    pos = spec_end + 1;
+                } else if (spec == 'f') {
+                    // Just %f without precision
+                    emit_comment("Print float");
+                    emit("li $v0, 2");
+                    
+                    if ((size_t)param_index < param_list.size()) {
+                        if ((size_t)param_index < param_regs.size() && !param_regs[param_index].empty()) {
+                            emit("mtc1 " + param_regs[param_index] + ", $f12");
+                        } else {
+                            std::string reg = get_register(param_list[param_index]);
+                            emit("mtc1 " + reg + ", $f12");
+                        }
+                        param_index++;
+                    }
+                    emit("syscall");
+                    pos = percent_pos + 2;
+                } else {
+                    pos = percent_pos + 1;
+                }
+            }
             else {
                 pos = percent_pos + 1;
             }
@@ -1202,10 +1256,11 @@ void MIPSGenerator::translate_array_access(const TACInstruction& instr) {
             reg_contents.erase(elem_size_reg);  // Free this temp
         }
         
-        // Get array base address
+        // Get array base address (use safe name for global arrays)
         std::string base_reg = allocate_temp_register();
         reg_contents[base_reg] = "temp_base";  // Mark as in-use
-        emit("la " + base_reg + ", " + array_name);
+        std::string safe_array_name = get_mips_var_name(array_name);
+        emit("la " + base_reg + ", " + safe_array_name);
         
         // Calculate element address
         std::string addr_reg = allocate_temp_register();
@@ -1279,10 +1334,11 @@ void MIPSGenerator::translate_array_access(const TACInstruction& instr) {
             reg_contents.erase(elem_size_reg);
         }
         
-        // Get array base address
+        // Get array base address (use safe name)
         std::string base_reg = allocate_temp_register();
         reg_contents[base_reg] = "temp_base";
-        emit("la " + base_reg + ", " + array_name);
+        std::string safe_array_name = get_mips_var_name(array_name);
+        emit("la " + base_reg + ", " + safe_array_name);
         
         // Calculate element address
         std::string addr_reg = allocate_temp_register();
@@ -1342,8 +1398,9 @@ void MIPSGenerator::translate_address_of(const TACInstruction& instr) {
         add_global_variable(var_name, alloc_size);
     }
     
-    // Load address of the array/variable
-    emit("la " + result_reg + ", " + var_name);
+    // Load address of the array/variable (use safe name)
+    std::string safe_var_name = get_mips_var_name(var_name);
+    emit("la " + result_reg + ", " + safe_var_name);
 }
 
 void MIPSGenerator::translate_dereference(const TACInstruction& instr) {
@@ -1655,15 +1712,43 @@ void MIPSGenerator::restore_callee_saved_regs() {
     // TODO: Restore $s0-$s7 if used
 }
 
+// Helper function to create safe variable names for MIPS (avoid instruction name conflicts)
+std::string safe_var_name(const std::string& var) {
+    // Check if variable name might conflict with MIPS instructions
+    // Single letter names and common instruction mnemonics need prefixing
+    if (var.length() <= 2 || 
+        var == "add" || var == "sub" || var == "mul" || var == "div" ||
+        var == "and" || var == "or" || var == "xor" || var == "sll" ||
+        var == "srl" || var == "lw" || var == "sw" || var == "lb" ||
+        var == "sb" || var == "beq" || var == "bne" || var == "j" || var == "b") {
+        return "var_" + var;
+    }
+    return var;
+}
+
+// Get the actual name to use in MIPS code (handles variable name mapping)
+std::string MIPSGenerator::get_mips_var_name(const std::string& var) {
+    // Check if this variable has a mapped safe name
+    auto it = variable_name_map.find(var);
+    if (it != variable_name_map.end()) {
+        return it->second;
+    }
+    return var;
+}
+
 void MIPSGenerator::add_global_variable(const std::string& var, int size) {
     if (global_vars.find(var) == global_vars.end()) {
         global_vars.insert(var);
-        // Add to data section
-        std::string data_line = var + ": .space " + std::to_string(size);
+        // Add alignment BEFORE the variable declaration
+        data_section.push_back(".align 2");
+        // Add to data section with safe name
+        std::string safe_name = safe_var_name(var);
+        std::string data_line = safe_name + ": .space " + std::to_string(size);
         data_section.push_back(data_line);
-        // Add alignment after each variable to ensure proper alignment
-        if (size % 4 != 0) {
-            data_section.push_back(".align 2");
+        
+        // Store mapping from original name to safe name
+        if (safe_name != var) {
+            variable_name_map[var] = safe_name;
         }
     }
 }
@@ -1671,8 +1756,16 @@ void MIPSGenerator::add_global_variable(const std::string& var, int size) {
 void MIPSGenerator::add_static_variable(const std::string& var, int size) {
     if (static_vars.find(var) == static_vars.end()) {
         static_vars.insert(var);
-        std::string data_line = var + ": .space " + std::to_string(size);
+        // Add alignment BEFORE the variable declaration
+        data_section.push_back(".align 2");
+        std::string safe_name = safe_var_name(var);
+        std::string data_line = safe_name + ": .space " + std::to_string(size);
         data_section.push_back(data_line);
+        
+        // Store mapping
+        if (safe_name != var) {
+            variable_name_map[var] = safe_name;
+        }
     }
 }
 
