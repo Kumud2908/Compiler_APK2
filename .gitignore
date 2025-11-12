@@ -1,0 +1,7 @@
+output.s
+ast.dot
+compiler
+outputs
+.vscode
+build/
+

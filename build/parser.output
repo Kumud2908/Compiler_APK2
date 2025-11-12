@@ -164,159 +164,162 @@ Grammar
    98 initializer: assignment_expression
    99            | LBRACE initializer_list RBRACE
   100            | LBRACE initializer_list COMMA RBRACE
+  101            | LBRACE RBRACE
 
-  101 initializer_list: initializer
-  102                 | initializer_list COMMA initializer
+  102 initializer_list: initializer
+  103                 | initializer_list COMMA initializer
 
-  103 compound_statement: LBRACE RBRACE
-  104                   | LBRACE block_item_list RBRACE
+  104 compound_statement: LBRACE RBRACE
+  105                   | LBRACE block_item_list RBRACE
 
-  105 block_item_list: block_item
-  106                | block_item_list block_item
+  106 block_item_list: block_item
+  107                | block_item_list block_item
 
-  107 block_item: declaration
-  108           | statement
+  108 block_item: declaration
+  109           | statement
 
-  109 statement: labeled_statement
-  110          | expression_statement
-  111          | compound_statement
-  112          | selection_statement
-  113          | iteration_statement
-  114          | jump_statement
+  110 statement: labeled_statement
+  111          | expression_statement
+  112          | compound_statement
+  113          | selection_statement
+  114          | iteration_statement
+  115          | jump_statement
 
-  115 labeled_statement: ID COLON statement
-  116                  | CASE assignment_expression COLON statement
-  117                  | DEFAULT COLON statement
+  116 labeled_statement: ID COLON statement
+  117                  | CASE assignment_expression COLON statement
+  118                  | CASE assignment_expression COLON declaration
+  119                  | DEFAULT COLON statement
+  120                  | DEFAULT COLON declaration
 
-  118 expression_statement: expression SEMI
-  119                     | SEMI
+  121 expression_statement: expression SEMI
+  122                     | SEMI
 
-  120 selection_statement: IF LPAREN expression RPAREN statement
-  121                    | IF LPAREN expression RPAREN statement ELSE statement
-  122                    | SWITCH LPAREN expression RPAREN statement
+  123 selection_statement: IF LPAREN expression RPAREN statement
+  124                    | IF LPAREN expression RPAREN statement ELSE statement
+  125                    | SWITCH LPAREN expression RPAREN statement
 
-  123 iteration_statement: WHILE LPAREN expression RPAREN statement
-  124                    | DO statement WHILE LPAREN expression RPAREN SEMI
-  125                    | UNTIL LPAREN expression RPAREN statement
-  126                    | FOR LPAREN for_init_statement expression_statement RPAREN statement
-  127                    | FOR LPAREN for_init_statement expression_statement expression RPAREN statement
-  128                    | FOR LPAREN range_based_for RPAREN statement
+  126 iteration_statement: WHILE LPAREN expression RPAREN statement
+  127                    | DO statement WHILE LPAREN expression RPAREN SEMI
+  128                    | UNTIL LPAREN expression RPAREN statement
+  129                    | FOR LPAREN for_init_statement expression_statement RPAREN statement
+  130                    | FOR LPAREN for_init_statement expression_statement expression RPAREN statement
+  131                    | FOR LPAREN range_based_for RPAREN statement
 
-  129 for_init_statement: expression_statement
-  130                   | declaration
+  132 for_init_statement: expression_statement
+  133                   | declaration
 
-  131 range_based_for: declaration_specifiers ID COLON expression
-  132                | declaration_specifiers BIT_AND ID COLON expression
+  134 range_based_for: declaration_specifiers ID COLON expression
+  135                | declaration_specifiers BIT_AND ID COLON expression
 
-  133 jump_statement: GOTO ID SEMI
-  134               | CONTINUE SEMI
-  135               | BREAK SEMI
-  136               | RETURN expression SEMI
-  137               | RETURN SEMI
+  136 jump_statement: GOTO ID SEMI
+  137               | CONTINUE SEMI
+  138               | BREAK SEMI
+  139               | RETURN expression SEMI
+  140               | RETURN SEMI
 
-  138 expression: assignment_expression
-  139           | expression COMMA assignment_expression
+  141 expression: assignment_expression
+  142           | expression COMMA assignment_expression
 
-  140 assignment_expression: conditional_expression
-  141                      | unary_expression assignment_operator assignment_expression
+  143 assignment_expression: conditional_expression
+  144                      | unary_expression assignment_operator assignment_expression
 
-  142 assignment_operator: ASSIGN
-  143                    | PLUS_EQ
-  144                    | MINUS_EQ
-  145                    | MUL_EQ
-  146                    | DIV_EQ
-  147                    | MOD_EQ
-  148                    | AND_EQ
-  149                    | OR_EQ
-  150                    | XOR_EQ
-  151                    | LSHIFT_EQ
-  152                    | RSHIFT_EQ
+  145 assignment_operator: ASSIGN
+  146                    | PLUS_EQ
+  147                    | MINUS_EQ
+  148                    | MUL_EQ
+  149                    | DIV_EQ
+  150                    | MOD_EQ
+  151                    | AND_EQ
+  152                    | OR_EQ
+  153                    | XOR_EQ
+  154                    | LSHIFT_EQ
+  155                    | RSHIFT_EQ
 
-  153 conditional_expression: logical_or_expression
-  154                       | logical_or_expression QUESTION expression COLON conditional_expression
+  156 conditional_expression: logical_or_expression
+  157                       | logical_or_expression QUESTION expression COLON conditional_expression
 
-  155 logical_or_expression: logical_and_expression
-  156                      | logical_or_expression OR logical_and_expression
+  158 logical_or_expression: logical_and_expression
+  159                      | logical_or_expression OR logical_and_expression
 
-  157 logical_and_expression: inclusive_or_expression
-  158                       | logical_and_expression AND inclusive_or_expression
+  160 logical_and_expression: inclusive_or_expression
+  161                       | logical_and_expression AND inclusive_or_expression
 
-  159 inclusive_or_expression: exclusive_or_expression
-  160                        | inclusive_or_expression BIT_OR exclusive_or_expression
+  162 inclusive_or_expression: exclusive_or_expression
+  163                        | inclusive_or_expression BIT_OR exclusive_or_expression
 
-  161 exclusive_or_expression: and_expression
-  162                        | exclusive_or_expression BIT_XOR and_expression
+  164 exclusive_or_expression: and_expression
+  165                        | exclusive_or_expression BIT_XOR and_expression
 
-  163 and_expression: equality_expression
-  164               | and_expression BIT_AND equality_expression
+  166 and_expression: equality_expression
+  167               | and_expression BIT_AND equality_expression
 
-  165 equality_expression: relational_expression
-  166                    | equality_expression EQ relational_expression
-  167                    | equality_expression NE relational_expression
+  168 equality_expression: relational_expression
+  169                    | equality_expression EQ relational_expression
+  170                    | equality_expression NE relational_expression
 
-  168 relational_expression: shift_expression
-  169                      | relational_expression LT shift_expression
-  170                      | relational_expression GT shift_expression
-  171                      | relational_expression LE shift_expression
-  172                      | relational_expression GE shift_expression
+  171 relational_expression: shift_expression
+  172                      | relational_expression LT shift_expression
+  173                      | relational_expression GT shift_expression
+  174                      | relational_expression LE shift_expression
+  175                      | relational_expression GE shift_expression
 
-  173 shift_expression: additive_expression
-  174                 | shift_expression LSHIFT additive_expression
-  175                 | shift_expression RSHIFT additive_expression
+  176 shift_expression: additive_expression
+  177                 | shift_expression LSHIFT additive_expression
+  178                 | shift_expression RSHIFT additive_expression
 
-  176 additive_expression: multiplicative_expression
-  177                    | additive_expression PLUS multiplicative_expression
-  178                    | additive_expression MINUS multiplicative_expression
+  179 additive_expression: multiplicative_expression
+  180                    | additive_expression PLUS multiplicative_expression
+  181                    | additive_expression MINUS multiplicative_expression
 
-  179 multiplicative_expression: cast_expression
-  180                          | multiplicative_expression MUL cast_expression
-  181                          | multiplicative_expression DIV cast_expression
-  182                          | multiplicative_expression MOD cast_expression
+  182 multiplicative_expression: cast_expression
+  183                          | multiplicative_expression MUL cast_expression
+  184                          | multiplicative_expression DIV cast_expression
+  185                          | multiplicative_expression MOD cast_expression
 
-  183 cast_expression: unary_expression
-  184                | LPAREN type_name RPAREN cast_expression
+  186 cast_expression: unary_expression
+  187                | LPAREN type_name RPAREN cast_expression
 
-  185 unary_expression: postfix_expression
-  186                 | INC unary_expression
-  187                 | DEC unary_expression
-  188                 | unary_operator cast_expression
-  189                 | SIZEOF unary_expression
-  190                 | SIZEOF LPAREN type_name RPAREN
+  188 unary_expression: postfix_expression
+  189                 | INC unary_expression
+  190                 | DEC unary_expression
+  191                 | unary_operator cast_expression
+  192                 | SIZEOF unary_expression
+  193                 | SIZEOF LPAREN type_name RPAREN
 
-  191 unary_operator: BIT_AND
-  192               | MUL
-  193               | PLUS
-  194               | MINUS
-  195               | BIT_NOT
-  196               | NOT
+  194 unary_operator: BIT_AND
+  195               | MUL
+  196               | PLUS
+  197               | MINUS
+  198               | BIT_NOT
+  199               | NOT
 
-  197 postfix_expression: primary_expression
-  198                   | postfix_expression LBRACKET expression RBRACKET
-  199                   | postfix_expression LPAREN argument_expression_list RPAREN
-  200                   | postfix_expression LPAREN RPAREN
-  201                   | postfix_expression DOT ID
-  202                   | postfix_expression ARROW ID
-  203                   | postfix_expression INC
-  204                   | postfix_expression DEC
+  200 postfix_expression: primary_expression
+  201                   | postfix_expression LBRACKET expression RBRACKET
+  202                   | postfix_expression LPAREN argument_expression_list RPAREN
+  203                   | postfix_expression LPAREN RPAREN
+  204                   | postfix_expression DOT ID
+  205                   | postfix_expression ARROW ID
+  206                   | postfix_expression INC
+  207                   | postfix_expression DEC
 
-  205 primary_expression: ID
-  206                   | constant
-  207                   | string_literal
-  208                   | LPAREN expression RPAREN
+  208 primary_expression: ID
+  209                   | constant
+  210                   | string_literal
+  211                   | LPAREN expression RPAREN
 
-  209 string_literal: STRING_LIT
-  210               | string_literal STRING_LIT
+  212 string_literal: STRING_LIT
+  213               | string_literal STRING_LIT
 
-  211 argument_expression_list: assignment_expression
-  212                         | argument_expression_list COMMA assignment_expression
+  214 argument_expression_list: assignment_expression
+  215                         | argument_expression_list COMMA assignment_expression
 
-  213 constant: NUM
-  214         | FLOAT_LIT
-  215         | CHAR_LIT
-  216         | TRUE
-  217         | FALSE
-  218         | NULL_TOKEN
-  219         | NULLPTR
+  216 constant: NUM
+  217         | FLOAT_LIT
+  218         | CHAR_LIT
+  219         | TRUE
+  220         | FALSE
+  221         | NULL_TOKEN
+  222         | NULLPTR
 
 
 Terminals, with rules where they appear
@@ -324,39 +327,39 @@ Terminals, with rules where they appear
     $end (0) 0
     error (256)
     AUTO <str> (258) 20
-    BREAK <str> (259) 135
-    CASE <str> (260) 116
+    BREAK <str> (259) 138
+    CASE <str> (260) 117 118
     CHAR <str> (261) 26
     CONST <str> (262)
-    CONTINUE <str> (263) 134
-    DEFAULT <str> (264) 117
-    DO <str> (265) 124
+    CONTINUE <str> (263) 137
+    DEFAULT <str> (264) 119 120
+    DO <str> (265) 127
     DOUBLE <str> (266) 31
-    ELSE <str> (267) 121
+    ELSE <str> (267) 124
     ENUM <str> (268) 48 49 50 51 52
     EXTERN <str> (269) 18
     FLOAT <str> (270) 30
-    FOR <str> (271) 126 127 128
-    GOTO <str> (272) 133
-    IF <str> (273) 120 121
+    FOR <str> (271) 129 130 131
+    GOTO <str> (272) 136
+    IF <str> (273) 123 124
     INT <str> (274) 28
     LONG <str> (275) 29
     REGISTER <str> (276) 19
-    RETURN <str> (277) 136 137
+    RETURN <str> (277) 139 140
     SHORT <str> (278) 27
     SIGNED <str> (279) 32
-    SIZEOF <str> (280) 189 190
+    SIZEOF <str> (280) 192 193
     STATIC <str> (281) 17
     STRUCT <str> (282) 40
-    SWITCH <str> (283) 122
+    SWITCH <str> (283) 125
     TYPEDEF <str> (284) 16
     UNION <str> (285) 41
     UNSIGNED <str> (286) 33
     VOID <str> (287) 25
     VOLATILE <str> (288)
-    WHILE <str> (289) 123 124
-    NULL_TOKEN <str> (290) 218
-    NULLPTR <str> (291) 219
+    WHILE <str> (289) 126 127
+    NULL_TOKEN <str> (290) 221
+    NULLPTR <str> (291) 222
     CLASS <str> (292)
     PRIVATE <str> (293)
     PROTECTED <str> (294)
@@ -376,61 +379,61 @@ Terminals, with rules where they appear
     CATCH <str> (308)
     THROW <str> (309)
     BOOL <str> (310) 34
-    TRUE <str> (311) 216
-    FALSE <str> (312) 217
+    TRUE <str> (311) 219
+    FALSE <str> (312) 220
     TYPEDEF_NAME <str> (313) 24 36 39 49 52
-    ID <str> (314) 35 38 48 51 55 56 67 115 131 132 133 201 202 205
-    NUM <str> (315) 213
-    FLOAT_LIT <str> (316) 214
-    CHAR_LIT <str> (317) 215
-    STRING_LIT <str> (318) 209 210
-    PLUS <str> (319) 177 193
-    MINUS <str> (320) 178 194
-    MUL <str> (321) 65 66 180 192
-    DIV <str> (322) 181
-    MOD <str> (323) 182
-    ASSIGN <str> (324) 56 60 142
-    PLUS_EQ <str> (325) 143
-    MINUS_EQ <str> (326) 144
-    MUL_EQ <str> (327) 145
-    DIV_EQ <str> (328) 146
-    MOD_EQ <str> (329) 147
-    INC <str> (330) 186 203
-    DEC <str> (331) 187 204
-    EQ <str> (332) 166
-    NE <str> (333) 167
-    LT <str> (334) 169
-    GT <str> (335) 170
-    LE <str> (336) 171
-    GE <str> (337) 172
-    AND <str> (338) 158
-    OR <str> (339) 156
-    NOT <str> (340) 196
-    BIT_AND <str> (341) 63 64 83 84 85 86 132 164 191
-    BIT_OR <str> (342) 160
-    BIT_XOR <str> (343) 162
-    BIT_NOT <str> (344) 195
-    LSHIFT <str> (345) 174
-    RSHIFT <str> (346) 175
-    AND_EQ <str> (347) 148
-    OR_EQ <str> (348) 149
-    XOR_EQ <str> (349) 150
-    LSHIFT_EQ <str> (350) 151
-    RSHIFT_EQ <str> (351) 152
-    ARROW <str> (352) 202
-    DOT <str> (353) 201
+    ID <str> (314) 35 38 48 51 55 56 67 116 134 135 136 204 205 208
+    NUM <str> (315) 216
+    FLOAT_LIT <str> (316) 217
+    CHAR_LIT <str> (317) 218
+    STRING_LIT <str> (318) 212 213
+    PLUS <str> (319) 180 196
+    MINUS <str> (320) 181 197
+    MUL <str> (321) 65 66 183 195
+    DIV <str> (322) 184
+    MOD <str> (323) 185
+    ASSIGN <str> (324) 56 60 145
+    PLUS_EQ <str> (325) 146
+    MINUS_EQ <str> (326) 147
+    MUL_EQ <str> (327) 148
+    DIV_EQ <str> (328) 149
+    MOD_EQ <str> (329) 150
+    INC <str> (330) 189 206
+    DEC <str> (331) 190 207
+    EQ <str> (332) 169
+    NE <str> (333) 170
+    LT <str> (334) 172
+    GT <str> (335) 173
+    LE <str> (336) 174
+    GE <str> (337) 175
+    AND <str> (338) 161
+    OR <str> (339) 159
+    NOT <str> (340) 199
+    BIT_AND <str> (341) 63 64 83 84 85 86 135 167 194
+    BIT_OR <str> (342) 163
+    BIT_XOR <str> (343) 165
+    BIT_NOT <str> (344) 198
+    LSHIFT <str> (345) 177
+    RSHIFT <str> (346) 178
+    AND_EQ <str> (347) 151
+    OR_EQ <str> (348) 152
+    XOR_EQ <str> (349) 153
+    LSHIFT_EQ <str> (350) 154
+    RSHIFT_EQ <str> (351) 155
+    ARROW <str> (352) 205
+    DOT <str> (353) 204
     SCOPE <str> (354)
-    UNTIL <str> (355) 125
-    SEMI <str> (356) 10 11 44 118 119 124 133 134 135 136 137
-    COMMA <str> (357) 46 54 58 75 76 100 102 139 212
-    QUESTION <str> (358) 154
-    COLON <str> (359) 115 116 117 131 132 154
-    LPAREN <str> (360) 68 72 73 87 92 93 94 95 120 121 122 123 124 125 126 127 128 184 190 199 200 208
-    RPAREN <str> (361) 68 72 73 87 92 93 94 95 120 121 122 123 124 125 126 127 128 184 190 199 200 208
-    LBRACE <str> (362) 35 36 37 48 49 50 99 100 103 104
-    RBRACE <str> (363) 35 36 37 48 49 50 99 100 103 104
-    LBRACKET <str> (364) 69 70 88 89 90 91 198
-    RBRACKET <str> (365) 69 70 88 89 90 91 198
+    UNTIL <str> (355) 128
+    SEMI <str> (356) 10 11 44 121 122 127 136 137 138 139 140
+    COMMA <str> (357) 46 54 58 75 76 100 103 142 215
+    QUESTION <str> (358) 157
+    COLON <str> (359) 116 117 118 119 120 134 135 157
+    LPAREN <str> (360) 68 72 73 87 92 93 94 95 123 124 125 126 127 128 129 130 131 187 193 202 203 211
+    RPAREN <str> (361) 68 72 73 87 92 93 94 95 123 124 125 126 127 128 129 130 131 187 193 202 203 211
+    LBRACE <str> (362) 35 36 37 48 49 50 99 100 101 104 105
+    RBRACE <str> (363) 35 36 37 48 49 50 99 100 101 104 105
+    LBRACKET <str> (364) 69 70 88 89 90 91 201
+    RBRACKET <str> (365) 69 70 88 89 90 91 201
     ELLIPSIS <str> (366) 76
     PREP <str> (367) 7
     NEWLINE <str> (368)
@@ -463,10 +466,10 @@ Nonterminals, with rules where they appear
         on right: 4
     declaration <node> (126)
         on left: 10 11
-        on right: 5 107 130
+        on right: 5 108 118 120 133
     declaration_specifiers <node> (127)
         on left: 12 13 14 15
-        on right: 8 10 11 13 15 77 78 79 131 132
+        on right: 8 10 11 13 15 77 78 79 134 135
     storage_class_specifier <node> (128)
         on left: 16 17 18 19 20
         on right: 12 13
@@ -535,112 +538,112 @@ Nonterminals, with rules where they appear
         on right: 81 82 84 86 90 91 94 95
     type_name <node> (150)
         on left: 96 97
-        on right: 184 190
+        on right: 187 193
     initializer <node> (151)
-        on left: 98 99 100
-        on right: 60 101 102
+        on left: 98 99 100 101
+        on right: 60 102 103
     initializer_list <node> (152)
-        on left: 101 102
-        on right: 99 100 102
+        on left: 102 103
+        on right: 99 100 103
     compound_statement <node> (153)
-        on left: 103 104
-        on right: 8 9 111
+        on left: 104 105
+        on right: 8 9 112
     block_item_list <node> (154)
-        on left: 105 106
-        on right: 104 106
+        on left: 106 107
+        on right: 105 107
     block_item <node> (155)
-        on left: 107 108
-        on right: 105 106
+        on left: 108 109
+        on right: 106 107
     statement <node> (156)
-        on left: 109 110 111 112 113 114
-        on right: 108 115 116 117 120 121 122 123 124 125 126 127 128
+        on left: 110 111 112 113 114 115
+        on right: 109 116 117 119 123 124 125 126 127 128 129 130 131
     labeled_statement <node> (157)
-        on left: 115 116 117
-        on right: 109
+        on left: 116 117 118 119 120
+        on right: 110
     expression_statement <node> (158)
-        on left: 118 119
-        on right: 110 126 127 129
+        on left: 121 122
+        on right: 111 129 130 132
     selection_statement <node> (159)
-        on left: 120 121 122
-        on right: 112
-    iteration_statement <node> (160)
-        on left: 123 124 125 126 127 128
+        on left: 123 124 125
         on right: 113
-    for_init_statement <node> (161)
-        on left: 129 130
-        on right: 126 127
-    range_based_for <node> (162)
-        on left: 131 132
-        on right: 128
-    jump_statement <node> (163)
-        on left: 133 134 135 136 137
+    iteration_statement <node> (160)
+        on left: 126 127 128 129 130 131
         on right: 114
+    for_init_statement <node> (161)
+        on left: 132 133
+        on right: 129 130
+    range_based_for <node> (162)
+        on left: 134 135
+        on right: 131
+    jump_statement <node> (163)
+        on left: 136 137 138 139 140
+        on right: 115
     expression <node> (164)
-        on left: 138 139
-        on right: 118 120 121 122 123 124 125 127 131 132 136 139 154 198 208
+        on left: 141 142
+        on right: 121 123 124 125 126 127 128 130 134 135 139 142 157 201 211
     assignment_expression <node> (165)
-        on left: 140 141
-        on right: 56 69 89 91 98 116 138 139 141 211 212
+        on left: 143 144
+        on right: 56 69 89 91 98 117 118 141 142 144 214 215
     assignment_operator <str> (166)
-        on left: 142 143 144 145 146 147 148 149 150 151 152
-        on right: 141
+        on left: 145 146 147 148 149 150 151 152 153 154 155
+        on right: 144
     conditional_expression <node> (167)
-        on left: 153 154
-        on right: 140 154
+        on left: 156 157
+        on right: 143 157
     logical_or_expression <node> (168)
-        on left: 155 156
-        on right: 153 154 156
+        on left: 158 159
+        on right: 156 157 159
     logical_and_expression <node> (169)
-        on left: 157 158
-        on right: 155 156 158
+        on left: 160 161
+        on right: 158 159 161
     inclusive_or_expression <node> (170)
-        on left: 159 160
-        on right: 157 158 160
+        on left: 162 163
+        on right: 160 161 163
     exclusive_or_expression <node> (171)
-        on left: 161 162
-        on right: 159 160 162
+        on left: 164 165
+        on right: 162 163 165
     and_expression <node> (172)
-        on left: 163 164
-        on right: 161 162 164
+        on left: 166 167
+        on right: 164 165 167
     equality_expression <node> (173)
-        on left: 165 166 167
-        on right: 163 164 166 167
+        on left: 168 169 170
+        on right: 166 167 169 170
     relational_expression <node> (174)
-        on left: 168 169 170 171 172
-        on right: 165 166 167 169 170 171 172
+        on left: 171 172 173 174 175
+        on right: 168 169 170 172 173 174 175
     shift_expression <node> (175)
-        on left: 173 174 175
-        on right: 168 169 170 171 172 174 175
-    additive_expression <node> (176)
         on left: 176 177 178
-        on right: 173 174 175 177 178
+        on right: 171 172 173 174 175 177 178
+    additive_expression <node> (176)
+        on left: 179 180 181
+        on right: 176 177 178 180 181
     multiplicative_expression <node> (177)
-        on left: 179 180 181 182
-        on right: 176 177 178 180 181 182
+        on left: 182 183 184 185
+        on right: 179 180 181 183 184 185
     cast_expression <node> (178)
-        on left: 183 184
-        on right: 179 180 181 182 184 188
+        on left: 186 187
+        on right: 182 183 184 185 187 191
     unary_expression <node> (179)
-        on left: 185 186 187 188 189 190
-        on right: 141 183 186 187 189
+        on left: 188 189 190 191 192 193
+        on right: 144 186 189 190 192
     unary_operator <str> (180)
-        on left: 191 192 193 194 195 196
-        on right: 188
+        on left: 194 195 196 197 198 199
+        on right: 191
     postfix_expression <node> (181)
-        on left: 197 198 199 200 201 202 203 204
-        on right: 185 198 199 200 201 202 203 204
+        on left: 200 201 202 203 204 205 206 207
+        on right: 188 201 202 203 204 205 206 207
     primary_expression <node> (182)
-        on left: 205 206 207 208
-        on right: 197
+        on left: 208 209 210 211
+        on right: 200
     string_literal <node> (183)
-        on left: 209 210
-        on right: 207 210
+        on left: 212 213
+        on right: 210 213
     argument_expression_list <node> (184)
-        on left: 211 212
-        on right: 199 212
+        on left: 214 215
+        on right: 202 215
     constant <node> (185)
-        on left: 213 214 215 216 217 218 219
-        on right: 206
+        on left: 216 217 218 219 220 221 222
+        on right: 209
 
 
 State 0
@@ -1295,8 +1298,8 @@ State 57
 
 State 58
 
-  103 compound_statement: LBRACE • RBRACE
-  104                   | LBRACE • block_item_list RBRACE
+  104 compound_statement: LBRACE • RBRACE
+  105                   | LBRACE • block_item_list RBRACE
 
     AUTO          shift, and go to state 1
     BREAK         shift, and go to state 79
@@ -1720,14 +1723,15 @@ State 78
 
 State 79
 
-  135 jump_statement: BREAK • SEMI
+  138 jump_statement: BREAK • SEMI
 
     SEMI  shift, and go to state 166
 
 
 State 80
 
-  116 labeled_statement: CASE • assignment_expression COLON statement
+  117 labeled_statement: CASE • assignment_expression COLON statement
+  118                  | CASE • assignment_expression COLON declaration
 
     SIZEOF      shift, and go to state 88
     NULL_TOKEN  shift, and go to state 91
@@ -1772,21 +1776,22 @@ State 80
 
 State 81
 
-  134 jump_statement: CONTINUE • SEMI
+  137 jump_statement: CONTINUE • SEMI
 
     SEMI  shift, and go to state 168
 
 
 State 82
 
-  117 labeled_statement: DEFAULT • COLON statement
+  119 labeled_statement: DEFAULT • COLON statement
+  120                  | DEFAULT • COLON declaration
 
     COLON  shift, and go to state 169
 
 
 State 83
 
-  124 iteration_statement: DO • statement WHILE LPAREN expression RPAREN SEMI
+  127 iteration_statement: DO • statement WHILE LPAREN expression RPAREN SEMI
 
     BREAK       shift, and go to state 79
     CASE        shift, and go to state 80
@@ -1853,32 +1858,32 @@ State 83
 
 State 84
 
-  126 iteration_statement: FOR • LPAREN for_init_statement expression_statement RPAREN statement
-  127                    | FOR • LPAREN for_init_statement expression_statement expression RPAREN statement
-  128                    | FOR • LPAREN range_based_for RPAREN statement
+  129 iteration_statement: FOR • LPAREN for_init_statement expression_statement RPAREN statement
+  130                    | FOR • LPAREN for_init_statement expression_statement expression RPAREN statement
+  131                    | FOR • LPAREN range_based_for RPAREN statement
 
     LPAREN  shift, and go to state 171
 
 
 State 85
 
-  133 jump_statement: GOTO • ID SEMI
+  136 jump_statement: GOTO • ID SEMI
 
     ID  shift, and go to state 172
 
 
 State 86
 
-  120 selection_statement: IF • LPAREN expression RPAREN statement
-  121                    | IF • LPAREN expression RPAREN statement ELSE statement
+  123 selection_statement: IF • LPAREN expression RPAREN statement
+  124                    | IF • LPAREN expression RPAREN statement ELSE statement
 
     LPAREN  shift, and go to state 173
 
 
 State 87
 
-  136 jump_statement: RETURN • expression SEMI
-  137               | RETURN • SEMI
+  139 jump_statement: RETURN • expression SEMI
+  140               | RETURN • SEMI
 
     SIZEOF      shift, and go to state 88
     NULL_TOKEN  shift, and go to state 91
@@ -1925,8 +1930,8 @@ State 87
 
 State 88
 
-  189 unary_expression: SIZEOF • unary_expression
-  190                 | SIZEOF • LPAREN type_name RPAREN
+  192 unary_expression: SIZEOF • unary_expression
+  193                 | SIZEOF • LPAREN type_name RPAREN
 
     SIZEOF      shift, and go to state 88
     NULL_TOKEN  shift, and go to state 91
@@ -1958,108 +1963,108 @@ State 88
 
 State 89
 
-  122 selection_statement: SWITCH • LPAREN expression RPAREN statement
+  125 selection_statement: SWITCH • LPAREN expression RPAREN statement
 
     LPAREN  shift, and go to state 178
 
 
 State 90
 
-  123 iteration_statement: WHILE • LPAREN expression RPAREN statement
+  126 iteration_statement: WHILE • LPAREN expression RPAREN statement
 
     LPAREN  shift, and go to state 179
 
 
 State 91
 
-  218 constant: NULL_TOKEN •
+  221 constant: NULL_TOKEN •
 
-    $default  reduce using rule 218 (constant)
+    $default  reduce using rule 221 (constant)
 
 
 State 92
 
-  219 constant: NULLPTR •
+  222 constant: NULLPTR •
 
-    $default  reduce using rule 219 (constant)
+    $default  reduce using rule 222 (constant)
 
 
 State 93
 
-  216 constant: TRUE •
+  219 constant: TRUE •
 
-    $default  reduce using rule 216 (constant)
+    $default  reduce using rule 219 (constant)
 
 
 State 94
 
-  217 constant: FALSE •
+  220 constant: FALSE •
 
-    $default  reduce using rule 217 (constant)
+    $default  reduce using rule 220 (constant)
 
 
 State 95
 
-  115 labeled_statement: ID • COLON statement
-  205 primary_expression: ID •
+  116 labeled_statement: ID • COLON statement
+  208 primary_expression: ID •
 
     COLON  shift, and go to state 180
 
-    $default  reduce using rule 205 (primary_expression)
+    $default  reduce using rule 208 (primary_expression)
 
 
 State 96
 
-  213 constant: NUM •
+  216 constant: NUM •
 
-    $default  reduce using rule 213 (constant)
+    $default  reduce using rule 216 (constant)
 
 
 State 97
 
-  214 constant: FLOAT_LIT •
+  217 constant: FLOAT_LIT •
 
-    $default  reduce using rule 214 (constant)
+    $default  reduce using rule 217 (constant)
 
 
 State 98
 
-  215 constant: CHAR_LIT •
+  218 constant: CHAR_LIT •
 
-    $default  reduce using rule 215 (constant)
+    $default  reduce using rule 218 (constant)
 
 
 State 99
 
-  209 string_literal: STRING_LIT •
+  212 string_literal: STRING_LIT •
 
-    $default  reduce using rule 209 (string_literal)
+    $default  reduce using rule 212 (string_literal)
 
 
 State 100
 
-  193 unary_operator: PLUS •
+  196 unary_operator: PLUS •
 
-    $default  reduce using rule 193 (unary_operator)
+    $default  reduce using rule 196 (unary_operator)
 
 
 State 101
 
-  194 unary_operator: MINUS •
+  197 unary_operator: MINUS •
 
-    $default  reduce using rule 194 (unary_operator)
+    $default  reduce using rule 197 (unary_operator)
 
 
 State 102
 
-  192 unary_operator: MUL •
+  195 unary_operator: MUL •
 
-    $default  reduce using rule 192 (unary_operator)
+    $default  reduce using rule 195 (unary_operator)
 
 
 State 103
 
-  186 unary_expression: INC • unary_expression
+  189 unary_expression: INC • unary_expression
 
     SIZEOF      shift, and go to state 88
     NULL_TOKEN  shift, and go to state 91
@@ -2091,7 +2096,7 @@ State 103
 
 State 104
 
-  187 unary_expression: DEC • unary_expression
+  190 unary_expression: DEC • unary_expression
 
     SIZEOF      shift, and go to state 88
     NULL_TOKEN  shift, and go to state 91
@@ -2123,43 +2128,43 @@ State 104
 
 State 105
 
-  196 unary_operator: NOT •
+  199 unary_operator: NOT •
 
-    $default  reduce using rule 196 (unary_operator)
+    $default  reduce using rule 199 (unary_operator)
 
 
 State 106
 
-  191 unary_operator: BIT_AND •
+  194 unary_operator: BIT_AND •
 
-    $default  reduce using rule 191 (unary_operator)
+    $default  reduce using rule 194 (unary_operator)
 
 
 State 107
 
-  195 unary_operator: BIT_NOT •
+  198 unary_operator: BIT_NOT •
 
-    $default  reduce using rule 195 (unary_operator)
+    $default  reduce using rule 198 (unary_operator)
 
 
 State 108
 
-  125 iteration_statement: UNTIL • LPAREN expression RPAREN statement
+  128 iteration_statement: UNTIL • LPAREN expression RPAREN statement
 
     LPAREN  shift, and go to state 184
 
 
 State 109
 
-  119 expression_statement: SEMI •
+  122 expression_statement: SEMI •
 
-    $default  reduce using rule 119 (expression_statement)
+    $default  reduce using rule 122 (expression_statement)
 
 
 State 110
 
-  184 cast_expression: LPAREN • type_name RPAREN cast_expression
-  208 primary_expression: LPAREN • expression RPAREN
+  187 cast_expression: LPAREN • type_name RPAREN cast_expression
+  211 primary_expression: LPAREN • expression RPAREN
 
     CHAR          shift, and go to state 2
     DOUBLE        shift, and go to state 3
@@ -2225,16 +2230,16 @@ State 110
 
 State 111
 
-  103 compound_statement: LBRACE RBRACE •
+  104 compound_statement: LBRACE RBRACE •
 
-    $default  reduce using rule 103 (compound_statement)
+    $default  reduce using rule 104 (compound_statement)
 
 
 State 112
 
-  107 block_item: declaration •
+  108 block_item: declaration •
 
-    $default  reduce using rule 107 (block_item)
+    $default  reduce using rule 108 (block_item)
 
 
 State 113
@@ -2257,15 +2262,15 @@ State 113
 
 State 114
 
-  111 statement: compound_statement •
+  112 statement: compound_statement •
 
-    $default  reduce using rule 111 (statement)
+    $default  reduce using rule 112 (statement)
 
 
 State 115
 
-  104 compound_statement: LBRACE block_item_list • RBRACE
-  106 block_item_list: block_item_list • block_item
+  105 compound_statement: LBRACE block_item_list • RBRACE
+  107 block_item_list: block_item_list • block_item
 
     AUTO          shift, and go to state 1
     BREAK         shift, and go to state 79
@@ -2361,57 +2366,57 @@ State 115
 
 State 116
 
-  105 block_item_list: block_item •
+  106 block_item_list: block_item •
 
-    $default  reduce using rule 105 (block_item_list)
+    $default  reduce using rule 106 (block_item_list)
 
 
 State 117
 
-  108 block_item: statement •
+  109 block_item: statement •
 
-    $default  reduce using rule 108 (block_item)
+    $default  reduce using rule 109 (block_item)
 
 
 State 118
 
-  109 statement: labeled_statement •
-
-    $default  reduce using rule 109 (statement)
-
-
-State 119
-
-  110 statement: expression_statement •
+  110 statement: labeled_statement •
 
     $default  reduce using rule 110 (statement)
 
 
+State 119
+
+  111 statement: expression_statement •
+
+    $default  reduce using rule 111 (statement)
+
+
 State 120
 
-  112 statement: selection_statement •
-
-    $default  reduce using rule 112 (statement)
-
-
-State 121
-
-  113 statement: iteration_statement •
+  113 statement: selection_statement •
 
     $default  reduce using rule 113 (statement)
 
 
-State 122
+State 121
 
-  114 statement: jump_statement •
+  114 statement: iteration_statement •
 
     $default  reduce using rule 114 (statement)
 
 
+State 122
+
+  115 statement: jump_statement •
+
+    $default  reduce using rule 115 (statement)
+
+
 State 123
 
-  118 expression_statement: expression • SEMI
-  139 expression: expression • COMMA assignment_expression
+  121 expression_statement: expression • SEMI
+  142 expression: expression • COMMA assignment_expression
 
     SEMI   shift, and go to state 190
     COMMA  shift, and go to state 191
@@ -2419,147 +2424,147 @@ State 123
 
 State 124
 
-  138 expression: assignment_expression •
+  141 expression: assignment_expression •
 
-    $default  reduce using rule 138 (expression)
+    $default  reduce using rule 141 (expression)
 
 
 State 125
 
-  140 assignment_expression: conditional_expression •
+  143 assignment_expression: conditional_expression •
 
-    $default  reduce using rule 140 (assignment_expression)
+    $default  reduce using rule 143 (assignment_expression)
 
 
 State 126
 
-  153 conditional_expression: logical_or_expression •
-  154                       | logical_or_expression • QUESTION expression COLON conditional_expression
-  156 logical_or_expression: logical_or_expression • OR logical_and_expression
+  156 conditional_expression: logical_or_expression •
+  157                       | logical_or_expression • QUESTION expression COLON conditional_expression
+  159 logical_or_expression: logical_or_expression • OR logical_and_expression
 
     OR        shift, and go to state 192
     QUESTION  shift, and go to state 193
 
-    $default  reduce using rule 153 (conditional_expression)
+    $default  reduce using rule 156 (conditional_expression)
 
 
 State 127
 
-  155 logical_or_expression: logical_and_expression •
-  158 logical_and_expression: logical_and_expression • AND inclusive_or_expression
+  158 logical_or_expression: logical_and_expression •
+  161 logical_and_expression: logical_and_expression • AND inclusive_or_expression
 
     AND  shift, and go to state 194
 
-    $default  reduce using rule 155 (logical_or_expression)
+    $default  reduce using rule 158 (logical_or_expression)
 
 
 State 128
 
-  157 logical_and_expression: inclusive_or_expression •
-  160 inclusive_or_expression: inclusive_or_expression • BIT_OR exclusive_or_expression
+  160 logical_and_expression: inclusive_or_expression •
+  163 inclusive_or_expression: inclusive_or_expression • BIT_OR exclusive_or_expression
 
     BIT_OR  shift, and go to state 195
 
-    $default  reduce using rule 157 (logical_and_expression)
+    $default  reduce using rule 160 (logical_and_expression)
 
 
 State 129
 
-  159 inclusive_or_expression: exclusive_or_expression •
-  162 exclusive_or_expression: exclusive_or_expression • BIT_XOR and_expression
+  162 inclusive_or_expression: exclusive_or_expression •
+  165 exclusive_or_expression: exclusive_or_expression • BIT_XOR and_expression
 
     BIT_XOR  shift, and go to state 196
 
-    $default  reduce using rule 159 (inclusive_or_expression)
+    $default  reduce using rule 162 (inclusive_or_expression)
 
 
 State 130
 
-  161 exclusive_or_expression: and_expression •
-  164 and_expression: and_expression • BIT_AND equality_expression
+  164 exclusive_or_expression: and_expression •
+  167 and_expression: and_expression • BIT_AND equality_expression
 
     BIT_AND  shift, and go to state 197
 
-    $default  reduce using rule 161 (exclusive_or_expression)
+    $default  reduce using rule 164 (exclusive_or_expression)
 
 
 State 131
 
-  163 and_expression: equality_expression •
-  166 equality_expression: equality_expression • EQ relational_expression
-  167                    | equality_expression • NE relational_expression
+  166 and_expression: equality_expression •
+  169 equality_expression: equality_expression • EQ relational_expression
+  170                    | equality_expression • NE relational_expression
 
     EQ  shift, and go to state 198
     NE  shift, and go to state 199
 
-    $default  reduce using rule 163 (and_expression)
+    $default  reduce using rule 166 (and_expression)
 
 
 State 132
 
-  165 equality_expression: relational_expression •
-  169 relational_expression: relational_expression • LT shift_expression
-  170                      | relational_expression • GT shift_expression
-  171                      | relational_expression • LE shift_expression
-  172                      | relational_expression • GE shift_expression
+  168 equality_expression: relational_expression •
+  172 relational_expression: relational_expression • LT shift_expression
+  173                      | relational_expression • GT shift_expression
+  174                      | relational_expression • LE shift_expression
+  175                      | relational_expression • GE shift_expression
 
     LT  shift, and go to state 200
     GT  shift, and go to state 201
     LE  shift, and go to state 202
     GE  shift, and go to state 203
 
-    $default  reduce using rule 165 (equality_expression)
+    $default  reduce using rule 168 (equality_expression)
 
 
 State 133
 
-  168 relational_expression: shift_expression •
-  174 shift_expression: shift_expression • LSHIFT additive_expression
-  175                 | shift_expression • RSHIFT additive_expression
+  171 relational_expression: shift_expression •
+  177 shift_expression: shift_expression • LSHIFT additive_expression
+  178                 | shift_expression • RSHIFT additive_expression
 
     LSHIFT  shift, and go to state 204
     RSHIFT  shift, and go to state 205
 
-    $default  reduce using rule 168 (relational_expression)
+    $default  reduce using rule 171 (relational_expression)
 
 
 State 134
 
-  173 shift_expression: additive_expression •
-  177 additive_expression: additive_expression • PLUS multiplicative_expression
-  178                    | additive_expression • MINUS multiplicative_expression
+  176 shift_expression: additive_expression •
+  180 additive_expression: additive_expression • PLUS multiplicative_expression
+  181                    | additive_expression • MINUS multiplicative_expression
 
     PLUS   shift, and go to state 206
     MINUS  shift, and go to state 207
 
-    $default  reduce using rule 173 (shift_expression)
+    $default  reduce using rule 176 (shift_expression)
 
 
 State 135
 
-  176 additive_expression: multiplicative_expression •
-  180 multiplicative_expression: multiplicative_expression • MUL cast_expression
-  181                          | multiplicative_expression • DIV cast_expression
-  182                          | multiplicative_expression • MOD cast_expression
+  179 additive_expression: multiplicative_expression •
+  183 multiplicative_expression: multiplicative_expression • MUL cast_expression
+  184                          | multiplicative_expression • DIV cast_expression
+  185                          | multiplicative_expression • MOD cast_expression
 
     MUL  shift, and go to state 208
     DIV  shift, and go to state 209
     MOD  shift, and go to state 210
 
-    $default  reduce using rule 176 (additive_expression)
+    $default  reduce using rule 179 (additive_expression)
 
 
 State 136
 
-  179 multiplicative_expression: cast_expression •
+  182 multiplicative_expression: cast_expression •
 
-    $default  reduce using rule 179 (multiplicative_expression)
+    $default  reduce using rule 182 (multiplicative_expression)
 
 
 State 137
 
-  141 assignment_expression: unary_expression • assignment_operator assignment_expression
-  183 cast_expression: unary_expression •
+  144 assignment_expression: unary_expression • assignment_operator assignment_expression
+  186 cast_expression: unary_expression •
 
     ASSIGN     shift, and go to state 211
     PLUS_EQ    shift, and go to state 212
@@ -2573,14 +2578,14 @@ State 137
     LSHIFT_EQ  shift, and go to state 220
     RSHIFT_EQ  shift, and go to state 221
 
-    $default  reduce using rule 183 (cast_expression)
+    $default  reduce using rule 186 (cast_expression)
 
     assignment_operator  go to state 222
 
 
 State 138
 
-  188 unary_expression: unary_operator • cast_expression
+  191 unary_expression: unary_operator • cast_expression
 
     SIZEOF      shift, and go to state 88
     NULL_TOKEN  shift, and go to state 91
@@ -2613,14 +2618,14 @@ State 138
 
 State 139
 
-  185 unary_expression: postfix_expression •
-  198 postfix_expression: postfix_expression • LBRACKET expression RBRACKET
-  199                   | postfix_expression • LPAREN argument_expression_list RPAREN
-  200                   | postfix_expression • LPAREN RPAREN
-  201                   | postfix_expression • DOT ID
-  202                   | postfix_expression • ARROW ID
-  203                   | postfix_expression • INC
-  204                   | postfix_expression • DEC
+  188 unary_expression: postfix_expression •
+  201 postfix_expression: postfix_expression • LBRACKET expression RBRACKET
+  202                   | postfix_expression • LPAREN argument_expression_list RPAREN
+  203                   | postfix_expression • LPAREN RPAREN
+  204                   | postfix_expression • DOT ID
+  205                   | postfix_expression • ARROW ID
+  206                   | postfix_expression • INC
+  207                   | postfix_expression • DEC
 
     INC       shift, and go to state 225
     DEC       shift, and go to state 226
@@ -2629,31 +2634,31 @@ State 139
     LPAREN    shift, and go to state 229
     LBRACKET  shift, and go to state 230
 
-    $default  reduce using rule 185 (unary_expression)
+    $default  reduce using rule 188 (unary_expression)
 
 
 State 140
 
-  197 postfix_expression: primary_expression •
+  200 postfix_expression: primary_expression •
 
-    $default  reduce using rule 197 (postfix_expression)
+    $default  reduce using rule 200 (postfix_expression)
 
 
 State 141
 
-  207 primary_expression: string_literal •
-  210 string_literal: string_literal • STRING_LIT
+  210 primary_expression: string_literal •
+  213 string_literal: string_literal • STRING_LIT
 
     STRING_LIT  shift, and go to state 231
 
-    $default  reduce using rule 207 (primary_expression)
+    $default  reduce using rule 210 (primary_expression)
 
 
 State 142
 
-  206 primary_expression: constant •
+  209 primary_expression: constant •
 
-    $default  reduce using rule 206 (primary_expression)
+    $default  reduce using rule 209 (primary_expression)
 
 
 State 143
@@ -2714,9 +2719,9 @@ State 145
 
 State 146
 
-  205 primary_expression: ID •
+  208 primary_expression: ID •
 
-    $default  reduce using rule 205 (primary_expression)
+    $default  reduce using rule 208 (primary_expression)
 
 
 State 147
@@ -2833,6 +2838,7 @@ State 156
 
    99 initializer: LBRACE • initializer_list RBRACE
   100            | LBRACE • initializer_list COMMA RBRACE
+  101            | LBRACE • RBRACE
 
     SIZEOF      shift, and go to state 88
     NULL_TOKEN  shift, and go to state 91
@@ -2854,9 +2860,10 @@ State 156
     BIT_NOT     shift, and go to state 107
     LPAREN      shift, and go to state 110
     LBRACE      shift, and go to state 156
+    RBRACE      shift, and go to state 240
 
-    initializer                go to state 240
-    initializer_list           go to state 241
+    initializer                go to state 241
+    initializer_list           go to state 242
     assignment_expression      go to state 158
     conditional_expression     go to state 125
     logical_or_expression      go to state 126
@@ -2911,7 +2918,7 @@ State 159
     VOID          shift, and go to state 17
     BOOL          shift, and go to state 18
     TYPEDEF_NAME  shift, and go to state 19
-    RBRACE        shift, and go to state 242
+    RBRACE        shift, and go to state 243
 
     type_specifier             go to state 76
     type_keyword               go to state 34
@@ -2940,7 +2947,7 @@ State 160
     VOID          shift, and go to state 17
     BOOL          shift, and go to state 18
     TYPEDEF_NAME  shift, and go to state 19
-    RBRACE        shift, and go to state 243
+    RBRACE        shift, and go to state 244
 
     type_specifier             go to state 76
     type_keyword               go to state 34
@@ -2955,8 +2962,8 @@ State 161
    44 struct_declaration: type_specifier struct_declarator_list • SEMI
    46 struct_declarator_list: struct_declarator_list • COMMA struct_declarator
 
-    SEMI   shift, and go to state 244
-    COMMA  shift, and go to state 245
+    SEMI   shift, and go to state 245
+    COMMA  shift, and go to state 246
 
 
 State 162
@@ -2989,65 +2996,94 @@ State 165
 
 State 166
 
-  135 jump_statement: BREAK SEMI •
+  138 jump_statement: BREAK SEMI •
 
-    $default  reduce using rule 135 (jump_statement)
+    $default  reduce using rule 138 (jump_statement)
 
 
 State 167
 
-  116 labeled_statement: CASE assignment_expression • COLON statement
+  117 labeled_statement: CASE assignment_expression • COLON statement
+  118                  | CASE assignment_expression • COLON declaration
 
-    COLON  shift, and go to state 246
+    COLON  shift, and go to state 247
 
 
 State 168
 
-  134 jump_statement: CONTINUE SEMI •
+  137 jump_statement: CONTINUE SEMI •
 
-    $default  reduce using rule 134 (jump_statement)
+    $default  reduce using rule 137 (jump_statement)
 
 
 State 169
 
-  117 labeled_statement: DEFAULT COLON • statement
+  119 labeled_statement: DEFAULT COLON • statement
+  120                  | DEFAULT COLON • declaration
 
-    BREAK       shift, and go to state 79
-    CASE        shift, and go to state 80
-    CONTINUE    shift, and go to state 81
-    DEFAULT     shift, and go to state 82
-    DO          shift, and go to state 83
-    FOR         shift, and go to state 84
-    GOTO        shift, and go to state 85
-    IF          shift, and go to state 86
-    RETURN      shift, and go to state 87
-    SIZEOF      shift, and go to state 88
-    SWITCH      shift, and go to state 89
-    WHILE       shift, and go to state 90
-    NULL_TOKEN  shift, and go to state 91
-    NULLPTR     shift, and go to state 92
-    TRUE        shift, and go to state 93
-    FALSE       shift, and go to state 94
-    ID          shift, and go to state 95
-    NUM         shift, and go to state 96
-    FLOAT_LIT   shift, and go to state 97
-    CHAR_LIT    shift, and go to state 98
-    STRING_LIT  shift, and go to state 99
-    PLUS        shift, and go to state 100
-    MINUS       shift, and go to state 101
-    MUL         shift, and go to state 102
-    INC         shift, and go to state 103
-    DEC         shift, and go to state 104
-    NOT         shift, and go to state 105
-    BIT_AND     shift, and go to state 106
-    BIT_NOT     shift, and go to state 107
-    UNTIL       shift, and go to state 108
-    SEMI        shift, and go to state 109
-    LPAREN      shift, and go to state 110
-    LBRACE      shift, and go to state 58
+    AUTO          shift, and go to state 1
+    BREAK         shift, and go to state 79
+    CASE          shift, and go to state 80
+    CHAR          shift, and go to state 2
+    CONTINUE      shift, and go to state 81
+    DEFAULT       shift, and go to state 82
+    DO            shift, and go to state 83
+    DOUBLE        shift, and go to state 3
+    ENUM          shift, and go to state 4
+    EXTERN        shift, and go to state 5
+    FLOAT         shift, and go to state 6
+    FOR           shift, and go to state 84
+    GOTO          shift, and go to state 85
+    IF            shift, and go to state 86
+    INT           shift, and go to state 7
+    LONG          shift, and go to state 8
+    REGISTER      shift, and go to state 9
+    RETURN        shift, and go to state 87
+    SHORT         shift, and go to state 10
+    SIGNED        shift, and go to state 11
+    SIZEOF        shift, and go to state 88
+    STATIC        shift, and go to state 12
+    STRUCT        shift, and go to state 13
+    SWITCH        shift, and go to state 89
+    TYPEDEF       shift, and go to state 14
+    UNION         shift, and go to state 15
+    UNSIGNED      shift, and go to state 16
+    VOID          shift, and go to state 17
+    WHILE         shift, and go to state 90
+    NULL_TOKEN    shift, and go to state 91
+    NULLPTR       shift, and go to state 92
+    BOOL          shift, and go to state 18
+    TRUE          shift, and go to state 93
+    FALSE         shift, and go to state 94
+    TYPEDEF_NAME  shift, and go to state 19
+    ID            shift, and go to state 95
+    NUM           shift, and go to state 96
+    FLOAT_LIT     shift, and go to state 97
+    CHAR_LIT      shift, and go to state 98
+    STRING_LIT    shift, and go to state 99
+    PLUS          shift, and go to state 100
+    MINUS         shift, and go to state 101
+    MUL           shift, and go to state 102
+    INC           shift, and go to state 103
+    DEC           shift, and go to state 104
+    NOT           shift, and go to state 105
+    BIT_AND       shift, and go to state 106
+    BIT_NOT       shift, and go to state 107
+    UNTIL         shift, and go to state 108
+    SEMI          shift, and go to state 109
+    LPAREN        shift, and go to state 110
+    LBRACE        shift, and go to state 58
 
+    declaration                go to state 248
+    declaration_specifiers     go to state 113
+    storage_class_specifier    go to state 32
+    type_specifier             go to state 33
+    type_keyword               go to state 34
+    struct_or_union_specifier  go to state 35
+    struct_or_union            go to state 36
+    enum_specifier             go to state 37
     compound_statement         go to state 114
-    statement                  go to state 247
+    statement                  go to state 249
     labeled_statement          go to state 118
     expression_statement       go to state 119
     selection_statement        go to state 120
@@ -3077,16 +3113,16 @@ State 169
 
 State 170
 
-  124 iteration_statement: DO statement • WHILE LPAREN expression RPAREN SEMI
+  127 iteration_statement: DO statement • WHILE LPAREN expression RPAREN SEMI
 
-    WHILE  shift, and go to state 248
+    WHILE  shift, and go to state 250
 
 
 State 171
 
-  126 iteration_statement: FOR LPAREN • for_init_statement expression_statement RPAREN statement
-  127                    | FOR LPAREN • for_init_statement expression_statement expression RPAREN statement
-  128                    | FOR LPAREN • range_based_for RPAREN statement
+  129 iteration_statement: FOR LPAREN • for_init_statement expression_statement RPAREN statement
+  130                    | FOR LPAREN • for_init_statement expression_statement expression RPAREN statement
+  131                    | FOR LPAREN • range_based_for RPAREN statement
 
     AUTO          shift, and go to state 1
     CHAR          shift, and go to state 2
@@ -3128,17 +3164,17 @@ State 171
     SEMI          shift, and go to state 109
     LPAREN        shift, and go to state 110
 
-    declaration                go to state 249
-    declaration_specifiers     go to state 250
+    declaration                go to state 251
+    declaration_specifiers     go to state 252
     storage_class_specifier    go to state 32
     type_specifier             go to state 33
     type_keyword               go to state 34
     struct_or_union_specifier  go to state 35
     struct_or_union            go to state 36
     enum_specifier             go to state 37
-    expression_statement       go to state 251
-    for_init_statement         go to state 252
-    range_based_for            go to state 253
+    expression_statement       go to state 253
+    for_init_statement         go to state 254
+    range_based_for            go to state 255
     expression                 go to state 123
     assignment_expression      go to state 124
     conditional_expression     go to state 125
@@ -3163,15 +3199,15 @@ State 171
 
 State 172
 
-  133 jump_statement: GOTO ID • SEMI
+  136 jump_statement: GOTO ID • SEMI
 
-    SEMI  shift, and go to state 254
+    SEMI  shift, and go to state 256
 
 
 State 173
 
-  120 selection_statement: IF LPAREN • expression RPAREN statement
-  121                    | IF LPAREN • expression RPAREN statement ELSE statement
+  123 selection_statement: IF LPAREN • expression RPAREN statement
+  124                    | IF LPAREN • expression RPAREN statement ELSE statement
 
     SIZEOF      shift, and go to state 88
     NULL_TOKEN  shift, and go to state 91
@@ -3193,7 +3229,7 @@ State 173
     BIT_NOT     shift, and go to state 107
     LPAREN      shift, and go to state 110
 
-    expression                 go to state 255
+    expression                 go to state 257
     assignment_expression      go to state 124
     conditional_expression     go to state 125
     logical_or_expression      go to state 126
@@ -3217,24 +3253,24 @@ State 173
 
 State 174
 
-  137 jump_statement: RETURN SEMI •
+  140 jump_statement: RETURN SEMI •
 
-    $default  reduce using rule 137 (jump_statement)
+    $default  reduce using rule 140 (jump_statement)
 
 
 State 175
 
-  136 jump_statement: RETURN expression • SEMI
-  139 expression: expression • COMMA assignment_expression
+  139 jump_statement: RETURN expression • SEMI
+  142 expression: expression • COMMA assignment_expression
 
-    SEMI   shift, and go to state 256
+    SEMI   shift, and go to state 258
     COMMA  shift, and go to state 191
 
 
 State 176
 
-  190 unary_expression: SIZEOF LPAREN • type_name RPAREN
-  208 primary_expression: LPAREN • expression RPAREN
+  193 unary_expression: SIZEOF LPAREN • type_name RPAREN
+  211 primary_expression: LPAREN • expression RPAREN
 
     CHAR          shift, and go to state 2
     DOUBLE        shift, and go to state 3
@@ -3275,7 +3311,7 @@ State 176
     struct_or_union_specifier  go to state 35
     struct_or_union            go to state 36
     enum_specifier             go to state 37
-    type_name                  go to state 257
+    type_name                  go to state 259
     expression                 go to state 187
     assignment_expression      go to state 124
     conditional_expression     go to state 125
@@ -3300,14 +3336,14 @@ State 176
 
 State 177
 
-  189 unary_expression: SIZEOF unary_expression •
+  192 unary_expression: SIZEOF unary_expression •
 
-    $default  reduce using rule 189 (unary_expression)
+    $default  reduce using rule 192 (unary_expression)
 
 
 State 178
 
-  122 selection_statement: SWITCH LPAREN • expression RPAREN statement
+  125 selection_statement: SWITCH LPAREN • expression RPAREN statement
 
     SIZEOF      shift, and go to state 88
     NULL_TOKEN  shift, and go to state 91
@@ -3329,7 +3365,7 @@ State 178
     BIT_NOT     shift, and go to state 107
     LPAREN      shift, and go to state 110
 
-    expression                 go to state 258
+    expression                 go to state 260
     assignment_expression      go to state 124
     conditional_expression     go to state 125
     logical_or_expression      go to state 126
@@ -3353,7 +3389,7 @@ State 178
 
 State 179
 
-  123 iteration_statement: WHILE LPAREN • expression RPAREN statement
+  126 iteration_statement: WHILE LPAREN • expression RPAREN statement
 
     SIZEOF      shift, and go to state 88
     NULL_TOKEN  shift, and go to state 91
@@ -3375,7 +3411,7 @@ State 179
     BIT_NOT     shift, and go to state 107
     LPAREN      shift, and go to state 110
 
-    expression                 go to state 259
+    expression                 go to state 261
     assignment_expression      go to state 124
     conditional_expression     go to state 125
     logical_or_expression      go to state 126
@@ -3399,7 +3435,7 @@ State 179
 
 State 180
 
-  115 labeled_statement: ID COLON • statement
+  116 labeled_statement: ID COLON • statement
 
     BREAK       shift, and go to state 79
     CASE        shift, and go to state 80
@@ -3436,7 +3472,7 @@ State 180
     LBRACE      shift, and go to state 58
 
     compound_statement         go to state 114
-    statement                  go to state 260
+    statement                  go to state 262
     labeled_statement          go to state 118
     expression_statement       go to state 119
     selection_statement        go to state 120
@@ -3466,7 +3502,7 @@ State 180
 
 State 181
 
-  208 primary_expression: LPAREN • expression RPAREN
+  211 primary_expression: LPAREN • expression RPAREN
 
     SIZEOF      shift, and go to state 88
     NULL_TOKEN  shift, and go to state 91
@@ -3512,21 +3548,21 @@ State 181
 
 State 182
 
-  186 unary_expression: INC unary_expression •
+  189 unary_expression: INC unary_expression •
 
-    $default  reduce using rule 186 (unary_expression)
+    $default  reduce using rule 189 (unary_expression)
 
 
 State 183
 
-  187 unary_expression: DEC unary_expression •
+  190 unary_expression: DEC unary_expression •
 
-    $default  reduce using rule 187 (unary_expression)
+    $default  reduce using rule 190 (unary_expression)
 
 
 State 184
 
-  125 iteration_statement: UNTIL LPAREN • expression RPAREN statement
+  128 iteration_statement: UNTIL LPAREN • expression RPAREN statement
 
     SIZEOF      shift, and go to state 88
     NULL_TOKEN  shift, and go to state 91
@@ -3548,7 +3584,7 @@ State 184
     BIT_NOT     shift, and go to state 107
     LPAREN      shift, and go to state 110
 
-    expression                 go to state 261
+    expression                 go to state 263
     assignment_expression      go to state 124
     conditional_expression     go to state 125
     logical_or_expression      go to state 126
@@ -3576,57 +3612,57 @@ State 185
    97          | type_specifier • abstract_declarator
 
     MUL       shift, and go to state 21
-    BIT_AND   shift, and go to state 262
-    LPAREN    shift, and go to state 263
-    LBRACKET  shift, and go to state 264
+    BIT_AND   shift, and go to state 264
+    LPAREN    shift, and go to state 265
+    LBRACKET  shift, and go to state 266
 
     $default  reduce using rule 96 (type_name)
 
-    pointer                     go to state 265
-    abstract_declarator         go to state 266
-    direct_abstract_declarator  go to state 267
+    pointer                     go to state 267
+    abstract_declarator         go to state 268
+    direct_abstract_declarator  go to state 269
 
 
 State 186
 
-  184 cast_expression: LPAREN type_name • RPAREN cast_expression
+  187 cast_expression: LPAREN type_name • RPAREN cast_expression
 
-    RPAREN  shift, and go to state 268
+    RPAREN  shift, and go to state 270
 
 
 State 187
 
-  139 expression: expression • COMMA assignment_expression
-  208 primary_expression: LPAREN expression • RPAREN
+  142 expression: expression • COMMA assignment_expression
+  211 primary_expression: LPAREN expression • RPAREN
 
     COMMA   shift, and go to state 191
-    RPAREN  shift, and go to state 269
+    RPAREN  shift, and go to state 271
 
 
 State 188
 
-  104 compound_statement: LBRACE block_item_list RBRACE •
+  105 compound_statement: LBRACE block_item_list RBRACE •
 
-    $default  reduce using rule 104 (compound_statement)
+    $default  reduce using rule 105 (compound_statement)
 
 
 State 189
 
-  106 block_item_list: block_item_list block_item •
+  107 block_item_list: block_item_list block_item •
 
-    $default  reduce using rule 106 (block_item_list)
+    $default  reduce using rule 107 (block_item_list)
 
 
 State 190
 
-  118 expression_statement: expression SEMI •
+  121 expression_statement: expression SEMI •
 
-    $default  reduce using rule 118 (expression_statement)
+    $default  reduce using rule 121 (expression_statement)
 
 
 State 191
 
-  139 expression: expression COMMA • assignment_expression
+  142 expression: expression COMMA • assignment_expression
 
     SIZEOF      shift, and go to state 88
     NULL_TOKEN  shift, and go to state 91
@@ -3648,7 +3684,7 @@ State 191
     BIT_NOT     shift, and go to state 107
     LPAREN      shift, and go to state 110
 
-    assignment_expression      go to state 270
+    assignment_expression      go to state 272
     conditional_expression     go to state 125
     logical_or_expression      go to state 126
     logical_and_expression     go to state 127
@@ -3671,7 +3707,7 @@ State 191
 
 State 192
 
-  156 logical_or_expression: logical_or_expression OR • logical_and_expression
+  159 logical_or_expression: logical_or_expression OR • logical_and_expression
 
     SIZEOF      shift, and go to state 88
     NULL_TOKEN  shift, and go to state 91
@@ -3693,7 +3729,7 @@ State 192
     BIT_NOT     shift, and go to state 107
     LPAREN      shift, and go to state 110
 
-    logical_and_expression     go to state 271
+    logical_and_expression     go to state 273
     inclusive_or_expression    go to state 128
     exclusive_or_expression    go to state 129
     and_expression             go to state 130
@@ -3713,7 +3749,7 @@ State 192
 
 State 193
 
-  154 conditional_expression: logical_or_expression QUESTION • expression COLON conditional_expression
+  157 conditional_expression: logical_or_expression QUESTION • expression COLON conditional_expression
 
     SIZEOF      shift, and go to state 88
     NULL_TOKEN  shift, and go to state 91
@@ -3735,7 +3771,7 @@ State 193
     BIT_NOT     shift, and go to state 107
     LPAREN      shift, and go to state 110
 
-    expression                 go to state 272
+    expression                 go to state 274
     assignment_expression      go to state 124
     conditional_expression     go to state 125
     logical_or_expression      go to state 126
@@ -3759,7 +3795,7 @@ State 193
 
 State 194
 
-  158 logical_and_expression: logical_and_expression AND • inclusive_or_expression
+  161 logical_and_expression: logical_and_expression AND • inclusive_or_expression
 
     SIZEOF      shift, and go to state 88
     NULL_TOKEN  shift, and go to state 91
@@ -3781,7 +3817,7 @@ State 194
     BIT_NOT     shift, and go to state 107
     LPAREN      shift, and go to state 110
 
-    inclusive_or_expression    go to state 273
+    inclusive_or_expression    go to state 275
     exclusive_or_expression    go to state 129
     and_expression             go to state 130
     equality_expression        go to state 131
@@ -3800,7 +3836,7 @@ State 194
 
 State 195
 
-  160 inclusive_or_expression: inclusive_or_expression BIT_OR • exclusive_or_expression
+  163 inclusive_or_expression: inclusive_or_expression BIT_OR • exclusive_or_expression
 
     SIZEOF      shift, and go to state 88
     NULL_TOKEN  shift, and go to state 91
@@ -3822,7 +3858,7 @@ State 195
     BIT_NOT     shift, and go to state 107
     LPAREN      shift, and go to state 110
 
-    exclusive_or_expression    go to state 274
+    exclusive_or_expression    go to state 276
     and_expression             go to state 130
     equality_expression        go to state 131
     relational_expression      go to state 132
@@ -3840,7 +3876,7 @@ State 195
 
 State 196
 
-  162 exclusive_or_expression: exclusive_or_expression BIT_XOR • and_expression
+  165 exclusive_or_expression: exclusive_or_expression BIT_XOR • and_expression
 
     SIZEOF      shift, and go to state 88
     NULL_TOKEN  shift, and go to state 91
@@ -3862,7 +3898,7 @@ State 196
     BIT_NOT     shift, and go to state 107
     LPAREN      shift, and go to state 110
 
-    and_expression             go to state 275
+    and_expression             go to state 277
     equality_expression        go to state 131
     relational_expression      go to state 132
     shift_expression           go to state 133
@@ -3879,7 +3915,7 @@ State 196
 
 State 197
 
-  164 and_expression: and_expression BIT_AND • equality_expression
+  167 and_expression: and_expression BIT_AND • equality_expression
 
     SIZEOF      shift, and go to state 88
     NULL_TOKEN  shift, and go to state 91
@@ -3901,7 +3937,7 @@ State 197
     BIT_NOT     shift, and go to state 107
     LPAREN      shift, and go to state 110
 
-    equality_expression        go to state 276
+    equality_expression        go to state 278
     relational_expression      go to state 132
     shift_expression           go to state 133
     additive_expression        go to state 134
@@ -3917,7 +3953,7 @@ State 197
 
 State 198
 
-  166 equality_expression: equality_expression EQ • relational_expression
+  169 equality_expression: equality_expression EQ • relational_expression
 
     SIZEOF      shift, and go to state 88
     NULL_TOKEN  shift, and go to state 91
@@ -3939,7 +3975,7 @@ State 198
     BIT_NOT     shift, and go to state 107
     LPAREN      shift, and go to state 110
 
-    relational_expression      go to state 277
+    relational_expression      go to state 279
     shift_expression           go to state 133
     additive_expression        go to state 134
     multiplicative_expression  go to state 135
@@ -3954,7 +3990,7 @@ State 198
 
 State 199
 
-  167 equality_expression: equality_expression NE • relational_expression
+  170 equality_expression: equality_expression NE • relational_expression
 
     SIZEOF      shift, and go to state 88
     NULL_TOKEN  shift, and go to state 91
@@ -3976,7 +4012,7 @@ State 199
     BIT_NOT     shift, and go to state 107
     LPAREN      shift, and go to state 110
 
-    relational_expression      go to state 278
+    relational_expression      go to state 280
     shift_expression           go to state 133
     additive_expression        go to state 134
     multiplicative_expression  go to state 135
@@ -3991,79 +4027,7 @@ State 199
 
 State 200
 
-  169 relational_expression: relational_expression LT • shift_expression
-
-    SIZEOF      shift, and go to state 88
-    NULL_TOKEN  shift, and go to state 91
-    NULLPTR     shift, and go to state 92
-    TRUE        shift, and go to state 93
-    FALSE       shift, and go to state 94
-    ID          shift, and go to state 146
-    NUM         shift, and go to state 96
-    FLOAT_LIT   shift, and go to state 97
-    CHAR_LIT    shift, and go to state 98
-    STRING_LIT  shift, and go to state 99
-    PLUS        shift, and go to state 100
-    MINUS       shift, and go to state 101
-    MUL         shift, and go to state 102
-    INC         shift, and go to state 103
-    DEC         shift, and go to state 104
-    NOT         shift, and go to state 105
-    BIT_AND     shift, and go to state 106
-    BIT_NOT     shift, and go to state 107
-    LPAREN      shift, and go to state 110
-
-    shift_expression           go to state 279
-    additive_expression        go to state 134
-    multiplicative_expression  go to state 135
-    cast_expression            go to state 136
-    unary_expression           go to state 224
-    unary_operator             go to state 138
-    postfix_expression         go to state 139
-    primary_expression         go to state 140
-    string_literal             go to state 141
-    constant                   go to state 142
-
-
-State 201
-
-  170 relational_expression: relational_expression GT • shift_expression
-
-    SIZEOF      shift, and go to state 88
-    NULL_TOKEN  shift, and go to state 91
-    NULLPTR     shift, and go to state 92
-    TRUE        shift, and go to state 93
-    FALSE       shift, and go to state 94
-    ID          shift, and go to state 146
-    NUM         shift, and go to state 96
-    FLOAT_LIT   shift, and go to state 97
-    CHAR_LIT    shift, and go to state 98
-    STRING_LIT  shift, and go to state 99
-    PLUS        shift, and go to state 100
-    MINUS       shift, and go to state 101
-    MUL         shift, and go to state 102
-    INC         shift, and go to state 103
-    DEC         shift, and go to state 104
-    NOT         shift, and go to state 105
-    BIT_AND     shift, and go to state 106
-    BIT_NOT     shift, and go to state 107
-    LPAREN      shift, and go to state 110
-
-    shift_expression           go to state 280
-    additive_expression        go to state 134
-    multiplicative_expression  go to state 135
-    cast_expression            go to state 136
-    unary_expression           go to state 224
-    unary_operator             go to state 138
-    postfix_expression         go to state 139
-    primary_expression         go to state 140
-    string_literal             go to state 141
-    constant                   go to state 142
-
-
-State 202
-
-  171 relational_expression: relational_expression LE • shift_expression
+  172 relational_expression: relational_expression LT • shift_expression
 
     SIZEOF      shift, and go to state 88
     NULL_TOKEN  shift, and go to state 91
@@ -4097,9 +4061,9 @@ State 202
     constant                   go to state 142
 
 
-State 203
+State 201
 
-  172 relational_expression: relational_expression GE • shift_expression
+  173 relational_expression: relational_expression GT • shift_expression
 
     SIZEOF      shift, and go to state 88
     NULL_TOKEN  shift, and go to state 91
@@ -4133,9 +4097,9 @@ State 203
     constant                   go to state 142
 
 
-State 204
+State 202
 
-  174 shift_expression: shift_expression LSHIFT • additive_expression
+  174 relational_expression: relational_expression LE • shift_expression
 
     SIZEOF      shift, and go to state 88
     NULL_TOKEN  shift, and go to state 91
@@ -4157,7 +4121,79 @@ State 204
     BIT_NOT     shift, and go to state 107
     LPAREN      shift, and go to state 110
 
-    additive_expression        go to state 283
+    shift_expression           go to state 283
+    additive_expression        go to state 134
+    multiplicative_expression  go to state 135
+    cast_expression            go to state 136
+    unary_expression           go to state 224
+    unary_operator             go to state 138
+    postfix_expression         go to state 139
+    primary_expression         go to state 140
+    string_literal             go to state 141
+    constant                   go to state 142
+
+
+State 203
+
+  175 relational_expression: relational_expression GE • shift_expression
+
+    SIZEOF      shift, and go to state 88
+    NULL_TOKEN  shift, and go to state 91
+    NULLPTR     shift, and go to state 92
+    TRUE        shift, and go to state 93
+    FALSE       shift, and go to state 94
+    ID          shift, and go to state 146
+    NUM         shift, and go to state 96
+    FLOAT_LIT   shift, and go to state 97
+    CHAR_LIT    shift, and go to state 98
+    STRING_LIT  shift, and go to state 99
+    PLUS        shift, and go to state 100
+    MINUS       shift, and go to state 101
+    MUL         shift, and go to state 102
+    INC         shift, and go to state 103
+    DEC         shift, and go to state 104
+    NOT         shift, and go to state 105
+    BIT_AND     shift, and go to state 106
+    BIT_NOT     shift, and go to state 107
+    LPAREN      shift, and go to state 110
+
+    shift_expression           go to state 284
+    additive_expression        go to state 134
+    multiplicative_expression  go to state 135
+    cast_expression            go to state 136
+    unary_expression           go to state 224
+    unary_operator             go to state 138
+    postfix_expression         go to state 139
+    primary_expression         go to state 140
+    string_literal             go to state 141
+    constant                   go to state 142
+
+
+State 204
+
+  177 shift_expression: shift_expression LSHIFT • additive_expression
+
+    SIZEOF      shift, and go to state 88
+    NULL_TOKEN  shift, and go to state 91
+    NULLPTR     shift, and go to state 92
+    TRUE        shift, and go to state 93
+    FALSE       shift, and go to state 94
+    ID          shift, and go to state 146
+    NUM         shift, and go to state 96
+    FLOAT_LIT   shift, and go to state 97
+    CHAR_LIT    shift, and go to state 98
+    STRING_LIT  shift, and go to state 99
+    PLUS        shift, and go to state 100
+    MINUS       shift, and go to state 101
+    MUL         shift, and go to state 102
+    INC         shift, and go to state 103
+    DEC         shift, and go to state 104
+    NOT         shift, and go to state 105
+    BIT_AND     shift, and go to state 106
+    BIT_NOT     shift, and go to state 107
+    LPAREN      shift, and go to state 110
+
+    additive_expression        go to state 285
     multiplicative_expression  go to state 135
     cast_expression            go to state 136
     unary_expression           go to state 224
@@ -4170,7 +4206,7 @@ State 204
 
 State 205
 
-  175 shift_expression: shift_expression RSHIFT • additive_expression
+  178 shift_expression: shift_expression RSHIFT • additive_expression
 
     SIZEOF      shift, and go to state 88
     NULL_TOKEN  shift, and go to state 91
@@ -4192,7 +4228,7 @@ State 205
     BIT_NOT     shift, and go to state 107
     LPAREN      shift, and go to state 110
 
-    additive_expression        go to state 284
+    additive_expression        go to state 286
     multiplicative_expression  go to state 135
     cast_expression            go to state 136
     unary_expression           go to state 224
@@ -4205,7 +4241,7 @@ State 205
 
 State 206
 
-  177 additive_expression: additive_expression PLUS • multiplicative_expression
+  180 additive_expression: additive_expression PLUS • multiplicative_expression
 
     SIZEOF      shift, and go to state 88
     NULL_TOKEN  shift, and go to state 91
@@ -4227,7 +4263,7 @@ State 206
     BIT_NOT     shift, and go to state 107
     LPAREN      shift, and go to state 110
 
-    multiplicative_expression  go to state 285
+    multiplicative_expression  go to state 287
     cast_expression            go to state 136
     unary_expression           go to state 224
     unary_operator             go to state 138
@@ -4239,7 +4275,7 @@ State 206
 
 State 207
 
-  178 additive_expression: additive_expression MINUS • multiplicative_expression
+  181 additive_expression: additive_expression MINUS • multiplicative_expression
 
     SIZEOF      shift, and go to state 88
     NULL_TOKEN  shift, and go to state 91
@@ -4261,7 +4297,7 @@ State 207
     BIT_NOT     shift, and go to state 107
     LPAREN      shift, and go to state 110
 
-    multiplicative_expression  go to state 286
+    multiplicative_expression  go to state 288
     cast_expression            go to state 136
     unary_expression           go to state 224
     unary_operator             go to state 138
@@ -4273,73 +4309,7 @@ State 207
 
 State 208
 
-  180 multiplicative_expression: multiplicative_expression MUL • cast_expression
-
-    SIZEOF      shift, and go to state 88
-    NULL_TOKEN  shift, and go to state 91
-    NULLPTR     shift, and go to state 92
-    TRUE        shift, and go to state 93
-    FALSE       shift, and go to state 94
-    ID          shift, and go to state 146
-    NUM         shift, and go to state 96
-    FLOAT_LIT   shift, and go to state 97
-    CHAR_LIT    shift, and go to state 98
-    STRING_LIT  shift, and go to state 99
-    PLUS        shift, and go to state 100
-    MINUS       shift, and go to state 101
-    MUL         shift, and go to state 102
-    INC         shift, and go to state 103
-    DEC         shift, and go to state 104
-    NOT         shift, and go to state 105
-    BIT_AND     shift, and go to state 106
-    BIT_NOT     shift, and go to state 107
-    LPAREN      shift, and go to state 110
-
-    cast_expression     go to state 287
-    unary_expression    go to state 224
-    unary_operator      go to state 138
-    postfix_expression  go to state 139
-    primary_expression  go to state 140
-    string_literal      go to state 141
-    constant            go to state 142
-
-
-State 209
-
-  181 multiplicative_expression: multiplicative_expression DIV • cast_expression
-
-    SIZEOF      shift, and go to state 88
-    NULL_TOKEN  shift, and go to state 91
-    NULLPTR     shift, and go to state 92
-    TRUE        shift, and go to state 93
-    FALSE       shift, and go to state 94
-    ID          shift, and go to state 146
-    NUM         shift, and go to state 96
-    FLOAT_LIT   shift, and go to state 97
-    CHAR_LIT    shift, and go to state 98
-    STRING_LIT  shift, and go to state 99
-    PLUS        shift, and go to state 100
-    MINUS       shift, and go to state 101
-    MUL         shift, and go to state 102
-    INC         shift, and go to state 103
-    DEC         shift, and go to state 104
-    NOT         shift, and go to state 105
-    BIT_AND     shift, and go to state 106
-    BIT_NOT     shift, and go to state 107
-    LPAREN      shift, and go to state 110
-
-    cast_expression     go to state 288
-    unary_expression    go to state 224
-    unary_operator      go to state 138
-    postfix_expression  go to state 139
-    primary_expression  go to state 140
-    string_literal      go to state 141
-    constant            go to state 142
-
-
-State 210
-
-  182 multiplicative_expression: multiplicative_expression MOD • cast_expression
+  183 multiplicative_expression: multiplicative_expression MUL • cast_expression
 
     SIZEOF      shift, and go to state 88
     NULL_TOKEN  shift, and go to state 91
@@ -4370,86 +4340,9 @@ State 210
     constant            go to state 142
 
 
-State 211
+State 209
 
-  142 assignment_operator: ASSIGN •
-
-    $default  reduce using rule 142 (assignment_operator)
-
-
-State 212
-
-  143 assignment_operator: PLUS_EQ •
-
-    $default  reduce using rule 143 (assignment_operator)
-
-
-State 213
-
-  144 assignment_operator: MINUS_EQ •
-
-    $default  reduce using rule 144 (assignment_operator)
-
-
-State 214
-
-  145 assignment_operator: MUL_EQ •
-
-    $default  reduce using rule 145 (assignment_operator)
-
-
-State 215
-
-  146 assignment_operator: DIV_EQ •
-
-    $default  reduce using rule 146 (assignment_operator)
-
-
-State 216
-
-  147 assignment_operator: MOD_EQ •
-
-    $default  reduce using rule 147 (assignment_operator)
-
-
-State 217
-
-  148 assignment_operator: AND_EQ •
-
-    $default  reduce using rule 148 (assignment_operator)
-
-
-State 218
-
-  149 assignment_operator: OR_EQ •
-
-    $default  reduce using rule 149 (assignment_operator)
-
-
-State 219
-
-  150 assignment_operator: XOR_EQ •
-
-    $default  reduce using rule 150 (assignment_operator)
-
-
-State 220
-
-  151 assignment_operator: LSHIFT_EQ •
-
-    $default  reduce using rule 151 (assignment_operator)
-
-
-State 221
-
-  152 assignment_operator: RSHIFT_EQ •
-
-    $default  reduce using rule 152 (assignment_operator)
-
-
-State 222
-
-  141 assignment_expression: unary_expression assignment_operator • assignment_expression
+  184 multiplicative_expression: multiplicative_expression DIV • cast_expression
 
     SIZEOF      shift, and go to state 88
     NULL_TOKEN  shift, and go to state 91
@@ -4471,7 +4364,150 @@ State 222
     BIT_NOT     shift, and go to state 107
     LPAREN      shift, and go to state 110
 
-    assignment_expression      go to state 290
+    cast_expression     go to state 290
+    unary_expression    go to state 224
+    unary_operator      go to state 138
+    postfix_expression  go to state 139
+    primary_expression  go to state 140
+    string_literal      go to state 141
+    constant            go to state 142
+
+
+State 210
+
+  185 multiplicative_expression: multiplicative_expression MOD • cast_expression
+
+    SIZEOF      shift, and go to state 88
+    NULL_TOKEN  shift, and go to state 91
+    NULLPTR     shift, and go to state 92
+    TRUE        shift, and go to state 93
+    FALSE       shift, and go to state 94
+    ID          shift, and go to state 146
+    NUM         shift, and go to state 96
+    FLOAT_LIT   shift, and go to state 97
+    CHAR_LIT    shift, and go to state 98
+    STRING_LIT  shift, and go to state 99
+    PLUS        shift, and go to state 100
+    MINUS       shift, and go to state 101
+    MUL         shift, and go to state 102
+    INC         shift, and go to state 103
+    DEC         shift, and go to state 104
+    NOT         shift, and go to state 105
+    BIT_AND     shift, and go to state 106
+    BIT_NOT     shift, and go to state 107
+    LPAREN      shift, and go to state 110
+
+    cast_expression     go to state 291
+    unary_expression    go to state 224
+    unary_operator      go to state 138
+    postfix_expression  go to state 139
+    primary_expression  go to state 140
+    string_literal      go to state 141
+    constant            go to state 142
+
+
+State 211
+
+  145 assignment_operator: ASSIGN •
+
+    $default  reduce using rule 145 (assignment_operator)
+
+
+State 212
+
+  146 assignment_operator: PLUS_EQ •
+
+    $default  reduce using rule 146 (assignment_operator)
+
+
+State 213
+
+  147 assignment_operator: MINUS_EQ •
+
+    $default  reduce using rule 147 (assignment_operator)
+
+
+State 214
+
+  148 assignment_operator: MUL_EQ •
+
+    $default  reduce using rule 148 (assignment_operator)
+
+
+State 215
+
+  149 assignment_operator: DIV_EQ •
+
+    $default  reduce using rule 149 (assignment_operator)
+
+
+State 216
+
+  150 assignment_operator: MOD_EQ •
+
+    $default  reduce using rule 150 (assignment_operator)
+
+
+State 217
+
+  151 assignment_operator: AND_EQ •
+
+    $default  reduce using rule 151 (assignment_operator)
+
+
+State 218
+
+  152 assignment_operator: OR_EQ •
+
+    $default  reduce using rule 152 (assignment_operator)
+
+
+State 219
+
+  153 assignment_operator: XOR_EQ •
+
+    $default  reduce using rule 153 (assignment_operator)
+
+
+State 220
+
+  154 assignment_operator: LSHIFT_EQ •
+
+    $default  reduce using rule 154 (assignment_operator)
+
+
+State 221
+
+  155 assignment_operator: RSHIFT_EQ •
+
+    $default  reduce using rule 155 (assignment_operator)
+
+
+State 222
+
+  144 assignment_expression: unary_expression assignment_operator • assignment_expression
+
+    SIZEOF      shift, and go to state 88
+    NULL_TOKEN  shift, and go to state 91
+    NULLPTR     shift, and go to state 92
+    TRUE        shift, and go to state 93
+    FALSE       shift, and go to state 94
+    ID          shift, and go to state 146
+    NUM         shift, and go to state 96
+    FLOAT_LIT   shift, and go to state 97
+    CHAR_LIT    shift, and go to state 98
+    STRING_LIT  shift, and go to state 99
+    PLUS        shift, and go to state 100
+    MINUS       shift, and go to state 101
+    MUL         shift, and go to state 102
+    INC         shift, and go to state 103
+    DEC         shift, and go to state 104
+    NOT         shift, and go to state 105
+    BIT_AND     shift, and go to state 106
+    BIT_NOT     shift, and go to state 107
+    LPAREN      shift, and go to state 110
+
+    assignment_expression      go to state 292
     conditional_expression     go to state 125
     logical_or_expression      go to state 126
     logical_and_expression     go to state 127
@@ -4494,50 +4530,50 @@ State 222
 
 State 223
 
-  188 unary_expression: unary_operator cast_expression •
+  191 unary_expression: unary_operator cast_expression •
 
-    $default  reduce using rule 188 (unary_expression)
+    $default  reduce using rule 191 (unary_expression)
 
 
 State 224
 
-  183 cast_expression: unary_expression •
+  186 cast_expression: unary_expression •
 
-    $default  reduce using rule 183 (cast_expression)
+    $default  reduce using rule 186 (cast_expression)
 
 
 State 225
 
-  203 postfix_expression: postfix_expression INC •
+  206 postfix_expression: postfix_expression INC •
 
-    $default  reduce using rule 203 (postfix_expression)
+    $default  reduce using rule 206 (postfix_expression)
 
 
 State 226
 
-  204 postfix_expression: postfix_expression DEC •
+  207 postfix_expression: postfix_expression DEC •
 
-    $default  reduce using rule 204 (postfix_expression)
+    $default  reduce using rule 207 (postfix_expression)
 
 
 State 227
 
-  202 postfix_expression: postfix_expression ARROW • ID
+  205 postfix_expression: postfix_expression ARROW • ID
 
-    ID  shift, and go to state 291
+    ID  shift, and go to state 293
 
 
 State 228
 
-  201 postfix_expression: postfix_expression DOT • ID
+  204 postfix_expression: postfix_expression DOT • ID
 
-    ID  shift, and go to state 292
+    ID  shift, and go to state 294
 
 
 State 229
 
-  199 postfix_expression: postfix_expression LPAREN • argument_expression_list RPAREN
-  200                   | postfix_expression LPAREN • RPAREN
+  202 postfix_expression: postfix_expression LPAREN • argument_expression_list RPAREN
+  203                   | postfix_expression LPAREN • RPAREN
 
     SIZEOF      shift, and go to state 88
     NULL_TOKEN  shift, and go to state 91
@@ -4558,9 +4594,9 @@ State 229
     BIT_AND     shift, and go to state 106
     BIT_NOT     shift, and go to state 107
     LPAREN      shift, and go to state 110
-    RPAREN      shift, and go to state 293
+    RPAREN      shift, and go to state 295
 
-    assignment_expression      go to state 294
+    assignment_expression      go to state 296
     conditional_expression     go to state 125
     logical_or_expression      go to state 126
     logical_and_expression     go to state 127
@@ -4578,13 +4614,13 @@ State 229
     postfix_expression         go to state 139
     primary_expression         go to state 140
     string_literal             go to state 141
-    argument_expression_list   go to state 295
+    argument_expression_list   go to state 297
     constant                   go to state 142
 
 
 State 230
 
-  198 postfix_expression: postfix_expression LBRACKET • expression RBRACKET
+  201 postfix_expression: postfix_expression LBRACKET • expression RBRACKET
 
     SIZEOF      shift, and go to state 88
     NULL_TOKEN  shift, and go to state 91
@@ -4606,7 +4642,7 @@ State 230
     BIT_NOT     shift, and go to state 107
     LPAREN      shift, and go to state 110
 
-    expression                 go to state 296
+    expression                 go to state 298
     assignment_expression      go to state 124
     conditional_expression     go to state 125
     logical_or_expression      go to state 126
@@ -4630,9 +4666,9 @@ State 230
 
 State 231
 
-  210 string_literal: string_literal STRING_LIT •
+  213 string_literal: string_literal STRING_LIT •
 
-    $default  reduce using rule 210 (string_literal)
+    $default  reduce using rule 213 (string_literal)
 
 
 State 232
@@ -4643,17 +4679,17 @@ State 232
 
     ID        shift, and go to state 20
     MUL       shift, and go to state 21
-    BIT_AND   shift, and go to state 297
-    LPAREN    shift, and go to state 298
-    LBRACKET  shift, and go to state 264
+    BIT_AND   shift, and go to state 299
+    LPAREN    shift, and go to state 300
+    LBRACKET  shift, and go to state 266
 
     $default  reduce using rule 79 (parameter_declaration)
 
-    declarator                  go to state 299
-    pointer                     go to state 300
+    declarator                  go to state 301
+    pointer                     go to state 302
     direct_declarator           go to state 40
-    abstract_declarator         go to state 301
-    direct_abstract_declarator  go to state 267
+    abstract_declarator         go to state 303
+    direct_abstract_declarator  go to state 269
 
 
 State 233
@@ -4662,8 +4698,8 @@ State 233
    75 parameter_list: parameter_list • COMMA parameter_declaration
    76               | parameter_list • COMMA ELLIPSIS
 
-    COMMA   shift, and go to state 302
-    RPAREN  shift, and go to state 303
+    COMMA   shift, and go to state 304
+    RPAREN  shift, and go to state 305
 
 
 State 234
@@ -4710,43 +4746,50 @@ State 239
 
 State 240
 
-  101 initializer_list: initializer •
+  101 initializer: LBRACE RBRACE •
 
-    $default  reduce using rule 101 (initializer_list)
+    $default  reduce using rule 101 (initializer)
 
 
 State 241
 
-   99 initializer: LBRACE initializer_list • RBRACE
-  100            | LBRACE initializer_list • COMMA RBRACE
-  102 initializer_list: initializer_list • COMMA initializer
+  102 initializer_list: initializer •
 
-    COMMA   shift, and go to state 304
-    RBRACE  shift, and go to state 305
+    $default  reduce using rule 102 (initializer_list)
 
 
 State 242
+
+   99 initializer: LBRACE initializer_list • RBRACE
+  100            | LBRACE initializer_list • COMMA RBRACE
+  103 initializer_list: initializer_list • COMMA initializer
+
+    COMMA   shift, and go to state 306
+    RBRACE  shift, and go to state 307
+
+
+State 243
 
    36 struct_or_union_specifier: struct_or_union TYPEDEF_NAME LBRACE struct_declaration_list RBRACE •
 
     $default  reduce using rule 36 (struct_or_union_specifier)
 
 
-State 243
+State 244
 
    35 struct_or_union_specifier: struct_or_union ID LBRACE struct_declaration_list RBRACE •
 
     $default  reduce using rule 35 (struct_or_union_specifier)
 
 
-State 244
+State 245
 
    44 struct_declaration: type_specifier struct_declarator_list SEMI •
 
     $default  reduce using rule 44 (struct_declaration)
 
 
-State 245
+State 246
 
    46 struct_declarator_list: struct_declarator_list COMMA • struct_declarator
 
@@ -4755,52 +4798,80 @@ State 245
     BIT_AND  shift, and go to state 22
     LPAREN   shift, and go to state 23
 
-    struct_declarator  go to state 306
+    struct_declarator  go to state 308
     declarator         go to state 163
     pointer            go to state 39
     direct_declarator  go to state 40
 
 
-State 246
+State 247
 
-  116 labeled_statement: CASE assignment_expression COLON • statement
+  117 labeled_statement: CASE assignment_expression COLON • statement
+  118                  | CASE assignment_expression COLON • declaration
 
-    BREAK       shift, and go to state 79
-    CASE        shift, and go to state 80
-    CONTINUE    shift, and go to state 81
-    DEFAULT     shift, and go to state 82
-    DO          shift, and go to state 83
-    FOR         shift, and go to state 84
-    GOTO        shift, and go to state 85
-    IF          shift, and go to state 86
-    RETURN      shift, and go to state 87
-    SIZEOF      shift, and go to state 88
-    SWITCH      shift, and go to state 89
-    WHILE       shift, and go to state 90
-    NULL_TOKEN  shift, and go to state 91
-    NULLPTR     shift, and go to state 92
-    TRUE        shift, and go to state 93
-    FALSE       shift, and go to state 94
-    ID          shift, and go to state 95
-    NUM         shift, and go to state 96
-    FLOAT_LIT   shift, and go to state 97
-    CHAR_LIT    shift, and go to state 98
-    STRING_LIT  shift, and go to state 99
-    PLUS        shift, and go to state 100
-    MINUS       shift, and go to state 101
-    MUL         shift, and go to state 102
-    INC         shift, and go to state 103
-    DEC         shift, and go to state 104
-    NOT         shift, and go to state 105
-    BIT_AND     shift, and go to state 106
-    BIT_NOT     shift, and go to state 107
-    UNTIL       shift, and go to state 108
-    SEMI        shift, and go to state 109
-    LPAREN      shift, and go to state 110
-    LBRACE      shift, and go to state 58
+    AUTO          shift, and go to state 1
+    BREAK         shift, and go to state 79
+    CASE          shift, and go to state 80
+    CHAR          shift, and go to state 2
+    CONTINUE      shift, and go to state 81
+    DEFAULT       shift, and go to state 82
+    DO            shift, and go to state 83
+    DOUBLE        shift, and go to state 3
+    ENUM          shift, and go to state 4
+    EXTERN        shift, and go to state 5
+    FLOAT         shift, and go to state 6
+    FOR           shift, and go to state 84
+    GOTO          shift, and go to state 85
+    IF            shift, and go to state 86
+    INT           shift, and go to state 7
+    LONG          shift, and go to state 8
+    REGISTER      shift, and go to state 9
+    RETURN        shift, and go to state 87
+    SHORT         shift, and go to state 10
+    SIGNED        shift, and go to state 11
+    SIZEOF        shift, and go to state 88
+    STATIC        shift, and go to state 12
+    STRUCT        shift, and go to state 13
+    SWITCH        shift, and go to state 89
+    TYPEDEF       shift, and go to state 14
+    UNION         shift, and go to state 15
+    UNSIGNED      shift, and go to state 16
+    VOID          shift, and go to state 17
+    WHILE         shift, and go to state 90
+    NULL_TOKEN    shift, and go to state 91
+    NULLPTR       shift, and go to state 92
+    BOOL          shift, and go to state 18
+    TRUE          shift, and go to state 93
+    FALSE         shift, and go to state 94
+    TYPEDEF_NAME  shift, and go to state 19
+    ID            shift, and go to state 95
+    NUM           shift, and go to state 96
+    FLOAT_LIT     shift, and go to state 97
+    CHAR_LIT      shift, and go to state 98
+    STRING_LIT    shift, and go to state 99
+    PLUS          shift, and go to state 100
+    MINUS         shift, and go to state 101
+    MUL           shift, and go to state 102
+    INC           shift, and go to state 103
+    DEC           shift, and go to state 104
+    NOT           shift, and go to state 105
+    BIT_AND       shift, and go to state 106
+    BIT_NOT       shift, and go to state 107
+    UNTIL         shift, and go to state 108
+    SEMI          shift, and go to state 109
+    LPAREN        shift, and go to state 110
+    LBRACE        shift, and go to state 58
 
+    declaration                go to state 309
+    declaration_specifiers     go to state 113
+    storage_class_specifier    go to state 32
+    type_specifier             go to state 33
+    type_keyword               go to state 34
+    struct_or_union_specifier  go to state 35
+    struct_or_union            go to state 36
+    enum_specifier             go to state 37
     compound_statement         go to state 114
-    statement                  go to state 307
+    statement                  go to state 310
     labeled_statement          go to state 118
     expression_statement       go to state 119
     selection_statement        go to state 120
@@ -4828,37 +4899,44 @@ State 246
     constant                   go to state 142
 
 
-State 247
-
-  117 labeled_statement: DEFAULT COLON statement •
-
-    $default  reduce using rule 117 (labeled_statement)
-
-
 State 248
 
-  124 iteration_statement: DO statement WHILE • LPAREN expression RPAREN SEMI
+  120 labeled_statement: DEFAULT COLON declaration •
 
-    LPAREN  shift, and go to state 308
+    $default  reduce using rule 120 (labeled_statement)
 
 
 State 249
 
-  130 for_init_statement: declaration •
+  119 labeled_statement: DEFAULT COLON statement •
 
-    $default  reduce using rule 130 (for_init_statement)
+    $default  reduce using rule 119 (labeled_statement)
 
 
 State 250
 
+  127 iteration_statement: DO statement WHILE • LPAREN expression RPAREN SEMI
+
+    LPAREN  shift, and go to state 311
+
+
+State 251
+
+  133 for_init_statement: declaration •
+
+    $default  reduce using rule 133 (for_init_statement)
+
+
+State 252
+
    10 declaration: declaration_specifiers • init_declarator_list SEMI
    11            | declaration_specifiers • SEMI
-  131 range_based_for: declaration_specifiers • ID COLON expression
-  132                | declaration_specifiers • BIT_AND ID COLON expression
+  134 range_based_for: declaration_specifiers • ID COLON expression
+  135                | declaration_specifiers • BIT_AND ID COLON expression
 
-    ID       shift, and go to state 309
+    ID       shift, and go to state 312
     MUL      shift, and go to state 21
-    BIT_AND  shift, and go to state 310
+    BIT_AND  shift, and go to state 313
     SEMI     shift, and go to state 49
     LPAREN   shift, and go to state 23
 
@@ -4869,17 +4947,17 @@ State 250
     direct_declarator     go to state 40
 
 
-State 251
+State 253
 
-  129 for_init_statement: expression_statement •
+  132 for_init_statement: expression_statement •
 
-    $default  reduce using rule 129 (for_init_statement)
+    $default  reduce using rule 132 (for_init_statement)
 
 
-State 252
+State 254
 
-  126 iteration_statement: FOR LPAREN for_init_statement • expression_statement RPAREN statement
-  127                    | FOR LPAREN for_init_statement • expression_statement expression RPAREN statement
+  129 iteration_statement: FOR LPAREN for_init_statement • expression_statement RPAREN statement
+  130                    | FOR LPAREN for_init_statement • expression_statement expression RPAREN statement
 
     SIZEOF      shift, and go to state 88
     NULL_TOKEN  shift, and go to state 91
@@ -4902,7 +4980,7 @@ State 252
     SEMI        shift, and go to state 109
     LPAREN      shift, and go to state 110
 
-    expression_statement       go to state 311
+    expression_statement       go to state 314
     expression                 go to state 123
     assignment_expression      go to state 124
     conditional_expression     go to state 125
@@ -4925,92 +5003,92 @@ State 252
     constant                   go to state 142
 
 
-State 253
-
-  128 iteration_statement: FOR LPAREN range_based_for • RPAREN statement
-
-    RPAREN  shift, and go to state 312
-
-
-State 254
-
-  133 jump_statement: GOTO ID SEMI •
-
-    $default  reduce using rule 133 (jump_statement)
-
-
 State 255
 
-  120 selection_statement: IF LPAREN expression • RPAREN statement
-  121                    | IF LPAREN expression • RPAREN statement ELSE statement
-  139 expression: expression • COMMA assignment_expression
+  131 iteration_statement: FOR LPAREN range_based_for • RPAREN statement
 
-    COMMA   shift, and go to state 191
-    RPAREN  shift, and go to state 313
+    RPAREN  shift, and go to state 315
 
 
 State 256
 
-  136 jump_statement: RETURN expression SEMI •
+  136 jump_statement: GOTO ID SEMI •
 
     $default  reduce using rule 136 (jump_statement)
 
 
 State 257
 
-  190 unary_expression: SIZEOF LPAREN type_name • RPAREN
-
-    RPAREN  shift, and go to state 314
-
-
-State 258
-
-  122 selection_statement: SWITCH LPAREN expression • RPAREN statement
-  139 expression: expression • COMMA assignment_expression
-
-    COMMA   shift, and go to state 191
-    RPAREN  shift, and go to state 315
-
-
-State 259
-
-  123 iteration_statement: WHILE LPAREN expression • RPAREN statement
-  139 expression: expression • COMMA assignment_expression
+  123 selection_statement: IF LPAREN expression • RPAREN statement
+  124                    | IF LPAREN expression • RPAREN statement ELSE statement
+  142 expression: expression • COMMA assignment_expression
 
     COMMA   shift, and go to state 191
     RPAREN  shift, and go to state 316
 
 
+State 258
+
+  139 jump_statement: RETURN expression SEMI •
+
+    $default  reduce using rule 139 (jump_statement)
+
+
+State 259
+
+  193 unary_expression: SIZEOF LPAREN type_name • RPAREN
+
+    RPAREN  shift, and go to state 317
+
+
 State 260
 
-  115 labeled_statement: ID COLON statement •
+  125 selection_statement: SWITCH LPAREN expression • RPAREN statement
+  142 expression: expression • COMMA assignment_expression
 
-    $default  reduce using rule 115 (labeled_statement)
+    COMMA   shift, and go to state 191
+    RPAREN  shift, and go to state 318
 
 
 State 261
 
-  125 iteration_statement: UNTIL LPAREN expression • RPAREN statement
-  139 expression: expression • COMMA assignment_expression
+  126 iteration_statement: WHILE LPAREN expression • RPAREN statement
+  142 expression: expression • COMMA assignment_expression
 
     COMMA   shift, and go to state 191
-    RPAREN  shift, and go to state 317
+    RPAREN  shift, and go to state 319
 
 
 State 262
 
-   83 abstract_declarator: BIT_AND •
-   84                    | BIT_AND • direct_abstract_declarator
+  116 labeled_statement: ID COLON statement •
 
-    LPAREN    shift, and go to state 263
-    LBRACKET  shift, and go to state 264
-
-    $default  reduce using rule 83 (abstract_declarator)
-
-    direct_abstract_declarator  go to state 318
+    $default  reduce using rule 116 (labeled_statement)
 
 
 State 263
+
+  128 iteration_statement: UNTIL LPAREN expression • RPAREN statement
+  142 expression: expression • COMMA assignment_expression
+
+    COMMA   shift, and go to state 191
+    RPAREN  shift, and go to state 320
+
+
+State 264
+
+   83 abstract_declarator: BIT_AND •
+   84                    | BIT_AND • direct_abstract_declarator
+
+    LPAREN    shift, and go to state 265
+    LBRACKET  shift, and go to state 266
+
+    $default  reduce using rule 83 (abstract_declarator)
+
+    direct_abstract_declarator  go to state 321
+
+
+State 265
 
    87 direct_abstract_declarator: LPAREN • abstract_declarator RPAREN
    92                           | LPAREN • RPAREN
@@ -5036,10 +5114,10 @@ State 263
     BOOL          shift, and go to state 18
     TYPEDEF_NAME  shift, and go to state 19
     MUL           shift, and go to state 21
-    BIT_AND       shift, and go to state 262
-    LPAREN        shift, and go to state 263
-    RPAREN        shift, and go to state 319
-    LBRACKET      shift, and go to state 264
+    BIT_AND       shift, and go to state 264
+    LPAREN        shift, and go to state 265
+    RPAREN        shift, and go to state 322
+    LBRACKET      shift, and go to state 266
 
     declaration_specifiers      go to state 232
     storage_class_specifier     go to state 32
@@ -5048,14 +5126,14 @@ State 263
     struct_or_union_specifier   go to state 35
     struct_or_union             go to state 36
     enum_specifier              go to state 37
-    pointer                     go to state 265
-    parameter_list              go to state 320
+    pointer                     go to state 267
+    parameter_list              go to state 323
     parameter_declaration       go to state 234
-    abstract_declarator         go to state 321
-    direct_abstract_declarator  go to state 267
+    abstract_declarator         go to state 324
+    direct_abstract_declarator  go to state 269
 
 
-State 264
+State 266
 
    88 direct_abstract_declarator: LBRACKET • RBRACKET
    89                           | LBRACKET • assignment_expression RBRACKET
@@ -5079,9 +5157,9 @@ State 264
     BIT_AND     shift, and go to state 106
     BIT_NOT     shift, and go to state 107
     LPAREN      shift, and go to state 110
-    RBRACKET    shift, and go to state 322
+    RBRACKET    shift, and go to state 325
 
-    assignment_expression      go to state 323
+    assignment_expression      go to state 326
     conditional_expression     go to state 125
     logical_or_expression      go to state 126
     logical_and_expression     go to state 127
@@ -5102,30 +5180,30 @@ State 264
     constant                   go to state 142
 
 
-State 265
+State 267
 
    80 abstract_declarator: pointer •
    81                    | pointer • direct_abstract_declarator
    85                    | pointer • BIT_AND
    86                    | pointer • BIT_AND direct_abstract_declarator
 
-    BIT_AND   shift, and go to state 324
-    LPAREN    shift, and go to state 263
-    LBRACKET  shift, and go to state 264
+    BIT_AND   shift, and go to state 327
+    LPAREN    shift, and go to state 265
+    LBRACKET  shift, and go to state 266
 
     $default  reduce using rule 80 (abstract_declarator)
 
-    direct_abstract_declarator  go to state 325
+    direct_abstract_declarator  go to state 328
 
 
-State 266
+State 268
 
    97 type_name: type_specifier abstract_declarator •
 
     $default  reduce using rule 97 (type_name)
 
 
-State 267
+State 269
 
    82 abstract_declarator: direct_abstract_declarator •
    90 direct_abstract_declarator: direct_abstract_declarator • LBRACKET RBRACKET
@@ -5133,15 +5211,15 @@ State 267
    94                           | direct_abstract_declarator • LPAREN RPAREN
    95                           | direct_abstract_declarator • LPAREN parameter_list RPAREN
 
-    LPAREN    shift, and go to state 326
-    LBRACKET  shift, and go to state 327
+    LPAREN    shift, and go to state 329
+    LBRACKET  shift, and go to state 330
 
     $default  reduce using rule 82 (abstract_declarator)
 
 
-State 268
+State 270
 
-  184 cast_expression: LPAREN type_name RPAREN • cast_expression
+  187 cast_expression: LPAREN type_name RPAREN • cast_expression
 
     SIZEOF      shift, and go to state 88
     NULL_TOKEN  shift, and go to state 91
@@ -5163,7 +5241,7 @@ State 268
     BIT_NOT     shift, and go to state 107
     LPAREN      shift, and go to state 110
 
-    cast_expression     go to state 328
+    cast_expression     go to state 331
     unary_expression    go to state 224
     unary_operator      go to state 138
     postfix_expression  go to state 139
@@ -5172,154 +5250,118 @@ State 268
     constant            go to state 142
 
 
-State 269
-
-  208 primary_expression: LPAREN expression RPAREN •
-
-    $default  reduce using rule 208 (primary_expression)
-
-
-State 270
-
-  139 expression: expression COMMA assignment_expression •
-
-    $default  reduce using rule 139 (expression)
-
-
 State 271
 
-  156 logical_or_expression: logical_or_expression OR logical_and_expression •
-  158 logical_and_expression: logical_and_expression • AND inclusive_or_expression
+  211 primary_expression: LPAREN expression RPAREN •
 
-    AND  shift, and go to state 194
-
-    $default  reduce using rule 156 (logical_or_expression)
+    $default  reduce using rule 211 (primary_expression)
 
 
 State 272
 
-  139 expression: expression • COMMA assignment_expression
-  154 conditional_expression: logical_or_expression QUESTION expression • COLON conditional_expression
+  142 expression: expression COMMA assignment_expression •
 
-    COMMA  shift, and go to state 191
-    COLON  shift, and go to state 329
+    $default  reduce using rule 142 (expression)
 
 
 State 273
 
-  158 logical_and_expression: logical_and_expression AND inclusive_or_expression •
-  160 inclusive_or_expression: inclusive_or_expression • BIT_OR exclusive_or_expression
+  159 logical_or_expression: logical_or_expression OR logical_and_expression •
+  161 logical_and_expression: logical_and_expression • AND inclusive_or_expression
 
-    BIT_OR  shift, and go to state 195
+    AND  shift, and go to state 194
 
-    $default  reduce using rule 158 (logical_and_expression)
+    $default  reduce using rule 159 (logical_or_expression)
 
 
 State 274
 
-  160 inclusive_or_expression: inclusive_or_expression BIT_OR exclusive_or_expression •
-  162 exclusive_or_expression: exclusive_or_expression • BIT_XOR and_expression
+  142 expression: expression • COMMA assignment_expression
+  157 conditional_expression: logical_or_expression QUESTION expression • COLON conditional_expression
 
-    BIT_XOR  shift, and go to state 196
-
-    $default  reduce using rule 160 (inclusive_or_expression)
+    COMMA  shift, and go to state 191
+    COLON  shift, and go to state 332
 
 
 State 275
 
-  162 exclusive_or_expression: exclusive_or_expression BIT_XOR and_expression •
-  164 and_expression: and_expression • BIT_AND equality_expression
+  161 logical_and_expression: logical_and_expression AND inclusive_or_expression •
+  163 inclusive_or_expression: inclusive_or_expression • BIT_OR exclusive_or_expression
 
-    BIT_AND  shift, and go to state 197
+    BIT_OR  shift, and go to state 195
 
-    $default  reduce using rule 162 (exclusive_or_expression)
+    $default  reduce using rule 161 (logical_and_expression)
 
 
 State 276
 
-  164 and_expression: and_expression BIT_AND equality_expression •
-  166 equality_expression: equality_expression • EQ relational_expression
-  167                    | equality_expression • NE relational_expression
+  163 inclusive_or_expression: inclusive_or_expression BIT_OR exclusive_or_expression •
+  165 exclusive_or_expression: exclusive_or_expression • BIT_XOR and_expression
 
-    EQ  shift, and go to state 198
-    NE  shift, and go to state 199
+    BIT_XOR  shift, and go to state 196
 
-    $default  reduce using rule 164 (and_expression)
+    $default  reduce using rule 163 (inclusive_or_expression)
 
 
 State 277
 
-  166 equality_expression: equality_expression EQ relational_expression •
-  169 relational_expression: relational_expression • LT shift_expression
-  170                      | relational_expression • GT shift_expression
-  171                      | relational_expression • LE shift_expression
-  172                      | relational_expression • GE shift_expression
+  165 exclusive_or_expression: exclusive_or_expression BIT_XOR and_expression •
+  167 and_expression: and_expression • BIT_AND equality_expression
 
-    LT  shift, and go to state 200
-    GT  shift, and go to state 201
-    LE  shift, and go to state 202
-    GE  shift, and go to state 203
+    BIT_AND  shift, and go to state 197
 
-    $default  reduce using rule 166 (equality_expression)
+    $default  reduce using rule 165 (exclusive_or_expression)
 
 
 State 278
 
-  167 equality_expression: equality_expression NE relational_expression •
-  169 relational_expression: relational_expression • LT shift_expression
-  170                      | relational_expression • GT shift_expression
-  171                      | relational_expression • LE shift_expression
-  172                      | relational_expression • GE shift_expression
+  167 and_expression: and_expression BIT_AND equality_expression •
+  169 equality_expression: equality_expression • EQ relational_expression
+  170                    | equality_expression • NE relational_expression
+
+    EQ  shift, and go to state 198
+    NE  shift, and go to state 199
+
+    $default  reduce using rule 167 (and_expression)
+
+
+State 279
+
+  169 equality_expression: equality_expression EQ relational_expression •
+  172 relational_expression: relational_expression • LT shift_expression
+  173                      | relational_expression • GT shift_expression
+  174                      | relational_expression • LE shift_expression
+  175                      | relational_expression • GE shift_expression
 
     LT  shift, and go to state 200
     GT  shift, and go to state 201
     LE  shift, and go to state 202
     GE  shift, and go to state 203
 
-    $default  reduce using rule 167 (equality_expression)
-
-
-State 279
-
-  169 relational_expression: relational_expression LT shift_expression •
-  174 shift_expression: shift_expression • LSHIFT additive_expression
-  175                 | shift_expression • RSHIFT additive_expression
-
-    LSHIFT  shift, and go to state 204
-    RSHIFT  shift, and go to state 205
-
-    $default  reduce using rule 169 (relational_expression)
+    $default  reduce using rule 169 (equality_expression)
 
 
 State 280
 
-  170 relational_expression: relational_expression GT shift_expression •
-  174 shift_expression: shift_expression • LSHIFT additive_expression
-  175                 | shift_expression • RSHIFT additive_expression
+  170 equality_expression: equality_expression NE relational_expression •
+  172 relational_expression: relational_expression • LT shift_expression
+  173                      | relational_expression • GT shift_expression
+  174                      | relational_expression • LE shift_expression
+  175                      | relational_expression • GE shift_expression
 
-    LSHIFT  shift, and go to state 204
-    RSHIFT  shift, and go to state 205
+    LT  shift, and go to state 200
+    GT  shift, and go to state 201
+    LE  shift, and go to state 202
+    GE  shift, and go to state 203
 
-    $default  reduce using rule 170 (relational_expression)
+    $default  reduce using rule 170 (equality_expression)
 
 
 State 281
 
-  171 relational_expression: relational_expression LE shift_expression •
-  174 shift_expression: shift_expression • LSHIFT additive_expression
-  175                 | shift_expression • RSHIFT additive_expression
-
-    LSHIFT  shift, and go to state 204
-    RSHIFT  shift, and go to state 205
-
-    $default  reduce using rule 171 (relational_expression)
-
-
-State 282
-
-  172 relational_expression: relational_expression GE shift_expression •
-  174 shift_expression: shift_expression • LSHIFT additive_expression
-  175                 | shift_expression • RSHIFT additive_expression
+  172 relational_expression: relational_expression LT shift_expression •
+  177 shift_expression: shift_expression • LSHIFT additive_expression
+  178                 | shift_expression • RSHIFT additive_expression
 
     LSHIFT  shift, and go to state 204
     RSHIFT  shift, and go to state 205
@@ -5327,149 +5369,185 @@ State 282
     $default  reduce using rule 172 (relational_expression)
 
 
+State 282
+
+  173 relational_expression: relational_expression GT shift_expression •
+  177 shift_expression: shift_expression • LSHIFT additive_expression
+  178                 | shift_expression • RSHIFT additive_expression
+
+    LSHIFT  shift, and go to state 204
+    RSHIFT  shift, and go to state 205
+
+    $default  reduce using rule 173 (relational_expression)
+
+
 State 283
 
-  174 shift_expression: shift_expression LSHIFT additive_expression •
-  177 additive_expression: additive_expression • PLUS multiplicative_expression
-  178                    | additive_expression • MINUS multiplicative_expression
+  174 relational_expression: relational_expression LE shift_expression •
+  177 shift_expression: shift_expression • LSHIFT additive_expression
+  178                 | shift_expression • RSHIFT additive_expression
 
-    PLUS   shift, and go to state 206
-    MINUS  shift, and go to state 207
+    LSHIFT  shift, and go to state 204
+    RSHIFT  shift, and go to state 205
 
-    $default  reduce using rule 174 (shift_expression)
+    $default  reduce using rule 174 (relational_expression)
 
 
 State 284
 
-  175 shift_expression: shift_expression RSHIFT additive_expression •
-  177 additive_expression: additive_expression • PLUS multiplicative_expression
-  178                    | additive_expression • MINUS multiplicative_expression
+  175 relational_expression: relational_expression GE shift_expression •
+  177 shift_expression: shift_expression • LSHIFT additive_expression
+  178                 | shift_expression • RSHIFT additive_expression
 
-    PLUS   shift, and go to state 206
-    MINUS  shift, and go to state 207
+    LSHIFT  shift, and go to state 204
+    RSHIFT  shift, and go to state 205
 
-    $default  reduce using rule 175 (shift_expression)
+    $default  reduce using rule 175 (relational_expression)
 
 
 State 285
 
-  177 additive_expression: additive_expression PLUS multiplicative_expression •
-  180 multiplicative_expression: multiplicative_expression • MUL cast_expression
-  181                          | multiplicative_expression • DIV cast_expression
-  182                          | multiplicative_expression • MOD cast_expression
+  177 shift_expression: shift_expression LSHIFT additive_expression •
+  180 additive_expression: additive_expression • PLUS multiplicative_expression
+  181                    | additive_expression • MINUS multiplicative_expression
 
-    MUL  shift, and go to state 208
-    DIV  shift, and go to state 209
-    MOD  shift, and go to state 210
+    PLUS   shift, and go to state 206
+    MINUS  shift, and go to state 207
 
-    $default  reduce using rule 177 (additive_expression)
+    $default  reduce using rule 177 (shift_expression)
 
 
 State 286
 
-  178 additive_expression: additive_expression MINUS multiplicative_expression •
-  180 multiplicative_expression: multiplicative_expression • MUL cast_expression
-  181                          | multiplicative_expression • DIV cast_expression
-  182                          | multiplicative_expression • MOD cast_expression
+  178 shift_expression: shift_expression RSHIFT additive_expression •
+  180 additive_expression: additive_expression • PLUS multiplicative_expression
+  181                    | additive_expression • MINUS multiplicative_expression
+
+    PLUS   shift, and go to state 206
+    MINUS  shift, and go to state 207
+
+    $default  reduce using rule 178 (shift_expression)
+
+
+State 287
+
+  180 additive_expression: additive_expression PLUS multiplicative_expression •
+  183 multiplicative_expression: multiplicative_expression • MUL cast_expression
+  184                          | multiplicative_expression • DIV cast_expression
+  185                          | multiplicative_expression • MOD cast_expression
 
     MUL  shift, and go to state 208
     DIV  shift, and go to state 209
     MOD  shift, and go to state 210
 
-    $default  reduce using rule 178 (additive_expression)
-
-
-State 287
-
-  180 multiplicative_expression: multiplicative_expression MUL cast_expression •
-
-    $default  reduce using rule 180 (multiplicative_expression)
+    $default  reduce using rule 180 (additive_expression)
 
 
 State 288
 
-  181 multiplicative_expression: multiplicative_expression DIV cast_expression •
+  181 additive_expression: additive_expression MINUS multiplicative_expression •
+  183 multiplicative_expression: multiplicative_expression • MUL cast_expression
+  184                          | multiplicative_expression • DIV cast_expression
+  185                          | multiplicative_expression • MOD cast_expression
 
-    $default  reduce using rule 181 (multiplicative_expression)
+    MUL  shift, and go to state 208
+    DIV  shift, and go to state 209
+    MOD  shift, and go to state 210
+
+    $default  reduce using rule 181 (additive_expression)
 
 
 State 289
 
-  182 multiplicative_expression: multiplicative_expression MOD cast_expression •
+  183 multiplicative_expression: multiplicative_expression MUL cast_expression •
 
-    $default  reduce using rule 182 (multiplicative_expression)
+    $default  reduce using rule 183 (multiplicative_expression)
 
 
 State 290
 
-  141 assignment_expression: unary_expression assignment_operator assignment_expression •
+  184 multiplicative_expression: multiplicative_expression DIV cast_expression •
 
-    $default  reduce using rule 141 (assignment_expression)
+    $default  reduce using rule 184 (multiplicative_expression)
 
 
 State 291
 
-  202 postfix_expression: postfix_expression ARROW ID •
+  185 multiplicative_expression: multiplicative_expression MOD cast_expression •
 
-    $default  reduce using rule 202 (postfix_expression)
+    $default  reduce using rule 185 (multiplicative_expression)
 
 
 State 292
 
-  201 postfix_expression: postfix_expression DOT ID •
+  144 assignment_expression: unary_expression assignment_operator assignment_expression •
 
-    $default  reduce using rule 201 (postfix_expression)
+    $default  reduce using rule 144 (assignment_expression)
 
 
 State 293
 
-  200 postfix_expression: postfix_expression LPAREN RPAREN •
+  205 postfix_expression: postfix_expression ARROW ID •
 
-    $default  reduce using rule 200 (postfix_expression)
+    $default  reduce using rule 205 (postfix_expression)
 
 
 State 294
 
-  211 argument_expression_list: assignment_expression •
+  204 postfix_expression: postfix_expression DOT ID •
 
-    $default  reduce using rule 211 (argument_expression_list)
+    $default  reduce using rule 204 (postfix_expression)
 
 
 State 295
 
-  199 postfix_expression: postfix_expression LPAREN argument_expression_list • RPAREN
-  212 argument_expression_list: argument_expression_list • COMMA assignment_expression
+  203 postfix_expression: postfix_expression LPAREN RPAREN •
 
-    COMMA   shift, and go to state 330
-    RPAREN  shift, and go to state 331
+    $default  reduce using rule 203 (postfix_expression)
 
 
 State 296
 
-  139 expression: expression • COMMA assignment_expression
-  198 postfix_expression: postfix_expression LBRACKET expression • RBRACKET
+  214 argument_expression_list: assignment_expression •
 
-    COMMA     shift, and go to state 191
-    RBRACKET  shift, and go to state 332
+    $default  reduce using rule 214 (argument_expression_list)
 
 
 State 297
+
+  202 postfix_expression: postfix_expression LPAREN argument_expression_list • RPAREN
+  215 argument_expression_list: argument_expression_list • COMMA assignment_expression
+
+    COMMA   shift, and go to state 333
+    RPAREN  shift, and go to state 334
+
+
+State 298
+
+  142 expression: expression • COMMA assignment_expression
+  201 postfix_expression: postfix_expression LBRACKET expression • RBRACKET
+
+    COMMA     shift, and go to state 191
+    RBRACKET  shift, and go to state 335
+
+
+State 299
 
    63 declarator: BIT_AND • direct_declarator
    83 abstract_declarator: BIT_AND •
    84                    | BIT_AND • direct_abstract_declarator
 
     ID        shift, and go to state 20
-    LPAREN    shift, and go to state 298
-    LBRACKET  shift, and go to state 264
+    LPAREN    shift, and go to state 300
+    LBRACKET  shift, and go to state 266
 
     $default  reduce using rule 83 (abstract_declarator)
 
     direct_declarator           go to state 45
-    direct_abstract_declarator  go to state 318
+    direct_abstract_declarator  go to state 321
 
 
-State 298
+State 300
 
    68 direct_declarator: LPAREN • declarator RPAREN
    87 direct_abstract_declarator: LPAREN • abstract_declarator RPAREN
@@ -5497,10 +5575,10 @@ State 298
     TYPEDEF_NAME  shift, and go to state 19
     ID            shift, and go to state 20
     MUL           shift, and go to state 21
-    BIT_AND       shift, and go to state 297
-    LPAREN        shift, and go to state 298
-    RPAREN        shift, and go to state 319
-    LBRACKET      shift, and go to state 264
+    BIT_AND       shift, and go to state 299
+    LPAREN        shift, and go to state 300
+    RPAREN        shift, and go to state 322
+    LBRACKET      shift, and go to state 266
 
     declaration_specifiers      go to state 232
     storage_class_specifier     go to state 32
@@ -5510,22 +5588,22 @@ State 298
     struct_or_union             go to state 36
     enum_specifier              go to state 37
     declarator                  go to state 46
-    pointer                     go to state 300
+    pointer                     go to state 302
     direct_declarator           go to state 40
-    parameter_list              go to state 320
+    parameter_list              go to state 323
     parameter_declaration       go to state 234
-    abstract_declarator         go to state 321
-    direct_abstract_declarator  go to state 267
+    abstract_declarator         go to state 324
+    direct_abstract_declarator  go to state 269
 
 
-State 299
+State 301
 
    77 parameter_declaration: declaration_specifiers declarator •
 
     $default  reduce using rule 77 (parameter_declaration)
 
 
-State 300
+State 302
 
    61 declarator: pointer • direct_declarator
    64           | pointer • BIT_AND direct_declarator
@@ -5535,24 +5613,24 @@ State 300
    86                    | pointer • BIT_AND direct_abstract_declarator
 
     ID        shift, and go to state 20
-    BIT_AND   shift, and go to state 333
-    LPAREN    shift, and go to state 298
-    LBRACKET  shift, and go to state 264
+    BIT_AND   shift, and go to state 336
+    LPAREN    shift, and go to state 300
+    LBRACKET  shift, and go to state 266
 
     $default  reduce using rule 80 (abstract_declarator)
 
     direct_declarator           go to state 61
-    direct_abstract_declarator  go to state 325
+    direct_abstract_declarator  go to state 328
 
 
-State 301
+State 303
 
    78 parameter_declaration: declaration_specifiers abstract_declarator •
 
     $default  reduce using rule 78 (parameter_declaration)
 
 
-State 302
+State 304
 
    75 parameter_list: parameter_list COMMA • parameter_declaration
    76               | parameter_list COMMA • ELLIPSIS
@@ -5576,7 +5654,7 @@ State 302
     VOID          shift, and go to state 17
     BOOL          shift, and go to state 18
     TYPEDEF_NAME  shift, and go to state 19
-    ELLIPSIS      shift, and go to state 334
+    ELLIPSIS      shift, and go to state 337
 
     declaration_specifiers     go to state 232
     storage_class_specifier    go to state 32
@@ -5585,20 +5663,20 @@ State 302
     struct_or_union_specifier  go to state 35
     struct_or_union            go to state 36
     enum_specifier             go to state 37
-    parameter_declaration      go to state 335
+    parameter_declaration      go to state 338
 
 
-State 303
+State 305
 
    72 direct_declarator: direct_declarator LPAREN $@1 parameter_list RPAREN •
 
     $default  reduce using rule 72 (direct_declarator)
 
 
-State 304
+State 306
 
   100 initializer: LBRACE initializer_list COMMA • RBRACE
-  102 initializer_list: initializer_list COMMA • initializer
+  103 initializer_list: initializer_list COMMA • initializer
 
     SIZEOF      shift, and go to state 88
     NULL_TOKEN  shift, and go to state 91
@@ -5620,9 +5698,9 @@ State 304
     BIT_NOT     shift, and go to state 107
     LPAREN      shift, and go to state 110
     LBRACE      shift, and go to state 156
-    RBRACE      shift, and go to state 336
+    RBRACE      shift, and go to state 339
 
-    initializer                go to state 337
+    initializer                go to state 340
     assignment_expression      go to state 158
     conditional_expression     go to state 125
     logical_or_expression      go to state 126
@@ -5644,98 +5722,37 @@ State 304
     constant                   go to state 142
 
 
-State 305
+State 307
 
    99 initializer: LBRACE initializer_list RBRACE •
 
     $default  reduce using rule 99 (initializer)
 
 
-State 306
+State 308
 
    46 struct_declarator_list: struct_declarator_list COMMA struct_declarator •
 
     $default  reduce using rule 46 (struct_declarator_list)
 
 
-State 307
-
-  116 labeled_statement: CASE assignment_expression COLON statement •
-
-    $default  reduce using rule 116 (labeled_statement)
-
-
-State 308
-
-  124 iteration_statement: DO statement WHILE LPAREN • expression RPAREN SEMI
-
-    SIZEOF      shift, and go to state 88
-    NULL_TOKEN  shift, and go to state 91
-    NULLPTR     shift, and go to state 92
-    TRUE        shift, and go to state 93
-    FALSE       shift, and go to state 94
-    ID          shift, and go to state 146
-    NUM         shift, and go to state 96
-    FLOAT_LIT   shift, and go to state 97
-    CHAR_LIT    shift, and go to state 98
-    STRING_LIT  shift, and go to state 99
-    PLUS        shift, and go to state 100
-    MINUS       shift, and go to state 101
-    MUL         shift, and go to state 102
-    INC         shift, and go to state 103
-    DEC         shift, and go to state 104
-    NOT         shift, and go to state 105
-    BIT_AND     shift, and go to state 106
-    BIT_NOT     shift, and go to state 107
-    LPAREN      shift, and go to state 110
-
-    expression                 go to state 338
-    assignment_expression      go to state 124
-    conditional_expression     go to state 125
-    logical_or_expression      go to state 126
-    logical_and_expression     go to state 127
-    inclusive_or_expression    go to state 128
-    exclusive_or_expression    go to state 129
-    and_expression             go to state 130
-    equality_expression        go to state 131
-    relational_expression      go to state 132
-    shift_expression           go to state 133
-    additive_expression        go to state 134
-    multiplicative_expression  go to state 135
-    cast_expression            go to state 136
-    unary_expression           go to state 137
-    unary_operator             go to state 138
-    postfix_expression         go to state 139
-    primary_expression         go to state 140
-    string_literal             go to state 141
-    constant                   go to state 142
-
-
 State 309
 
-   67 direct_declarator: ID •
-  131 range_based_for: declaration_specifiers ID • COLON expression
+  118 labeled_statement: CASE assignment_expression COLON declaration •
 
-    COLON  shift, and go to state 339
-
-    $default  reduce using rule 67 (direct_declarator)
+    $default  reduce using rule 118 (labeled_statement)
 
 
 State 310
 
-   63 declarator: BIT_AND • direct_declarator
-  132 range_based_for: declaration_specifiers BIT_AND • ID COLON expression
+  117 labeled_statement: CASE assignment_expression COLON statement •
 
-    ID      shift, and go to state 340
-    LPAREN  shift, and go to state 23
-
-    direct_declarator  go to state 45
+    $default  reduce using rule 117 (labeled_statement)
 
 
 State 311
 
-  126 iteration_statement: FOR LPAREN for_init_statement expression_statement • RPAREN statement
-  127                    | FOR LPAREN for_init_statement expression_statement • expression RPAREN statement
+  127 iteration_statement: DO statement WHILE LPAREN • expression RPAREN SEMI
 
     SIZEOF      shift, and go to state 88
     NULL_TOKEN  shift, and go to state 91
@@ -5756,9 +5773,8 @@ State 311
     BIT_AND     shift, and go to state 106
     BIT_NOT     shift, and go to state 107
     LPAREN      shift, and go to state 110
-    RPAREN      shift, and go to state 341
 
-    expression                 go to state 342
+    expression                 go to state 341
     assignment_expression      go to state 124
     conditional_expression     go to state 125
     logical_or_expression      go to state 126
@@ -5782,167 +5798,36 @@ State 311
 
 State 312
 
-  128 iteration_statement: FOR LPAREN range_based_for RPAREN • statement
+   67 direct_declarator: ID •
+  134 range_based_for: declaration_specifiers ID • COLON expression
 
-    BREAK       shift, and go to state 79
-    CASE        shift, and go to state 80
-    CONTINUE    shift, and go to state 81
-    DEFAULT     shift, and go to state 82
-    DO          shift, and go to state 83
-    FOR         shift, and go to state 84
-    GOTO        shift, and go to state 85
-    IF          shift, and go to state 86
-    RETURN      shift, and go to state 87
-    SIZEOF      shift, and go to state 88
-    SWITCH      shift, and go to state 89
-    WHILE       shift, and go to state 90
-    NULL_TOKEN  shift, and go to state 91
-    NULLPTR     shift, and go to state 92
-    TRUE        shift, and go to state 93
-    FALSE       shift, and go to state 94
-    ID          shift, and go to state 95
-    NUM         shift, and go to state 96
-    FLOAT_LIT   shift, and go to state 97
-    CHAR_LIT    shift, and go to state 98
-    STRING_LIT  shift, and go to state 99
-    PLUS        shift, and go to state 100
-    MINUS       shift, and go to state 101
-    MUL         shift, and go to state 102
-    INC         shift, and go to state 103
-    DEC         shift, and go to state 104
-    NOT         shift, and go to state 105
-    BIT_AND     shift, and go to state 106
-    BIT_NOT     shift, and go to state 107
-    UNTIL       shift, and go to state 108
-    SEMI        shift, and go to state 109
-    LPAREN      shift, and go to state 110
-    LBRACE      shift, and go to state 58
+    COLON  shift, and go to state 342
 
-    compound_statement         go to state 114
-    statement                  go to state 343
-    labeled_statement          go to state 118
-    expression_statement       go to state 119
-    selection_statement        go to state 120
-    iteration_statement        go to state 121
-    jump_statement             go to state 122
-    expression                 go to state 123
-    assignment_expression      go to state 124
-    conditional_expression     go to state 125
-    logical_or_expression      go to state 126
-    logical_and_expression     go to state 127
-    inclusive_or_expression    go to state 128
-    exclusive_or_expression    go to state 129
-    and_expression             go to state 130
-    equality_expression        go to state 131
-    relational_expression      go to state 132
-    shift_expression           go to state 133
-    additive_expression        go to state 134
-    multiplicative_expression  go to state 135
-    cast_expression            go to state 136
-    unary_expression           go to state 137
-    unary_operator             go to state 138
-    postfix_expression         go to state 139
-    primary_expression         go to state 140
-    string_literal             go to state 141
-    constant                   go to state 142
+    $default  reduce using rule 67 (direct_declarator)
 
 
 State 313
 
-  120 selection_statement: IF LPAREN expression RPAREN • statement
-  121                    | IF LPAREN expression RPAREN • statement ELSE statement
+   63 declarator: BIT_AND • direct_declarator
+  135 range_based_for: declaration_specifiers BIT_AND • ID COLON expression
 
-    BREAK       shift, and go to state 79
-    CASE        shift, and go to state 80
-    CONTINUE    shift, and go to state 81
-    DEFAULT     shift, and go to state 82
-    DO          shift, and go to state 83
-    FOR         shift, and go to state 84
-    GOTO        shift, and go to state 85
-    IF          shift, and go to state 86
-    RETURN      shift, and go to state 87
-    SIZEOF      shift, and go to state 88
-    SWITCH      shift, and go to state 89
-    WHILE       shift, and go to state 90
-    NULL_TOKEN  shift, and go to state 91
-    NULLPTR     shift, and go to state 92
-    TRUE        shift, and go to state 93
-    FALSE       shift, and go to state 94
-    ID          shift, and go to state 95
-    NUM         shift, and go to state 96
-    FLOAT_LIT   shift, and go to state 97
-    CHAR_LIT    shift, and go to state 98
-    STRING_LIT  shift, and go to state 99
-    PLUS        shift, and go to state 100
-    MINUS       shift, and go to state 101
-    MUL         shift, and go to state 102
-    INC         shift, and go to state 103
-    DEC         shift, and go to state 104
-    NOT         shift, and go to state 105
-    BIT_AND     shift, and go to state 106
-    BIT_NOT     shift, and go to state 107
-    UNTIL       shift, and go to state 108
-    SEMI        shift, and go to state 109
-    LPAREN      shift, and go to state 110
-    LBRACE      shift, and go to state 58
+    ID      shift, and go to state 343
+    LPAREN  shift, and go to state 23
 
-    compound_statement         go to state 114
-    statement                  go to state 344
-    labeled_statement          go to state 118
-    expression_statement       go to state 119
-    selection_statement        go to state 120
-    iteration_statement        go to state 121
-    jump_statement             go to state 122
-    expression                 go to state 123
-    assignment_expression      go to state 124
-    conditional_expression     go to state 125
-    logical_or_expression      go to state 126
-    logical_and_expression     go to state 127
-    inclusive_or_expression    go to state 128
-    exclusive_or_expression    go to state 129
-    and_expression             go to state 130
-    equality_expression        go to state 131
-    relational_expression      go to state 132
-    shift_expression           go to state 133
-    additive_expression        go to state 134
-    multiplicative_expression  go to state 135
-    cast_expression            go to state 136
-    unary_expression           go to state 137
-    unary_operator             go to state 138
-    postfix_expression         go to state 139
-    primary_expression         go to state 140
-    string_literal             go to state 141
-    constant                   go to state 142
+    direct_declarator  go to state 45
 
 
 State 314
 
-  190 unary_expression: SIZEOF LPAREN type_name RPAREN •
+  129 iteration_statement: FOR LPAREN for_init_statement expression_statement • RPAREN statement
+  130                    | FOR LPAREN for_init_statement expression_statement • expression RPAREN statement
 
-    $default  reduce using rule 190 (unary_expression)
-
-
-State 315
-
-  122 selection_statement: SWITCH LPAREN expression RPAREN • statement
-
-    BREAK       shift, and go to state 79
-    CASE        shift, and go to state 80
-    CONTINUE    shift, and go to state 81
-    DEFAULT     shift, and go to state 82
-    DO          shift, and go to state 83
-    FOR         shift, and go to state 84
-    GOTO        shift, and go to state 85
-    IF          shift, and go to state 86
-    RETURN      shift, and go to state 87
     SIZEOF      shift, and go to state 88
-    SWITCH      shift, and go to state 89
-    WHILE       shift, and go to state 90
     NULL_TOKEN  shift, and go to state 91
     NULLPTR     shift, and go to state 92
     TRUE        shift, and go to state 93
     FALSE       shift, and go to state 94
-    ID          shift, and go to state 95
+    ID          shift, and go to state 146
     NUM         shift, and go to state 96
     FLOAT_LIT   shift, and go to state 97
     CHAR_LIT    shift, and go to state 98
@@ -5955,19 +5840,10 @@ State 315
     NOT         shift, and go to state 105
     BIT_AND     shift, and go to state 106
     BIT_NOT     shift, and go to state 107
-    UNTIL       shift, and go to state 108
-    SEMI        shift, and go to state 109
     LPAREN      shift, and go to state 110
-    LBRACE      shift, and go to state 58
+    RPAREN      shift, and go to state 344
 
-    compound_statement         go to state 114
-    statement                  go to state 345
-    labeled_statement          go to state 118
-    expression_statement       go to state 119
-    selection_statement        go to state 120
-    iteration_statement        go to state 121
-    jump_statement             go to state 122
-    expression                 go to state 123
+    expression                 go to state 345
     assignment_expression      go to state 124
     conditional_expression     go to state 125
     logical_or_expression      go to state 126
@@ -5989,9 +5865,9 @@ State 315
     constant                   go to state 142
 
 
-State 316
+State 315
 
-  123 iteration_statement: WHILE LPAREN expression RPAREN • statement
+  131 iteration_statement: FOR LPAREN range_based_for RPAREN • statement
 
     BREAK       shift, and go to state 79
     CASE        shift, and go to state 80
@@ -6056,9 +5932,10 @@ State 316
     constant                   go to state 142
 
 
-State 317
+State 316
 
-  125 iteration_statement: UNTIL LPAREN expression RPAREN • statement
+  123 selection_statement: IF LPAREN expression RPAREN • statement
+  124                    | IF LPAREN expression RPAREN • statement ELSE statement
 
     BREAK       shift, and go to state 79
     CASE        shift, and go to state 80
@@ -6123,7 +6000,215 @@ State 317
     constant                   go to state 142
 
 
+State 317
+
+  193 unary_expression: SIZEOF LPAREN type_name RPAREN •
+
+    $default  reduce using rule 193 (unary_expression)
+
+
 State 318
+
+  125 selection_statement: SWITCH LPAREN expression RPAREN • statement
+
+    BREAK       shift, and go to state 79
+    CASE        shift, and go to state 80
+    CONTINUE    shift, and go to state 81
+    DEFAULT     shift, and go to state 82
+    DO          shift, and go to state 83
+    FOR         shift, and go to state 84
+    GOTO        shift, and go to state 85
+    IF          shift, and go to state 86
+    RETURN      shift, and go to state 87
+    SIZEOF      shift, and go to state 88
+    SWITCH      shift, and go to state 89
+    WHILE       shift, and go to state 90
+    NULL_TOKEN  shift, and go to state 91
+    NULLPTR     shift, and go to state 92
+    TRUE        shift, and go to state 93
+    FALSE       shift, and go to state 94
+    ID          shift, and go to state 95
+    NUM         shift, and go to state 96
+    FLOAT_LIT   shift, and go to state 97
+    CHAR_LIT    shift, and go to state 98
+    STRING_LIT  shift, and go to state 99
+    PLUS        shift, and go to state 100
+    MINUS       shift, and go to state 101
+    MUL         shift, and go to state 102
+    INC         shift, and go to state 103
+    DEC         shift, and go to state 104
+    NOT         shift, and go to state 105
+    BIT_AND     shift, and go to state 106
+    BIT_NOT     shift, and go to state 107
+    UNTIL       shift, and go to state 108
+    SEMI        shift, and go to state 109
+    LPAREN      shift, and go to state 110
+    LBRACE      shift, and go to state 58
+
+    compound_statement         go to state 114
+    statement                  go to state 348
+    labeled_statement          go to state 118
+    expression_statement       go to state 119
+    selection_statement        go to state 120
+    iteration_statement        go to state 121
+    jump_statement             go to state 122
+    expression                 go to state 123
+    assignment_expression      go to state 124
+    conditional_expression     go to state 125
+    logical_or_expression      go to state 126
+    logical_and_expression     go to state 127
+    inclusive_or_expression    go to state 128
+    exclusive_or_expression    go to state 129
+    and_expression             go to state 130
+    equality_expression        go to state 131
+    relational_expression      go to state 132
+    shift_expression           go to state 133
+    additive_expression        go to state 134
+    multiplicative_expression  go to state 135
+    cast_expression            go to state 136
+    unary_expression           go to state 137
+    unary_operator             go to state 138
+    postfix_expression         go to state 139
+    primary_expression         go to state 140
+    string_literal             go to state 141
+    constant                   go to state 142
+
+
+State 319
+
+  126 iteration_statement: WHILE LPAREN expression RPAREN • statement
+
+    BREAK       shift, and go to state 79
+    CASE        shift, and go to state 80
+    CONTINUE    shift, and go to state 81
+    DEFAULT     shift, and go to state 82
+    DO          shift, and go to state 83
+    FOR         shift, and go to state 84
+    GOTO        shift, and go to state 85
+    IF          shift, and go to state 86
+    RETURN      shift, and go to state 87
+    SIZEOF      shift, and go to state 88
+    SWITCH      shift, and go to state 89
+    WHILE       shift, and go to state 90
+    NULL_TOKEN  shift, and go to state 91
+    NULLPTR     shift, and go to state 92
+    TRUE        shift, and go to state 93
+    FALSE       shift, and go to state 94
+    ID          shift, and go to state 95
+    NUM         shift, and go to state 96
+    FLOAT_LIT   shift, and go to state 97
+    CHAR_LIT    shift, and go to state 98
+    STRING_LIT  shift, and go to state 99
+    PLUS        shift, and go to state 100
+    MINUS       shift, and go to state 101
+    MUL         shift, and go to state 102
+    INC         shift, and go to state 103
+    DEC         shift, and go to state 104
+    NOT         shift, and go to state 105
+    BIT_AND     shift, and go to state 106
+    BIT_NOT     shift, and go to state 107
+    UNTIL       shift, and go to state 108
+    SEMI        shift, and go to state 109
+    LPAREN      shift, and go to state 110
+    LBRACE      shift, and go to state 58
+
+    compound_statement         go to state 114
+    statement                  go to state 349
+    labeled_statement          go to state 118
+    expression_statement       go to state 119
+    selection_statement        go to state 120
+    iteration_statement        go to state 121
+    jump_statement             go to state 122
+    expression                 go to state 123
+    assignment_expression      go to state 124
+    conditional_expression     go to state 125
+    logical_or_expression      go to state 126
+    logical_and_expression     go to state 127
+    inclusive_or_expression    go to state 128
+    exclusive_or_expression    go to state 129
+    and_expression             go to state 130
+    equality_expression        go to state 131
+    relational_expression      go to state 132
+    shift_expression           go to state 133
+    additive_expression        go to state 134
+    multiplicative_expression  go to state 135
+    cast_expression            go to state 136
+    unary_expression           go to state 137
+    unary_operator             go to state 138
+    postfix_expression         go to state 139
+    primary_expression         go to state 140
+    string_literal             go to state 141
+    constant                   go to state 142
+
+
+State 320
+
+  128 iteration_statement: UNTIL LPAREN expression RPAREN • statement
+
+    BREAK       shift, and go to state 79
+    CASE        shift, and go to state 80
+    CONTINUE    shift, and go to state 81
+    DEFAULT     shift, and go to state 82
+    DO          shift, and go to state 83
+    FOR         shift, and go to state 84
+    GOTO        shift, and go to state 85
+    IF          shift, and go to state 86
+    RETURN      shift, and go to state 87
+    SIZEOF      shift, and go to state 88
+    SWITCH      shift, and go to state 89
+    WHILE       shift, and go to state 90
+    NULL_TOKEN  shift, and go to state 91
+    NULLPTR     shift, and go to state 92
+    TRUE        shift, and go to state 93
+    FALSE       shift, and go to state 94
+    ID          shift, and go to state 95
+    NUM         shift, and go to state 96
+    FLOAT_LIT   shift, and go to state 97
+    CHAR_LIT    shift, and go to state 98
+    STRING_LIT  shift, and go to state 99
+    PLUS        shift, and go to state 100
+    MINUS       shift, and go to state 101
+    MUL         shift, and go to state 102
+    INC         shift, and go to state 103
+    DEC         shift, and go to state 104
+    NOT         shift, and go to state 105
+    BIT_AND     shift, and go to state 106
+    BIT_NOT     shift, and go to state 107
+    UNTIL       shift, and go to state 108
+    SEMI        shift, and go to state 109
+    LPAREN      shift, and go to state 110
+    LBRACE      shift, and go to state 58
+
+    compound_statement         go to state 114
+    statement                  go to state 350
+    labeled_statement          go to state 118
+    expression_statement       go to state 119
+    selection_statement        go to state 120
+    iteration_statement        go to state 121
+    jump_statement             go to state 122
+    expression                 go to state 123
+    assignment_expression      go to state 124
+    conditional_expression     go to state 125
+    logical_or_expression      go to state 126
+    logical_and_expression     go to state 127
+    inclusive_or_expression    go to state 128
+    exclusive_or_expression    go to state 129
+    and_expression             go to state 130
+    equality_expression        go to state 131
+    relational_expression      go to state 132
+    shift_expression           go to state 133
+    additive_expression        go to state 134
+    multiplicative_expression  go to state 135
+    cast_expression            go to state 136
+    unary_expression           go to state 137
+    unary_operator             go to state 138
+    postfix_expression         go to state 139
+    primary_expression         go to state 140
+    string_literal             go to state 141
+    constant                   go to state 142
+
+
+State 321
 
    84 abstract_declarator: BIT_AND direct_abstract_declarator •
    90 direct_abstract_declarator: direct_abstract_declarator • LBRACKET RBRACKET
@@ -6131,64 +6216,64 @@ State 318
    94                           | direct_abstract_declarator • LPAREN RPAREN
    95                           | direct_abstract_declarator • LPAREN parameter_list RPAREN
 
-    LPAREN    shift, and go to state 326
-    LBRACKET  shift, and go to state 327
+    LPAREN    shift, and go to state 329
+    LBRACKET  shift, and go to state 330
 
     $default  reduce using rule 84 (abstract_declarator)
 
 
-State 319
+State 322
 
    92 direct_abstract_declarator: LPAREN RPAREN •
 
     $default  reduce using rule 92 (direct_abstract_declarator)
 
 
-State 320
+State 323
 
    75 parameter_list: parameter_list • COMMA parameter_declaration
    76               | parameter_list • COMMA ELLIPSIS
    93 direct_abstract_declarator: LPAREN parameter_list • RPAREN
 
-    COMMA   shift, and go to state 302
-    RPAREN  shift, and go to state 348
+    COMMA   shift, and go to state 304
+    RPAREN  shift, and go to state 351
 
 
-State 321
+State 324
 
    87 direct_abstract_declarator: LPAREN abstract_declarator • RPAREN
 
-    RPAREN  shift, and go to state 349
+    RPAREN  shift, and go to state 352
 
 
-State 322
+State 325
 
    88 direct_abstract_declarator: LBRACKET RBRACKET •
 
     $default  reduce using rule 88 (direct_abstract_declarator)
 
 
-State 323
+State 326
 
    89 direct_abstract_declarator: LBRACKET assignment_expression • RBRACKET
 
-    RBRACKET  shift, and go to state 350
+    RBRACKET  shift, and go to state 353
 
 
-State 324
+State 327
 
    85 abstract_declarator: pointer BIT_AND •
    86                    | pointer BIT_AND • direct_abstract_declarator
 
-    LPAREN    shift, and go to state 263
-    LBRACKET  shift, and go to state 264
+    LPAREN    shift, and go to state 265
+    LBRACKET  shift, and go to state 266
 
     $default  reduce using rule 85 (abstract_declarator)
 
-    direct_abstract_declarator  go to state 351
+    direct_abstract_declarator  go to state 354
 
 
-State 325
+State 328
 
    81 abstract_declarator: pointer direct_abstract_declarator •
    90 direct_abstract_declarator: direct_abstract_declarator • LBRACKET RBRACKET
@@ -6196,13 +6281,13 @@ State 325
    94                           | direct_abstract_declarator • LPAREN RPAREN
    95                           | direct_abstract_declarator • LPAREN parameter_list RPAREN
 
-    LPAREN    shift, and go to state 326
-    LBRACKET  shift, and go to state 327
+    LPAREN    shift, and go to state 329
+    LBRACKET  shift, and go to state 330
 
     $default  reduce using rule 81 (abstract_declarator)
 
 
-State 326
+State 329
 
    94 direct_abstract_declarator: direct_abstract_declarator LPAREN • RPAREN
    95                           | direct_abstract_declarator LPAREN • parameter_list RPAREN
@@ -6226,7 +6311,7 @@ State 326
     VOID          shift, and go to state 17
     BOOL          shift, and go to state 18
     TYPEDEF_NAME  shift, and go to state 19
-    RPAREN        shift, and go to state 352
+    RPAREN        shift, and go to state 355
 
     declaration_specifiers     go to state 232
     storage_class_specifier    go to state 32
@@ -6235,11 +6320,11 @@ State 326
     struct_or_union_specifier  go to state 35
     struct_or_union            go to state 36
     enum_specifier             go to state 37
-    parameter_list             go to state 353
+    parameter_list             go to state 356
     parameter_declaration      go to state 234
 
 
-State 327
+State 330
 
    90 direct_abstract_declarator: direct_abstract_declarator LBRACKET • RBRACKET
    91                           | direct_abstract_declarator LBRACKET • assignment_expression RBRACKET
@@ -6263,105 +6348,9 @@ State 327
     BIT_AND     shift, and go to state 106
     BIT_NOT     shift, and go to state 107
     LPAREN      shift, and go to state 110
-    RBRACKET    shift, and go to state 354
+    RBRACKET    shift, and go to state 357
 
-    assignment_expression      go to state 355
-    conditional_expression     go to state 125
-    logical_or_expression      go to state 126
-    logical_and_expression     go to state 127
-    inclusive_or_expression    go to state 128
-    exclusive_or_expression    go to state 129
-    and_expression             go to state 130
-    equality_expression        go to state 131
-    relational_expression      go to state 132
-    shift_expression           go to state 133
-    additive_expression        go to state 134
-    multiplicative_expression  go to state 135
-    cast_expression            go to state 136
-    unary_expression           go to state 137
-    unary_operator             go to state 138
-    postfix_expression         go to state 139
-    primary_expression         go to state 140
-    string_literal             go to state 141
-    constant                   go to state 142
-
-
-State 328
-
-  184 cast_expression: LPAREN type_name RPAREN cast_expression •
-
-    $default  reduce using rule 184 (cast_expression)
-
-
-State 329
-
-  154 conditional_expression: logical_or_expression QUESTION expression COLON • conditional_expression
-
-    SIZEOF      shift, and go to state 88
-    NULL_TOKEN  shift, and go to state 91
-    NULLPTR     shift, and go to state 92
-    TRUE        shift, and go to state 93
-    FALSE       shift, and go to state 94
-    ID          shift, and go to state 146
-    NUM         shift, and go to state 96
-    FLOAT_LIT   shift, and go to state 97
-    CHAR_LIT    shift, and go to state 98
-    STRING_LIT  shift, and go to state 99
-    PLUS        shift, and go to state 100
-    MINUS       shift, and go to state 101
-    MUL         shift, and go to state 102
-    INC         shift, and go to state 103
-    DEC         shift, and go to state 104
-    NOT         shift, and go to state 105
-    BIT_AND     shift, and go to state 106
-    BIT_NOT     shift, and go to state 107
-    LPAREN      shift, and go to state 110
-
-    conditional_expression     go to state 356
-    logical_or_expression      go to state 126
-    logical_and_expression     go to state 127
-    inclusive_or_expression    go to state 128
-    exclusive_or_expression    go to state 129
-    and_expression             go to state 130
-    equality_expression        go to state 131
-    relational_expression      go to state 132
-    shift_expression           go to state 133
-    additive_expression        go to state 134
-    multiplicative_expression  go to state 135
-    cast_expression            go to state 136
-    unary_expression           go to state 224
-    unary_operator             go to state 138
-    postfix_expression         go to state 139
-    primary_expression         go to state 140
-    string_literal             go to state 141
-    constant                   go to state 142
-
-
-State 330
-
-  212 argument_expression_list: argument_expression_list COMMA • assignment_expression
-
-    SIZEOF      shift, and go to state 88
-    NULL_TOKEN  shift, and go to state 91
-    NULLPTR     shift, and go to state 92
-    TRUE        shift, and go to state 93
-    FALSE       shift, and go to state 94
-    ID          shift, and go to state 146
-    NUM         shift, and go to state 96
-    FLOAT_LIT   shift, and go to state 97
-    CHAR_LIT    shift, and go to state 98
-    STRING_LIT  shift, and go to state 99
-    PLUS        shift, and go to state 100
-    MINUS       shift, and go to state 101
-    MUL         shift, and go to state 102
-    INC         shift, and go to state 103
-    DEC         shift, and go to state 104
-    NOT         shift, and go to state 105
-    BIT_AND     shift, and go to state 106
-    BIT_NOT     shift, and go to state 107
-    LPAREN      shift, and go to state 110
-
-    assignment_expression      go to state 357
+    assignment_expression      go to state 358
     conditional_expression     go to state 125
     logical_or_expression      go to state 126
     logical_and_expression     go to state 127
@@ -6384,74 +6373,14 @@ State 330
 
 State 331
 
-  199 postfix_expression: postfix_expression LPAREN argument_expression_list RPAREN •
+  187 cast_expression: LPAREN type_name RPAREN cast_expression •
 
-    $default  reduce using rule 199 (postfix_expression)
+    $default  reduce using rule 187 (cast_expression)
 
 
 State 332
 
-  198 postfix_expression: postfix_expression LBRACKET expression RBRACKET •
-
-    $default  reduce using rule 198 (postfix_expression)
-
-
-State 333
-
-   64 declarator: pointer BIT_AND • direct_declarator
-   85 abstract_declarator: pointer BIT_AND •
-   86                    | pointer BIT_AND • direct_abstract_declarator
-
-    ID        shift, and go to state 20
-    LPAREN    shift, and go to state 298
-    LBRACKET  shift, and go to state 264
-
-    $default  reduce using rule 85 (abstract_declarator)
-
-    direct_declarator           go to state 143
-    direct_abstract_declarator  go to state 351
-
-
-State 334
-
-   76 parameter_list: parameter_list COMMA ELLIPSIS •
-
-    $default  reduce using rule 76 (parameter_list)
-
-
-State 335
-
-   75 parameter_list: parameter_list COMMA parameter_declaration •
-
-    $default  reduce using rule 75 (parameter_list)
-
-
-State 336
-
-  100 initializer: LBRACE initializer_list COMMA RBRACE •
-
-    $default  reduce using rule 100 (initializer)
-
-
-State 337
-
-  102 initializer_list: initializer_list COMMA initializer •
-
-    $default  reduce using rule 102 (initializer_list)
-
-
-State 338
-
-  124 iteration_statement: DO statement WHILE LPAREN expression • RPAREN SEMI
-  139 expression: expression • COMMA assignment_expression
-
-    COMMA   shift, and go to state 191
-    RPAREN  shift, and go to state 358
-
-
-State 339
-
-  131 range_based_for: declaration_specifiers ID COLON • expression
+  157 conditional_expression: logical_or_expression QUESTION expression COLON • conditional_expression
 
     SIZEOF      shift, and go to state 88
     NULL_TOKEN  shift, and go to state 91
@@ -6473,7 +6402,163 @@ State 339
     BIT_NOT     shift, and go to state 107
     LPAREN      shift, and go to state 110
 
-    expression                 go to state 359
+    conditional_expression     go to state 359
+    logical_or_expression      go to state 126
+    logical_and_expression     go to state 127
+    inclusive_or_expression    go to state 128
+    exclusive_or_expression    go to state 129
+    and_expression             go to state 130
+    equality_expression        go to state 131
+    relational_expression      go to state 132
+    shift_expression           go to state 133
+    additive_expression        go to state 134
+    multiplicative_expression  go to state 135
+    cast_expression            go to state 136
+    unary_expression           go to state 224
+    unary_operator             go to state 138
+    postfix_expression         go to state 139
+    primary_expression         go to state 140
+    string_literal             go to state 141
+    constant                   go to state 142
+
+
+State 333
+
+  215 argument_expression_list: argument_expression_list COMMA • assignment_expression
+
+    SIZEOF      shift, and go to state 88
+    NULL_TOKEN  shift, and go to state 91
+    NULLPTR     shift, and go to state 92
+    TRUE        shift, and go to state 93
+    FALSE       shift, and go to state 94
+    ID          shift, and go to state 146
+    NUM         shift, and go to state 96
+    FLOAT_LIT   shift, and go to state 97
+    CHAR_LIT    shift, and go to state 98
+    STRING_LIT  shift, and go to state 99
+    PLUS        shift, and go to state 100
+    MINUS       shift, and go to state 101
+    MUL         shift, and go to state 102
+    INC         shift, and go to state 103
+    DEC         shift, and go to state 104
+    NOT         shift, and go to state 105
+    BIT_AND     shift, and go to state 106
+    BIT_NOT     shift, and go to state 107
+    LPAREN      shift, and go to state 110
+
+    assignment_expression      go to state 360
+    conditional_expression     go to state 125
+    logical_or_expression      go to state 126
+    logical_and_expression     go to state 127
+    inclusive_or_expression    go to state 128
+    exclusive_or_expression    go to state 129
+    and_expression             go to state 130
+    equality_expression        go to state 131
+    relational_expression      go to state 132
+    shift_expression           go to state 133
+    additive_expression        go to state 134
+    multiplicative_expression  go to state 135
+    cast_expression            go to state 136
+    unary_expression           go to state 137
+    unary_operator             go to state 138
+    postfix_expression         go to state 139
+    primary_expression         go to state 140
+    string_literal             go to state 141
+    constant                   go to state 142
+
+
+State 334
+
+  202 postfix_expression: postfix_expression LPAREN argument_expression_list RPAREN •
+
+    $default  reduce using rule 202 (postfix_expression)
+
+
+State 335
+
+  201 postfix_expression: postfix_expression LBRACKET expression RBRACKET •
+
+    $default  reduce using rule 201 (postfix_expression)
+
+
+State 336
+
+   64 declarator: pointer BIT_AND • direct_declarator
+   85 abstract_declarator: pointer BIT_AND •
+   86                    | pointer BIT_AND • direct_abstract_declarator
+
+    ID        shift, and go to state 20
+    LPAREN    shift, and go to state 300
+    LBRACKET  shift, and go to state 266
+
+    $default  reduce using rule 85 (abstract_declarator)
+
+    direct_declarator           go to state 143
+    direct_abstract_declarator  go to state 354
+
+
+State 337
+
+   76 parameter_list: parameter_list COMMA ELLIPSIS •
+
+    $default  reduce using rule 76 (parameter_list)
+
+
+State 338
+
+   75 parameter_list: parameter_list COMMA parameter_declaration •
+
+    $default  reduce using rule 75 (parameter_list)
+
+
+State 339
+
+  100 initializer: LBRACE initializer_list COMMA RBRACE •
+
+    $default  reduce using rule 100 (initializer)
+
+
+State 340
+
+  103 initializer_list: initializer_list COMMA initializer •
+
+    $default  reduce using rule 103 (initializer_list)
+
+
+State 341
+
+  127 iteration_statement: DO statement WHILE LPAREN expression • RPAREN SEMI
+  142 expression: expression • COMMA assignment_expression
+
+    COMMA   shift, and go to state 191
+    RPAREN  shift, and go to state 361
+
+
+State 342
+
+  134 range_based_for: declaration_specifiers ID COLON • expression
+
+    SIZEOF      shift, and go to state 88
+    NULL_TOKEN  shift, and go to state 91
+    NULLPTR     shift, and go to state 92
+    TRUE        shift, and go to state 93
+    FALSE       shift, and go to state 94
+    ID          shift, and go to state 146
+    NUM         shift, and go to state 96
+    FLOAT_LIT   shift, and go to state 97
+    CHAR_LIT    shift, and go to state 98
+    STRING_LIT  shift, and go to state 99
+    PLUS        shift, and go to state 100
+    MINUS       shift, and go to state 101
+    MUL         shift, and go to state 102
+    INC         shift, and go to state 103
+    DEC         shift, and go to state 104
+    NOT         shift, and go to state 105
+    BIT_AND     shift, and go to state 106
+    BIT_NOT     shift, and go to state 107
+    LPAREN      shift, and go to state 110
+
+    expression                 go to state 362
     assignment_expression      go to state 124
     conditional_expression     go to state 125
     logical_or_expression      go to state 126
@@ -6495,19 +6580,19 @@ State 339
     constant                   go to state 142
 
 
-State 340
+State 343
 
    67 direct_declarator: ID •
-  132 range_based_for: declaration_specifiers BIT_AND ID • COLON expression
+  135 range_based_for: declaration_specifiers BIT_AND ID • COLON expression
 
-    COLON  shift, and go to state 360
+    COLON  shift, and go to state 363
 
     $default  reduce using rule 67 (direct_declarator)
 
 
-State 341
+State 344
 
-  126 iteration_statement: FOR LPAREN for_init_statement expression_statement RPAREN • statement
+  129 iteration_statement: FOR LPAREN for_init_statement expression_statement RPAREN • statement
 
     BREAK       shift, and go to state 79
     CASE        shift, and go to state 80
@@ -6544,7 +6629,7 @@ State 341
     LBRACE      shift, and go to state 58
 
     compound_statement         go to state 114
-    statement                  go to state 361
+    statement                  go to state 364
     labeled_statement          go to state 118
     expression_statement       go to state 119
     selection_statement        go to state 120
@@ -6572,75 +6657,75 @@ State 341
     constant                   go to state 142
 
 
-State 342
-
-  127 iteration_statement: FOR LPAREN for_init_statement expression_statement expression • RPAREN statement
-  139 expression: expression • COMMA assignment_expression
-
-    COMMA   shift, and go to state 191
-    RPAREN  shift, and go to state 362
-
-
-State 343
-
-  128 iteration_statement: FOR LPAREN range_based_for RPAREN statement •
-
-    $default  reduce using rule 128 (iteration_statement)
-
-
-State 344
-
-  120 selection_statement: IF LPAREN expression RPAREN statement •
-  121                    | IF LPAREN expression RPAREN statement • ELSE statement
-
-    ELSE  shift, and go to state 363
-
-    $default  reduce using rule 120 (selection_statement)
-
-
 State 345
 
-  122 selection_statement: SWITCH LPAREN expression RPAREN statement •
+  130 iteration_statement: FOR LPAREN for_init_statement expression_statement expression • RPAREN statement
+  142 expression: expression • COMMA assignment_expression
 
-    $default  reduce using rule 122 (selection_statement)
+    COMMA   shift, and go to state 191
+    RPAREN  shift, and go to state 365
 
 
 State 346
 
-  123 iteration_statement: WHILE LPAREN expression RPAREN statement •
+  131 iteration_statement: FOR LPAREN range_based_for RPAREN statement •
 
-    $default  reduce using rule 123 (iteration_statement)
+    $default  reduce using rule 131 (iteration_statement)
 
 
 State 347
 
-  125 iteration_statement: UNTIL LPAREN expression RPAREN statement •
+  123 selection_statement: IF LPAREN expression RPAREN statement •
+  124                    | IF LPAREN expression RPAREN statement • ELSE statement
 
-    $default  reduce using rule 125 (iteration_statement)
+    ELSE  shift, and go to state 366
+
+    $default  reduce using rule 123 (selection_statement)
 
 
 State 348
+
+  125 selection_statement: SWITCH LPAREN expression RPAREN statement •
+
+    $default  reduce using rule 125 (selection_statement)
+
+
+State 349
+
+  126 iteration_statement: WHILE LPAREN expression RPAREN statement •
+
+    $default  reduce using rule 126 (iteration_statement)
+
+
+State 350
+
+  128 iteration_statement: UNTIL LPAREN expression RPAREN statement •
+
+    $default  reduce using rule 128 (iteration_statement)
+
+
+State 351
 
    93 direct_abstract_declarator: LPAREN parameter_list RPAREN •
 
     $default  reduce using rule 93 (direct_abstract_declarator)
 
 
-State 349
+State 352
 
    87 direct_abstract_declarator: LPAREN abstract_declarator RPAREN •
 
     $default  reduce using rule 87 (direct_abstract_declarator)
 
 
-State 350
+State 353
 
    89 direct_abstract_declarator: LBRACKET assignment_expression RBRACKET •
 
     $default  reduce using rule 89 (direct_abstract_declarator)
 
 
-State 351
+State 354
 
    86 abstract_declarator: pointer BIT_AND direct_abstract_declarator •
    90 direct_abstract_declarator: direct_abstract_declarator • LBRACKET RBRACKET
@@ -6648,77 +6733,77 @@ State 351
    94                           | direct_abstract_declarator • LPAREN RPAREN
    95                           | direct_abstract_declarator • LPAREN parameter_list RPAREN
 
-    LPAREN    shift, and go to state 326
-    LBRACKET  shift, and go to state 327
+    LPAREN    shift, and go to state 329
+    LBRACKET  shift, and go to state 330
 
     $default  reduce using rule 86 (abstract_declarator)
 
 
-State 352
+State 355
 
    94 direct_abstract_declarator: direct_abstract_declarator LPAREN RPAREN •
 
     $default  reduce using rule 94 (direct_abstract_declarator)
 
 
-State 353
+State 356
 
    75 parameter_list: parameter_list • COMMA parameter_declaration
    76               | parameter_list • COMMA ELLIPSIS
    95 direct_abstract_declarator: direct_abstract_declarator LPAREN parameter_list • RPAREN
 
-    COMMA   shift, and go to state 302
-    RPAREN  shift, and go to state 364
+    COMMA   shift, and go to state 304
+    RPAREN  shift, and go to state 367
 
 
-State 354
+State 357
 
    90 direct_abstract_declarator: direct_abstract_declarator LBRACKET RBRACKET •
 
     $default  reduce using rule 90 (direct_abstract_declarator)
 
 
-State 355
+State 358
 
    91 direct_abstract_declarator: direct_abstract_declarator LBRACKET assignment_expression • RBRACKET
 
-    RBRACKET  shift, and go to state 365
-
-
-State 356
-
-  154 conditional_expression: logical_or_expression QUESTION expression COLON conditional_expression •
-
-    $default  reduce using rule 154 (conditional_expression)
-
-
-State 357
-
-  212 argument_expression_list: argument_expression_list COMMA assignment_expression •
-
-    $default  reduce using rule 212 (argument_expression_list)
-
-
-State 358
-
-  124 iteration_statement: DO statement WHILE LPAREN expression RPAREN • SEMI
-
-    SEMI  shift, and go to state 366
+    RBRACKET  shift, and go to state 368
 
 
 State 359
 
-  131 range_based_for: declaration_specifiers ID COLON expression •
-  139 expression: expression • COMMA assignment_expression
+  157 conditional_expression: logical_or_expression QUESTION expression COLON conditional_expression •
 
-    COMMA  shift, and go to state 191
-
-    $default  reduce using rule 131 (range_based_for)
+    $default  reduce using rule 157 (conditional_expression)
 
 
 State 360
 
-  132 range_based_for: declaration_specifiers BIT_AND ID COLON • expression
+  215 argument_expression_list: argument_expression_list COMMA assignment_expression •
+
+    $default  reduce using rule 215 (argument_expression_list)
+
+
+State 361
+
+  127 iteration_statement: DO statement WHILE LPAREN expression RPAREN • SEMI
+
+    SEMI  shift, and go to state 369
+
+
+State 362
+
+  134 range_based_for: declaration_specifiers ID COLON expression •
+  142 expression: expression • COMMA assignment_expression
+
+    COMMA  shift, and go to state 191
+
+    $default  reduce using rule 134 (range_based_for)
+
+
+State 363
+
+  135 range_based_for: declaration_specifiers BIT_AND ID COLON • expression
 
     SIZEOF      shift, and go to state 88
     NULL_TOKEN  shift, and go to state 91
@@ -6740,148 +6825,7 @@ State 360
     BIT_NOT     shift, and go to state 107
     LPAREN      shift, and go to state 110
 
-    expression                 go to state 367
-    assignment_expression      go to state 124
-    conditional_expression     go to state 125
-    logical_or_expression      go to state 126
-    logical_and_expression     go to state 127
-    inclusive_or_expression    go to state 128
-    exclusive_or_expression    go to state 129
-    and_expression             go to state 130
-    equality_expression        go to state 131
-    relational_expression      go to state 132
-    shift_expression           go to state 133
-    additive_expression        go to state 134
-    multiplicative_expression  go to state 135
-    cast_expression            go to state 136
-    unary_expression           go to state 137
-    unary_operator             go to state 138
-    postfix_expression         go to state 139
-    primary_expression         go to state 140
-    string_literal             go to state 141
-    constant                   go to state 142
-
-
-State 361
-
-  126 iteration_statement: FOR LPAREN for_init_statement expression_statement RPAREN statement •
-
-    $default  reduce using rule 126 (iteration_statement)
-
-
-State 362
-
-  127 iteration_statement: FOR LPAREN for_init_statement expression_statement expression RPAREN • statement
-
-    BREAK       shift, and go to state 79
-    CASE        shift, and go to state 80
-    CONTINUE    shift, and go to state 81
-    DEFAULT     shift, and go to state 82
-    DO          shift, and go to state 83
-    FOR         shift, and go to state 84
-    GOTO        shift, and go to state 85
-    IF          shift, and go to state 86
-    RETURN      shift, and go to state 87
-    SIZEOF      shift, and go to state 88
-    SWITCH      shift, and go to state 89
-    WHILE       shift, and go to state 90
-    NULL_TOKEN  shift, and go to state 91
-    NULLPTR     shift, and go to state 92
-    TRUE        shift, and go to state 93
-    FALSE       shift, and go to state 94
-    ID          shift, and go to state 95
-    NUM         shift, and go to state 96
-    FLOAT_LIT   shift, and go to state 97
-    CHAR_LIT    shift, and go to state 98
-    STRING_LIT  shift, and go to state 99
-    PLUS        shift, and go to state 100
-    MINUS       shift, and go to state 101
-    MUL         shift, and go to state 102
-    INC         shift, and go to state 103
-    DEC         shift, and go to state 104
-    NOT         shift, and go to state 105
-    BIT_AND     shift, and go to state 106
-    BIT_NOT     shift, and go to state 107
-    UNTIL       shift, and go to state 108
-    SEMI        shift, and go to state 109
-    LPAREN      shift, and go to state 110
-    LBRACE      shift, and go to state 58
-
-    compound_statement         go to state 114
-    statement                  go to state 368
-    labeled_statement          go to state 118
-    expression_statement       go to state 119
-    selection_statement        go to state 120
-    iteration_statement        go to state 121
-    jump_statement             go to state 122
-    expression                 go to state 123
-    assignment_expression      go to state 124
-    conditional_expression     go to state 125
-    logical_or_expression      go to state 126
-    logical_and_expression     go to state 127
-    inclusive_or_expression    go to state 128
-    exclusive_or_expression    go to state 129
-    and_expression             go to state 130
-    equality_expression        go to state 131
-    relational_expression      go to state 132
-    shift_expression           go to state 133
-    additive_expression        go to state 134
-    multiplicative_expression  go to state 135
-    cast_expression            go to state 136
-    unary_expression           go to state 137
-    unary_operator             go to state 138
-    postfix_expression         go to state 139
-    primary_expression         go to state 140
-    string_literal             go to state 141
-    constant                   go to state 142
-
-
-State 363
-
-  121 selection_statement: IF LPAREN expression RPAREN statement ELSE • statement
-
-    BREAK       shift, and go to state 79
-    CASE        shift, and go to state 80
-    CONTINUE    shift, and go to state 81
-    DEFAULT     shift, and go to state 82
-    DO          shift, and go to state 83
-    FOR         shift, and go to state 84
-    GOTO        shift, and go to state 85
-    IF          shift, and go to state 86
-    RETURN      shift, and go to state 87
-    SIZEOF      shift, and go to state 88
-    SWITCH      shift, and go to state 89
-    WHILE       shift, and go to state 90
-    NULL_TOKEN  shift, and go to state 91
-    NULLPTR     shift, and go to state 92
-    TRUE        shift, and go to state 93
-    FALSE       shift, and go to state 94
-    ID          shift, and go to state 95
-    NUM         shift, and go to state 96
-    FLOAT_LIT   shift, and go to state 97
-    CHAR_LIT    shift, and go to state 98
-    STRING_LIT  shift, and go to state 99
-    PLUS        shift, and go to state 100
-    MINUS       shift, and go to state 101
-    MUL         shift, and go to state 102
-    INC         shift, and go to state 103
-    DEC         shift, and go to state 104
-    NOT         shift, and go to state 105
-    BIT_AND     shift, and go to state 106
-    BIT_NOT     shift, and go to state 107
-    UNTIL       shift, and go to state 108
-    SEMI        shift, and go to state 109
-    LPAREN      shift, and go to state 110
-    LBRACE      shift, and go to state 58
-
-    compound_statement         go to state 114
-    statement                  go to state 369
-    labeled_statement          go to state 118
-    expression_statement       go to state 119
-    selection_statement        go to state 120
-    iteration_statement        go to state 121
-    jump_statement             go to state 122
-    expression                 go to state 123
+    expression                 go to state 370
     assignment_expression      go to state 124
     conditional_expression     go to state 125
     logical_or_expression      go to state 126
@@ -6905,44 +6849,185 @@ State 363
 
 State 364
 
+  129 iteration_statement: FOR LPAREN for_init_statement expression_statement RPAREN statement •
+
+    $default  reduce using rule 129 (iteration_statement)
+
+
+State 365
+
+  130 iteration_statement: FOR LPAREN for_init_statement expression_statement expression RPAREN • statement
+
+    BREAK       shift, and go to state 79
+    CASE        shift, and go to state 80
+    CONTINUE    shift, and go to state 81
+    DEFAULT     shift, and go to state 82
+    DO          shift, and go to state 83
+    FOR         shift, and go to state 84
+    GOTO        shift, and go to state 85
+    IF          shift, and go to state 86
+    RETURN      shift, and go to state 87
+    SIZEOF      shift, and go to state 88
+    SWITCH      shift, and go to state 89
+    WHILE       shift, and go to state 90
+    NULL_TOKEN  shift, and go to state 91
+    NULLPTR     shift, and go to state 92
+    TRUE        shift, and go to state 93
+    FALSE       shift, and go to state 94
+    ID          shift, and go to state 95
+    NUM         shift, and go to state 96
+    FLOAT_LIT   shift, and go to state 97
+    CHAR_LIT    shift, and go to state 98
+    STRING_LIT  shift, and go to state 99
+    PLUS        shift, and go to state 100
+    MINUS       shift, and go to state 101
+    MUL         shift, and go to state 102
+    INC         shift, and go to state 103
+    DEC         shift, and go to state 104
+    NOT         shift, and go to state 105
+    BIT_AND     shift, and go to state 106
+    BIT_NOT     shift, and go to state 107
+    UNTIL       shift, and go to state 108
+    SEMI        shift, and go to state 109
+    LPAREN      shift, and go to state 110
+    LBRACE      shift, and go to state 58
+
+    compound_statement         go to state 114
+    statement                  go to state 371
+    labeled_statement          go to state 118
+    expression_statement       go to state 119
+    selection_statement        go to state 120
+    iteration_statement        go to state 121
+    jump_statement             go to state 122
+    expression                 go to state 123
+    assignment_expression      go to state 124
+    conditional_expression     go to state 125
+    logical_or_expression      go to state 126
+    logical_and_expression     go to state 127
+    inclusive_or_expression    go to state 128
+    exclusive_or_expression    go to state 129
+    and_expression             go to state 130
+    equality_expression        go to state 131
+    relational_expression      go to state 132
+    shift_expression           go to state 133
+    additive_expression        go to state 134
+    multiplicative_expression  go to state 135
+    cast_expression            go to state 136
+    unary_expression           go to state 137
+    unary_operator             go to state 138
+    postfix_expression         go to state 139
+    primary_expression         go to state 140
+    string_literal             go to state 141
+    constant                   go to state 142
+
+
+State 366
+
+  124 selection_statement: IF LPAREN expression RPAREN statement ELSE • statement
+
+    BREAK       shift, and go to state 79
+    CASE        shift, and go to state 80
+    CONTINUE    shift, and go to state 81
+    DEFAULT     shift, and go to state 82
+    DO          shift, and go to state 83
+    FOR         shift, and go to state 84
+    GOTO        shift, and go to state 85
+    IF          shift, and go to state 86
+    RETURN      shift, and go to state 87
+    SIZEOF      shift, and go to state 88
+    SWITCH      shift, and go to state 89
+    WHILE       shift, and go to state 90
+    NULL_TOKEN  shift, and go to state 91
+    NULLPTR     shift, and go to state 92
+    TRUE        shift, and go to state 93
+    FALSE       shift, and go to state 94
+    ID          shift, and go to state 95
+    NUM         shift, and go to state 96
+    FLOAT_LIT   shift, and go to state 97
+    CHAR_LIT    shift, and go to state 98
+    STRING_LIT  shift, and go to state 99
+    PLUS        shift, and go to state 100
+    MINUS       shift, and go to state 101
+    MUL         shift, and go to state 102
+    INC         shift, and go to state 103
+    DEC         shift, and go to state 104
+    NOT         shift, and go to state 105
+    BIT_AND     shift, and go to state 106
+    BIT_NOT     shift, and go to state 107
+    UNTIL       shift, and go to state 108
+    SEMI        shift, and go to state 109
+    LPAREN      shift, and go to state 110
+    LBRACE      shift, and go to state 58
+
+    compound_statement         go to state 114
+    statement                  go to state 372
+    labeled_statement          go to state 118
+    expression_statement       go to state 119
+    selection_statement        go to state 120
+    iteration_statement        go to state 121
+    jump_statement             go to state 122
+    expression                 go to state 123
+    assignment_expression      go to state 124
+    conditional_expression     go to state 125
+    logical_or_expression      go to state 126
+    logical_and_expression     go to state 127
+    inclusive_or_expression    go to state 128
+    exclusive_or_expression    go to state 129
+    and_expression             go to state 130
+    equality_expression        go to state 131
+    relational_expression      go to state 132
+    shift_expression           go to state 133
+    additive_expression        go to state 134
+    multiplicative_expression  go to state 135
+    cast_expression            go to state 136
+    unary_expression           go to state 137
+    unary_operator             go to state 138
+    postfix_expression         go to state 139
+    primary_expression         go to state 140
+    string_literal             go to state 141
+    constant                   go to state 142
+
+
+State 367
+
    95 direct_abstract_declarator: direct_abstract_declarator LPAREN parameter_list RPAREN •
 
     $default  reduce using rule 95 (direct_abstract_declarator)
 
 
-State 365
+State 368
 
    91 direct_abstract_declarator: direct_abstract_declarator LBRACKET assignment_expression RBRACKET •
 
     $default  reduce using rule 91 (direct_abstract_declarator)
 
 
-State 366
+State 369
 
-  124 iteration_statement: DO statement WHILE LPAREN expression RPAREN SEMI •
-
-    $default  reduce using rule 124 (iteration_statement)
-
-
-State 367
-
-  132 range_based_for: declaration_specifiers BIT_AND ID COLON expression •
-  139 expression: expression • COMMA assignment_expression
-
-    COMMA  shift, and go to state 191
-
-    $default  reduce using rule 132 (range_based_for)
-
-
-State 368
-
-  127 iteration_statement: FOR LPAREN for_init_statement expression_statement expression RPAREN statement •
+  127 iteration_statement: DO statement WHILE LPAREN expression RPAREN SEMI •
 
     $default  reduce using rule 127 (iteration_statement)
 
 
-State 369
+State 370
 
-  121 selection_statement: IF LPAREN expression RPAREN statement ELSE statement •
+  135 range_based_for: declaration_specifiers BIT_AND ID COLON expression •
+  142 expression: expression • COMMA assignment_expression
 
-    $default  reduce using rule 121 (selection_statement)
+    COMMA  shift, and go to state 191
+
+    $default  reduce using rule 135 (range_based_for)
+
+
+State 371
+
+  130 iteration_statement: FOR LPAREN for_init_statement expression_statement expression RPAREN statement •
+
+    $default  reduce using rule 130 (iteration_statement)
+
+
+State 372
+
+  124 selection_statement: IF LPAREN expression RPAREN statement ELSE statement •
+
+    $default  reduce using rule 124 (selection_statement)

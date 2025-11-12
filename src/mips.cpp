@@ -320,6 +320,9 @@ void MIPSGenerator::translate_function_label(const TACInstruction& instr) {
     spill_offset = 0;  // Reset spill offset for new function
     current_func_params.clear();  // Clear parameters
     
+    // NOTE: Parameter detection is now handled by param_decl instructions in TAC
+    // The old code that scanned forward to detect parameters is no longer needed
+    /*
     // Detect function parameters: variables used before being assigned in this function
     // Scan forward from current instruction to find parameters
     if (func_name != "main") {
@@ -366,6 +369,7 @@ void MIPSGenerator::translate_function_label(const TACInstruction& instr) {
             }
         }
     }
+    */
     
     output_file << std::endl;
     emit_comment("Function: " + func_name);
@@ -852,8 +856,14 @@ void MIPSGenerator::pass_arguments(int num_params) {
             emit("la " + arg_reg + ", " + str_label);
         }
         else {
-            std::string src_reg = get_register(param_list[i]);
-            emit("move " + arg_reg + ", " + src_reg);
+            // Use the saved register from param_regs (which was allocated in translate_param)
+            // If param_regs[i] is empty, it means we should use get_register for immediate values
+            if (!param_regs[i].empty()) {
+                emit("move " + arg_reg + ", " + param_regs[i]);
+            } else {
+                std::string src_reg = get_register(param_list[i]);
+                emit("move " + arg_reg + ", " + src_reg);
+            }
         }
     }
     
@@ -958,7 +968,7 @@ void MIPSGenerator::handle_printf() {
                 emit_comment("Print integer");
                 emit("li $v0, 1");  // Syscall for print_int
                 
-                if (param_index < param_list.size()) {
+                if ((size_t)param_index < param_list.size()) {
                     if (is_number(param_list[param_index])) {
                         emit("li $a0, " + param_list[param_index]);
                     } else if (is_char_literal(param_list[param_index])) {
@@ -966,7 +976,7 @@ void MIPSGenerator::handle_printf() {
                         emit("li $a0, " + std::to_string(get_char_value(param_list[param_index])));
                     } else {
                         // Use the saved register from param_regs
-                        if (param_index < param_regs.size() && !param_regs[param_index].empty()) {
+                        if ((size_t)param_index < param_regs.size() && !param_regs[param_index].empty()) {
                             emit("move $a0, " + param_regs[param_index]);
                         } else {
                             // Fallback (shouldn't happen)
@@ -984,8 +994,8 @@ void MIPSGenerator::handle_printf() {
                 // Print string
                 emit_comment("Print string");
                 emit("li $v0, 4");  // Syscall for print_string
-                if (param_index < param_list.size()) {
-                    if (param_index < param_regs.size() && !param_regs[param_index].empty()) {
+                if ((size_t)param_index < param_list.size()) {
+                    if ((size_t)param_index < param_regs.size() && !param_regs[param_index].empty()) {
                         emit("move $a0, " + param_regs[param_index]);
                     } else {
                         std::string reg = get_register(param_list[param_index]);
@@ -1000,13 +1010,13 @@ void MIPSGenerator::handle_printf() {
                 // Print character
                 emit_comment("Print character");
                 emit("li $v0, 11");  // Syscall for print_char
-                if (param_index < param_list.size()) {
+                if ((size_t)param_index < param_list.size()) {
                     if (is_number(param_list[param_index])) {
                         emit("li $a0, " + param_list[param_index]);
                     } else if (is_char_literal(param_list[param_index])) {
                         emit("li $a0, " + std::to_string(get_char_value(param_list[param_index])));
                     } else {
-                        if (param_index < param_regs.size() && !param_regs[param_index].empty()) {
+                        if ((size_t)param_index < param_regs.size() && !param_regs[param_index].empty()) {
                             emit("move $a0, " + param_regs[param_index]);
                         } else {
                             std::string reg = get_register(param_list[param_index]);
@@ -1041,7 +1051,7 @@ void MIPSGenerator::handle_scanf() {
     
     // Parse format string for input specifiers
     size_t pos = 0;
-    while (pos < format.length() && param_index < param_list.size()) {
+    while (pos < format.length() && (size_t)param_index < param_list.size()) {
         size_t percent_pos = format.find('%', pos);
         
         if (percent_pos == std::string::npos) {
@@ -1059,9 +1069,9 @@ void MIPSGenerator::handle_scanf() {
                 emit("syscall");
                 
                 // Store to address - param should be a register holding address
-                if (param_index < param_regs.size() && !param_regs[param_index].empty()) {
+                if ((size_t)param_index < param_regs.size() && !param_regs[param_index].empty()) {
                     emit("sw $v0, 0(" + param_regs[param_index] + ")");
-                } else if (param_index < param_list.size()) {
+                } else if ((size_t)param_index < param_list.size()) {
                     // Fallback - shouldn't happen with proper param handling
                     std::string addr_reg = get_register(param_list[param_index]);
                     emit("sw $v0, 0(" + addr_reg + ")");
@@ -1076,9 +1086,9 @@ void MIPSGenerator::handle_scanf() {
                 emit("syscall");
                 
                 // Store to address
-                if (param_index < param_regs.size() && !param_regs[param_index].empty()) {
+                if ((size_t)param_index < param_regs.size() && !param_regs[param_index].empty()) {
                     emit("sb $v0, 0(" + param_regs[param_index] + ")");
-                } else if (param_index < param_list.size()) {
+                } else if ((size_t)param_index < param_list.size()) {
                     std::string addr_reg = get_register(param_list[param_index]);
                     emit("sb $v0, 0(" + addr_reg + ")");
                 }
@@ -1091,9 +1101,9 @@ void MIPSGenerator::handle_scanf() {
                 emit("li $v0, 8");  // Syscall for read_string
                 
                 // Address in $a0, max length in $a1
-                if (param_index < param_regs.size() && !param_regs[param_index].empty()) {
+                if ((size_t)param_index < param_regs.size() && !param_regs[param_index].empty()) {
                     emit("move $a0, " + param_regs[param_index]);
-                } else if (param_index < param_list.size()) {
+                } else if ((size_t)param_index < param_list.size()) {
                     std::string addr_reg = get_register(param_list[param_index]);
                     emit("move $a0, " + addr_reg);
                 }

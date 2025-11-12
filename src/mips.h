@@ -142,6 +142,11 @@ private:
     void handle_scanf();
     void handle_syscall(const std::string& func_name);
     void print_literal_string(const std::string& text);
+
+    void translate_indirect_call(const TACInstruction& instr);
+    bool is_temp_register(const std::string& reg) const;
+bool is_saved_register(const std::string& reg) const;
+void clear_temp_registers();
 };
 
 #endif // MIPS_H
