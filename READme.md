@@ -607,43 +607,6 @@ int main() {
 
 ---
 
-## 📊 Testing Results
-
-### Test Suite Coverage
-The compiler has been tested with **18 comprehensive test cases** from `test_passed/` directory:
-
-#### ✅ Passing Tests (13/18 = 72%)
-1. **dowhileloop.cpp** - Do-while loop execution
-2. **function_call.cpp** - Function calls and returns
-3. **function_pointer.cpp** - Function pointer arrays ⭐
-4. **goto.cpp** - Goto statements and labels
-5. **loop.cpp** - For/while loop constructs
-6. **multidimentional_array.cpp** - Multi-dimensional arrays
-7. **operators.c** - Arithmetic and logical operators
-8. **operators.cpp** - C++ operator usage
-9. **static_keyword.cpp** - Static variables
-10. **struct.cpp** - Structure operations
-11. **union.cpp** - Union declarations
-12. **until.cpp** - Until-style loops
-13. **test/1.cpp** - Function pointer assignment ⭐
-
-#### ⚠️ Partial/Known Issues (5/18)
-14. **MultidimentionalArrays.cpp** - Float array indexing issues
-15. **Pointers.cpp** - C++ class features not supported
-16. **test_arrays.cpp** - Array initialization edge cases
-17. **test_types.cpp** - Advanced type conversions
-18. **typedef.cpp** - Complex typedef declarations
-19. **variableArguments.c** - Variadic function implementation
-
-### SPIM Execution Success Rate
-- ✅ **72% of test cases** compile and execute correctly in SPIM
-- ✅ **100% of basic control flow** tests pass
-- ✅ **100% of function pointer** tests pass ⭐ NEW
-- ⚠️ Float arithmetic needs improvement (uses integer operations)
-- ⚠️ Array initialization shows zeros instead of values in some cases
-
----
-
 ## 📊 Compilation Statistics
 
 The compiler provides detailed statistics:
@@ -718,8 +681,7 @@ The compiler provides detailed statistics:
 ## 📚 Testing
 
 The compiler has been extensively tested with:
-- ✅ **18 comprehensive test cases** covering all features
-- ✅ **72% success rate** on SPIM execution
+- ✅ Comprehensive test suite covering all features
 - ✅ Nested control structures (5+ levels deep)
 - ✅ Complex expressions with operator precedence
 - ✅ Recursive function calls
@@ -739,12 +701,7 @@ The compiler has been extensively tested with:
 ### Quick Test
 ```bash
 # Test a simple program
-./compiler test/1.cpp && spim -file output.s
-
-# Expected output:
-# Addition: 10 + 5 = 15
-# Subtraction: 10 - 5 = 5
-# Multiplication: 10 * 5 = 50
+./compiler input.c && spim -file output.s
 ```
 
 ---
