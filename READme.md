@@ -1,15 +1,5 @@
 # 🎯 C/C++ Compiler with MIPS Assembly Generation
 
-A comprehensive C/C++ compiler implemented as part o* ✅ **Pointers**
-  * Pointer declaration and initialization
-  * Pointer dereferencing (`*ptr`)
-  * Address-of operator (`&var`)
-  * Pointer arithmetic (add, subtract)
-  * Multi-level pointers (`**`, `***`, etc.)
-  * Array-to-pointer decay (implicit conversion)
-  * **Function pointers** with indirect calls
-  * Function pointer assignment and invocationmpiler design project. This compiler performs a complete compilation pipeline including lexical analysis, syntax parsing, semantic analysis, intermediate code generation (Three-Address Code), and **MIPS assembly code generation** with SPIM simulator support for a substantial subset of the C/C++ programming language.
-
 ## 📋 Table of Contents
 - [Features](#-features-implemented)
 - [Architecture](#-compiler-architecture)
