@@ -862,8 +862,13 @@ if (node->name == "FunctionCall") {
             
             // Check if this parameter is a struct being passed by value
             std::string param_type = "";
-            if (arg->symbol) {
-                param_type = arg->symbol->base_type;
+            if (arg->symbol && !arg->symbol->base_type.empty()) {
+                try {
+                    param_type = arg->symbol->base_type;
+                } catch (...) {
+                    // Handle corrupted base_type string gracefully
+                    param_type = "";
+                }
             } else if (variable_types.find(param) != variable_types.end()) {
                 param_type = variable_types[param];
             }
