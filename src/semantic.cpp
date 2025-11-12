@@ -2993,6 +2993,31 @@ if ((resolved_type1.find("(*)") != std::string::npos &&
         return false;
     }
     
+    // ARRAY TO POINTER DECAY
+    // Allow assigning array to pointer: int[5] -> int*
+    if (is_pointer_type(resolved_type1) && resolved_type2.find('[') != std::string::npos) {
+        // Extract base type from array (remove [...] parts)
+        std::string array_base = resolved_type2;
+        size_t bracket_pos = array_base.find('[');
+        if (bracket_pos != std::string::npos) {
+            array_base = array_base.substr(0, bracket_pos);
+        }
+        
+        // Extract base type from pointer (remove *)
+        std::string pointer_base = resolved_type1;
+        while (!pointer_base.empty() && pointer_base.back() == '*') {
+            pointer_base.pop_back();
+        }
+        while (!pointer_base.empty() && pointer_base.back() == ' ') {
+            pointer_base.pop_back();
+        }
+        
+        // Check if base types match
+        if (array_base == pointer_base) {
+            return true; // Array-to-pointer decay is valid
+        }
+    }
+    
     // Handle numeric conversions
     if (is_numeric_type(resolved_type1) && is_numeric_type(resolved_type2)) {
         return true;
