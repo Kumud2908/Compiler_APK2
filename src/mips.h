@@ -106,6 +106,7 @@ private:
     void translate_function_label(const TACInstruction& instr);
     void translate_param(const TACInstruction& instr);
     void translate_call(const TACInstruction& instr);
+    void translate_indirect_call(const TACInstruction& instr);
     void translate_return(const TACInstruction& instr);
     void translate_array_access(const TACInstruction& instr);
     void translate_pointer_op(const TACInstruction& instr);
@@ -137,7 +138,7 @@ private:
     void add_global_variable(const std::string& var, int size);
     void add_static_variable(const std::string& var, int size);
     std::string get_variable_type(const std::string& var);
-    std::string get_mips_var_name(const std::string& var);  // Get safe variable name for MIPS
+    std::string get_mips_var_name(const std::string& var);
     
     // ===== Special Instruction Handlers =====
     void handle_printf();
@@ -145,10 +146,9 @@ private:
     void handle_syscall(const std::string& func_name);
     void print_literal_string(const std::string& text);
 
-    void translate_indirect_call(const TACInstruction& instr);
     bool is_temp_register(const std::string& reg) const;
-bool is_saved_register(const std::string& reg) const;
-void clear_temp_registers();
+    bool is_saved_register(const std::string& reg) const;
+    void clear_temp_registers();
 };
 
 #endif // MIPS_H

@@ -1,11 +1,43 @@
 #!/bin/bash
 
 # =========================
-# C/C++ Syntax Analyzer Test Runner
+# C/C++ Compiler Test Runner
+# Compiles C/C++ source to MIPS assembly and optionally runs in SPIM
 # =========================
+
+# Usage:
+#   ./run.sh                    - Run all tests in test_passed/
+#   ./run.sh <file.c>          - Compile and run a specific file
+#   ./run.sh <file.c> --no-run - Compile only, don't execute in SPIM
 
 # Default executable
 EXECUTABLE="./compiler"
+
+# Check if a specific file was provided
+if [ $# -ge 1 ] && [ -f "$1" ]; then
+    echo "Compiling $1..."
+    $EXECUTABLE "$1"
+    
+    if [ $? -eq 0 ]; then
+        echo -e "\n${GREEN}✓ Compilation successful${NC}"
+        echo "Generated files:"
+        echo "  - output.tac (Three-Address Code)"
+        echo "  - output.s (MIPS Assembly)"
+        echo "  - ast.dot (Abstract Syntax Tree)"
+        
+        # Check if user wants to skip execution
+        if [ "$2" != "--no-run" ]; then
+            echo -e "\n${BLUE}Running in SPIM simulator...${NC}"
+            echo "========================================"
+            timeout 5 spim -file output.s
+            echo "========================================"
+        fi
+    else
+        echo -e "${RED}✗ Compilation failed${NC}"
+        exit 1
+    fi
+    exit 0
+fi
 
 # Use provided executable name if given
 if [ $# -eq 1 ]; then

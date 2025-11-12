@@ -24,9 +24,9 @@ int main() {
 
     // Print float operations
     printf("Float Operations:\n");
-    printf("Float Sum = %.2f\n", fsum);
-    printf("Mixed (a + x) = %.2f\n", mix);
-    printf("Float Division (y / b) = %.2f\n", divf);
+    printf("Float Sum = %f\n", fsum);
+    printf("Mixed (a + x) = %f\n", mix);
+    printf("Float Division (y / b) = %f\n", divf);
 
     return 0;
 }

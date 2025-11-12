@@ -259,6 +259,9 @@ void MIPSGenerator::translate_instruction(const TACInstruction& instr) {
     else if (instr.op == "param") {
         translate_param(instr);
     }
+    else if (instr.op == "call*") {
+        translate_indirect_call(instr);
+    }
     else if (instr.op == "call") {
         translate_call(instr);
     }
@@ -465,6 +468,9 @@ void MIPSGenerator::translate_assignment(const TACInstruction& instr) {
         float f = std::stof(instr.arg1);
         int bits = *reinterpret_cast<int*>(&f);
         emit("li " + dest_reg + ", " + std::to_string(bits));
+    } else if (function_names.find(instr.arg1) != function_names.end()) {
+        // Assigning a function pointer - load address of function label
+        emit("la " + dest_reg + ", func_" + instr.arg1);
     } else {
         // Variable assignment - may need type conversion
         std::string src_reg = get_register(instr.arg1);
@@ -872,6 +878,53 @@ void MIPSGenerator::pass_arguments(int num_params) {
     
     // Additional arguments go on stack (for future)
     // TODO: Handle more than 4 arguments
+}
+
+void MIPSGenerator::translate_indirect_call(const TACInstruction& instr) {
+    // result = call* func_ptr, arg_count
+    // func_ptr is in arg1, arg_count is in arg2
+    std::string func_ptr_var = instr.arg1;
+    int num_params = std::stoi(instr.arg2);
+    
+    emit_comment("Indirect call through " + func_ptr_var);
+    
+    // Get the register holding the function pointer
+    std::string func_ptr_reg = get_register(func_ptr_var);
+    
+    // Pass arguments (same as regular call)
+    pass_arguments(num_params);
+    
+    // Call through the function pointer using jalr
+    emit("jalr " + func_ptr_reg);
+    
+    // After function call, invalidate temporary register mappings
+    std::vector<std::string> to_remove;
+    for (const auto& entry : var_to_reg) {
+        if (entry.second[1] == 't') {  // $t0-$t9 registers
+            to_remove.push_back(entry.first);
+        }
+    }
+    for (const auto& var : to_remove) {
+        std::string reg = var_to_reg[var];
+        var_to_reg.erase(var);
+        reg_contents.erase(reg);
+    }
+    
+    // Store return value
+    if (!instr.result.empty()) {
+        std::string result_reg = allocate_saved_register();
+        var_to_reg[instr.result] = result_reg;
+        reg_contents[result_reg] = instr.result;
+        emit("move " + result_reg + ", $v0");
+    }
+    
+    // Remove the used params
+    if (num_params > 0 && param_list.size() >= (size_t)num_params) {
+        param_list.erase(param_list.end() - num_params, param_list.end());
+        if (param_regs.size() >= (size_t)num_params) {
+            param_regs.erase(param_regs.end() - num_params, param_regs.end());
+        }
+    }
 }
 
 void MIPSGenerator::print_literal_string(const std::string& text) {
@@ -1436,6 +1489,10 @@ void MIPSGenerator::translate_pointer_store(const TACInstruction& instr) {
     } else if (is_char_literal(instr.arg1)) {
         value_reg = allocate_temp_register();
         emit("li " + value_reg + ", " + std::to_string(get_char_value(instr.arg1)));
+    } else if (function_names.find(instr.arg1) != function_names.end()) {
+        // Storing a function address - load address of function label
+        value_reg = allocate_temp_register();
+        emit("la " + value_reg + ", func_" + instr.arg1);
     } else {
         value_reg = get_register(instr.arg1);
     }
