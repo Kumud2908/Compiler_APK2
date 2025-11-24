@@ -1688,9 +1688,20 @@ void CodeGenerator::generate_declaration(ASTNode* node) {
                     process_enum_declaration(spec);
                 }
                 if (spec->name == "StructOrUnionSpecifier") {
+                    // Check if it's struct or union
+                    bool is_union = false;
+                    for (auto su : spec->children) {
+                        if (su->name == "StructOrUnion" && su->lexeme == "union") {
+                            is_union = true;
+                            break;
+                        }
+                    }
+                    
                     for (auto id : spec->children) {
                         if (id->name == "Identifier") {
                             type_name = id->lexeme;
+                            // Set base_type to "struct TypeName" or "union TypeName"
+                            base_type = (is_union ? "union " : "struct ") + type_name;
                             break;
                         }
                     }
@@ -1905,6 +1916,55 @@ std::string CodeGenerator::generate_member_address(ASTNode* node) {
                 base_type = member_type_it->second;
             }
         }
+    }
+    else if (node->children[0]->name == "ArraySubscript") {
+        // Handle array element member access: arr[0].x
+        // Generate the address of the array element first
+        ASTNode* array_node = node->children[0];
+        
+        // Get the base array identifier node
+        ASTNode* base_id = array_node;
+        while (base_id && base_id->name == "ArraySubscript") {
+            base_id = base_id->children[0];
+        }
+        
+        std::string array_name = "";
+        if (base_id && base_id->name == "Identifier") {
+            array_name = base_id->lexeme;
+        }
+        
+        // Calculate array element address
+        std::string index = generate_expression(array_node->children[1]);
+        
+        // Get element size (struct/union size)
+        int element_size = 4; // default
+        
+        // Find the array's element type - try multiple sources
+        if (!array_name.empty() && array_element_types.find(array_name) != array_element_types.end()) {
+            std::string elem_type = array_element_types[array_name];
+            element_size = get_type_size(elem_type);
+            base_type = elem_type; // This is the struct/union type
+        } else if (base_id && base_id->symbol && base_id->symbol->is_array) {
+            // Fallback: use variable_types map
+            std::string var_type = variable_types[array_name];
+            // var_type might be like "struct Point[3]", extract the element type
+            size_t bracket_pos = var_type.find('[');
+            if (bracket_pos != std::string::npos) {
+                std::string elem_type = var_type.substr(0, bracket_pos);
+                element_size = get_type_size(elem_type);
+                base_type = elem_type;
+            }
+        }
+        
+        // Generate: base_addr = &arr + (index * element_size)
+        std::string arr_addr = tac->new_temp();
+        tac->generate_address_of(array_name, arr_addr);
+        
+        std::string byte_offset = tac->new_temp();
+        tac->generate_binary_op("*", index, std::to_string(element_size), byte_offset);
+        
+        base_addr = tac->new_temp();
+        tac->generate_binary_op("+", arr_addr, byte_offset, base_addr);
     }
     else if (node->children[0]->name == "Identifier") {
         // Simple case: base is just an identifier

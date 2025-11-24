@@ -78,6 +78,7 @@ class SymbolTable {
 private:
     Scope* current_scope;
     Scope* global_scope;
+    std::vector<Scope*> all_scopes;  // Track all scopes for cleanup
         
 public:
     SymbolTable();

@@ -264,24 +264,29 @@ SymbolTable::SymbolTable() {
     Symbol* null_sym = new Symbol("NULL", "constant", "void*", 0, 0);
     null_sym->const_value = 0;
     global_scope->add_symbol(null_sym);
+    
+    // Track global scope for cleanup
+    all_scopes.push_back(global_scope);
 }
 
 SymbolTable::~SymbolTable() {
-    if (global_scope) {
-        delete global_scope;
+    // Delete all scopes (including global_scope)
+    for (Scope* scope : all_scopes) {
+        delete scope;
     }
 }
 
 void SymbolTable::enter_scope() {
     Scope* new_scope = new Scope(current_scope->level + 1, current_scope);
+    all_scopes.push_back(new_scope);  // Track for later cleanup
     current_scope = new_scope;
 }
 
 void SymbolTable::exit_scope() {
     if (current_scope != global_scope) {
-        Scope* old_scope = current_scope;
+        // Don't delete - just move back to parent scope
+        // Scope will be deleted when SymbolTable is destroyed
         current_scope = current_scope->parent;
-        delete old_scope;
     }
 }
 
