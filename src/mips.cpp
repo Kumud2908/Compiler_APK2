@@ -225,6 +225,10 @@ void MIPSGenerator::translate_instruction(const TACInstruction& instr) {
     else if (instr.op == "&" && instr.arg2.empty()) {
         translate_address_of(instr);
     }
+    else if (instr.op == "~" || instr.op == "!" || instr.op == "uminus" ||
+             instr.op == "unary-" || instr.op == "unary+" || instr.op == "unary!") {
+        translate_unary_op(instr);
+    }
     else if (instr.op == "++" || instr.op == "--") {
         translate_unary_op(instr);
     }
@@ -238,10 +242,6 @@ void MIPSGenerator::translate_instruction(const TACInstruction& instr) {
     }
     else if (instr.op == "<<" || instr.op == ">>") {
         translate_shift_op(instr);
-    }
-    else if (instr.op == "~" || instr.op == "!" || instr.op == "uminus" ||
-             instr.op == "unary-" || instr.op == "unary+" || instr.op == "unary!") {
-        translate_unary_op(instr);
     }
     else if (instr.op == "<" || instr.op == ">" || instr.op == "<=" || 
              instr.op == ">=" || instr.op == "==" || instr.op == "!=") {
@@ -471,6 +471,9 @@ void MIPSGenerator::translate_assignment(const TACInstruction& instr) {
     } else if (function_names.find(instr.arg1) != function_names.end()) {
         // Assigning a function pointer - load address of function label
         emit("la " + dest_reg + ", func_" + instr.arg1);
+    } else if (array_dims.find(instr.arg1) != array_dims.end()) {
+        // Assigning an array address - load address
+        emit("la " + dest_reg + ", " + instr.arg1);
     } else {
         // Variable assignment - may need type conversion
         std::string src_reg = get_register(instr.arg1);
@@ -490,6 +493,34 @@ void MIPSGenerator::translate_assignment(const TACInstruction& instr) {
             emit("sll " + dest_reg + ", " + dest_reg + ", 24");
             emit("sra " + dest_reg + ", " + dest_reg + ", 24");
         }
+    }
+    
+    // If destination is a static variable, store it back to memory
+    if (static_vars.find(instr.result) != static_vars.end()) {
+        std::string safe_name = get_mips_var_name(instr.result);
+        emit_comment("Storing to static variable " + instr.result);
+        emit("sw " + dest_reg + ", " + safe_name);
+    }
+    
+    // For non-temporary user variables, also maintain a stack copy
+    // This ensures they survive function calls even if temp registers are cleared
+    if (!is_temporary(instr.result) && static_vars.find(instr.result) == static_vars.end()) {
+        // Allocate stack space if not already allocated
+        int stack_loc;
+        if (spilled_to_stack.find(instr.result) == spilled_to_stack.end()) {
+            stack_loc = spill_offset;
+            spilled_to_stack[instr.result] = stack_loc;
+            spill_offset += 4;
+        } else {
+            stack_loc = spilled_to_stack[instr.result];
+        }
+        // Always keep stack copy up to date
+        emit("sw " + dest_reg + ", " + std::to_string(stack_loc) + "($sp)");
+        
+        // Invalidate register mapping so next use will reload from stack
+        // This ensures consistency across loop iterations
+        var_to_reg.erase(instr.result);
+        reg_contents.erase(dest_reg);
     }
 }
 
@@ -572,6 +603,30 @@ void MIPSGenerator::translate_binary_op(const TACInstruction& instr) {
     if (reg2_is_temp_literal) {
         reg_contents.erase(reg2);
     }
+    
+    // If destination is a static variable, store it back to memory
+    if (static_vars.find(instr.result) != static_vars.end()) {
+        std::string safe_name = get_mips_var_name(instr.result);
+        emit_comment("Storing to static variable " + instr.result);
+        emit("sw " + dest_reg + ", " + safe_name);
+    }
+    
+    // For non-temporary user variables, maintain a stack copy
+    if (!is_temporary(instr.result) && static_vars.find(instr.result) == static_vars.end()) {
+        int stack_loc;
+        if (spilled_to_stack.find(instr.result) == spilled_to_stack.end()) {
+            stack_loc = spill_offset;
+            spilled_to_stack[instr.result] = stack_loc;
+            spill_offset += 4;
+        } else {
+            stack_loc = spilled_to_stack[instr.result];
+        }
+        emit("sw " + dest_reg + ", " + std::to_string(stack_loc) + "($sp)");
+        
+        // Invalidate register mapping to force reload on next use
+        var_to_reg.erase(instr.result);
+        reg_contents.erase(dest_reg);
+    }
 }
 
 void MIPSGenerator::translate_bitwise_op(const TACInstruction& instr) {
@@ -624,10 +679,10 @@ void MIPSGenerator::translate_unary_op(const TACInstruction& instr) {
         src_reg = get_register(instr.arg1);
     }
     
-    if (instr.op == "~") {
+    if (instr.op == "~" || instr.op == "unary~") {
         emit("nor " + dest_reg + ", " + src_reg + ", $zero");
     }
-    else if (instr.op == "!") {
+    else if (instr.op == "!" || instr.op == "unary!") {
         emit("seq " + dest_reg + ", " + src_reg + ", $zero");
     }
     else if (instr.op == "unary-" || instr.op == "uminus") {
@@ -799,6 +854,28 @@ void MIPSGenerator::translate_call(const TACInstruction& instr) {
         if (func_name != "main" && func_name != "printf" && func_name != "scanf") {
             call_label = "func_" + func_name;
         }
+        
+        // Before function call, spill temporary registers holding user variables
+        // since $t registers are caller-saved and may be modified
+        std::vector<std::string> to_spill;
+        for (const auto& entry : var_to_reg) {
+            if (entry.second[1] == 't') {  // $t0-$t9 registers
+                const std::string& var = entry.first;
+                
+                // If this is not a compiler temporary but a user variable, preserve it
+                if (!is_temporary(var) && spilled_to_stack.find(var) == spilled_to_stack.end()) {
+                    to_spill.push_back(var);
+                }
+            }
+        }
+        for (const auto& var : to_spill) {
+            std::string reg = var_to_reg[var];
+            emit_comment("Spilling " + var + " before function call");
+            emit("sw " + reg + ", " + std::to_string(spill_offset) + "($sp)");
+            spilled_to_stack[var] = spill_offset;
+            spill_offset += 4;
+        }
+        
         emit("jal " + call_label);
         
         // After function call, invalidate temporary register mappings
@@ -893,6 +970,26 @@ void MIPSGenerator::translate_indirect_call(const TACInstruction& instr) {
     
     // Pass arguments (same as regular call)
     pass_arguments(num_params);
+    
+    // Before function call, spill temporary registers holding user variables
+    std::vector<std::string> to_spill;
+    for (const auto& entry : var_to_reg) {
+        if (entry.second[1] == 't') {  // $t0-$t9 registers
+            const std::string& var = entry.first;
+            
+            // If this is not a compiler temporary but a user variable, preserve it
+            if (!is_temporary(var) && spilled_to_stack.find(var) == spilled_to_stack.end()) {
+                to_spill.push_back(var);
+            }
+        }
+    }
+    for (const auto& var : to_spill) {
+        std::string reg = var_to_reg[var];
+        emit_comment("Spilling " + var + " before function call");
+        emit("sw " + reg + ", " + std::to_string(spill_offset) + "($sp)");
+        spilled_to_stack[var] = spill_offset;
+        spill_offset += 4;
+    }
     
     // Call through the function pointer using jalr
     emit("jalr " + func_ptr_reg);
@@ -1519,6 +1616,19 @@ std::string MIPSGenerator::get_register(const std::string& var) {
         return var_to_reg[var];
     }
     
+    // Check if this is a static variable - load from .data section
+    if (static_vars.find(var) != static_vars.end()) {
+        std::string reg = allocate_temp_register();
+        var_to_reg[var] = reg;
+        reg_contents[reg] = var;
+        
+        std::string safe_name = get_mips_var_name(var);
+        emit_comment("Loading static variable " + var);
+        emit("lw " + reg + ", " + safe_name);
+        
+        return reg;
+    }
+    
     // Check if this variable was spilled to stack - if so, we need to reload it
     bool was_spilled = (spilled_to_stack.find(var) != spilled_to_stack.end());
     int spill_stack_offset = was_spilled ? spilled_to_stack[var] : 0;
@@ -1533,7 +1643,7 @@ std::string MIPSGenerator::get_register(const std::string& var) {
         if (was_spilled) {
             emit_comment("Reloading " + var + " from stack");
             emit("lw " + reg + ", " + std::to_string(spill_stack_offset) + "($sp)");
-            spilled_to_stack.erase(var);  // No longer spilled
+            // Keep in spilled_to_stack map to maintain consistent stack location
         }
         
         return reg;
@@ -1570,7 +1680,7 @@ std::string MIPSGenerator::get_register(const std::string& var) {
     if (was_spilled) {
         emit_comment("Reloading " + var + " from stack");
         emit("lw " + reg + ", " + std::to_string(spill_stack_offset) + "($sp)");
-        spilled_to_stack.erase(var);  // No longer spilled
+        // Keep in spilled_to_stack map to maintain consistent stack location
     }
     
     return reg;
@@ -1867,6 +1977,35 @@ void MIPSGenerator::set_variable_types(const std::unordered_map<std::string, std
 
 void MIPSGenerator::set_function_names(const std::unordered_set<std::string>& names) {
     this->function_names = names;
+}
+
+void MIPSGenerator::set_static_variables(const std::unordered_map<std::string, std::string>& static_inits) {
+    this->static_var_init_values = static_inits;
+    
+    // Add each static variable to the .data section with its initial value
+    for (const auto& entry : static_inits) {
+        const std::string& var_name = entry.first;
+        const std::string& init_value = entry.second;
+        
+        static_vars.insert(var_name);
+        data_section.push_back(".align 2");
+        std::string safe_name = safe_var_name(var_name);
+        
+        // Determine if init_value is a literal number or needs to be evaluated
+        std::string actual_value = init_value;
+        if (!is_number(init_value)) {
+            // If it's a variable/expression result, we can't use it as compile-time constant
+            // Default to 0 for now - static vars with complex initialization need runtime handling
+            actual_value = "0";
+        }
+        
+        data_section.push_back(safe_name + ": .word " + actual_value);
+        
+        // Store mapping
+        if (safe_name != var_name) {
+            variable_name_map[var_name] = safe_name;
+        }
+    }
 }
 
 std::string MIPSGenerator::get_variable_type(const std::string& var) {

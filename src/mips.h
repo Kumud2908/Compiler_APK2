@@ -59,6 +59,7 @@ private:
     int string_counter;
     std::unordered_set<std::string> static_vars;               // Static variable names
     std::unordered_set<std::string> global_vars;               // Global variable names
+    std::unordered_map<std::string, std::string> static_var_init_values; // Static var -> initial value
     
 public:
     MIPSGenerator(const std::vector<TACInstruction>& tac);
@@ -67,6 +68,7 @@ public:
                             const std::unordered_map<std::string, std::string>& types);
     void set_variable_types(const std::unordered_map<std::string, std::string>& types);
     void set_function_names(const std::unordered_set<std::string>& names);
+    void set_static_variables(const std::unordered_map<std::string, std::string>& static_inits);
     
 private:
     // ===== Core Generation =====

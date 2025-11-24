@@ -3018,6 +3018,19 @@ if ((resolved_type1.find("(*)") != std::string::npos &&
         }
     }
     
+    // ARRAY TO ARRAY COMPATIBILITY
+    // Allow int[5] -> int[] or int[5] -> int[10] (array parameters decay to pointers)
+    if (resolved_type1.find('[') != std::string::npos && resolved_type2.find('[') != std::string::npos) {
+        // Extract base types
+        std::string array_base1 = resolved_type1.substr(0, resolved_type1.find('['));
+        std::string array_base2 = resolved_type2.substr(0, resolved_type2.find('['));
+        
+        // Check if base types match
+        if (array_base1 == array_base2) {
+            return true; // Arrays with same base type are compatible
+        }
+    }
+    
     // Handle numeric conversions
     if (is_numeric_type(resolved_type1) && is_numeric_type(resolved_type2)) {
         return true;
@@ -3077,7 +3090,8 @@ bool SemanticAnalyzer::is_numeric_type(const std::string& type) {
         base_type = type.substr(0, star_pos);
     }
     return base_type == "int" || base_type == "float" || base_type == "double" ||
-           base_type == "long" || base_type == "short" || base_type == "char";
+           base_type == "long" || base_type == "short" || base_type == "char" ||
+           base_type == "unsigned" || base_type == "signed";
 }
 
 bool SemanticAnalyzer::is_integer_type(const std::string& type) {

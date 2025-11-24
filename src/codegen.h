@@ -16,6 +16,7 @@ public:
     std::unordered_map<std::string, std::string> array_element_types; // array name -> element type (int, char, etc)
     std::unordered_map<std::string, std::string> variable_types; // "var" -> "int"/"char"/etc
     std::unordered_set<std::string> function_names; // Set of all function names
+    std::unordered_map<std::string, std::string> static_var_init_values; // static var -> initial value
     
 private:
     TACGenerator* tac;

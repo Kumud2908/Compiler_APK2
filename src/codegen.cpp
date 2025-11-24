@@ -1812,20 +1812,19 @@ void CodeGenerator::generate_declaration(ASTNode* node) {
 std::string empty_base;
 flatten_array_initialization(var_name, dims, init_node, empty_indices, empty_base);
                         } else {
-                            int total_size = 1;
-                            for (int d : dims) total_size *= d;
-                            
-                            for (int i = 0; i < total_size; ++i) {
-                                tac->generate_array_store(static_var, std::to_string(i), "0");
-                            }
+                            // Static arrays will be zero-initialized in .data section by MIPS generator
+                            // No TAC needed
                         }
                     } else {
+                        // Store initial value for MIPS .data section
                         if (init_node) {
                             std::string init_val = generate_expression(init_node);
-                            tac->generate_assignment(static_var, init_val);
+                            static_var_init_values[static_var] = init_val;
                         } else {
-                            tac->generate_assignment(static_var, "0");
+                            static_var_init_values[static_var] = "0";
                         }
+                        // Don't generate TAC for static variable initialization
+                        // They will be initialized in .data section
                     }
                 } else {
                     // Check if this variable has its address taken
