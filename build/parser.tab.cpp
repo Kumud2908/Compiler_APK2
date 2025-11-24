@@ -4178,6 +4178,8 @@ int main(int argc, char* argv[]) {
             mips_gen.set_variable_types(code_gen.variable_types);
             // Pass function names to distinguish from goto labels
             mips_gen.set_function_names(code_gen.function_names);
+            // Pass static variables with their initial values
+            mips_gen.set_static_variables(code_gen.static_var_init_values);
             mips_gen.generate("output.s");
             
             printf("\n");
