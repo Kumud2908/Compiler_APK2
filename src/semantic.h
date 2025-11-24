@@ -103,8 +103,7 @@ std::string build_function_pointer_return_type(ASTNode* func_declarator, const s
     void process_typedef(ASTNode* declaration);
     std::string extract_typedef_name(ASTNode* init_decl_list);
 
-    // ========== NEW VALIDATION METHODS ==========
-    
+  
     // Type System
     std::string get_expression_type(ASTNode* expr);
     bool types_compatible(const std::string& type1, const std::string& type2);

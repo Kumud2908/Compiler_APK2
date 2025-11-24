@@ -4,9 +4,7 @@
 #include <functional>
 #include <algorithm>
 
-// =======================================================
 //  CodeGenerator: generate TAC from AST
-// =======================================================
 
 void CodeGenerator::generate(ASTNode* root) {
     if (!root) return;
@@ -19,7 +17,7 @@ void CodeGenerator::generate_node(ASTNode* node) {
     for (auto child : node->children) {
         if (!child) continue;
         
-        // ✅ NEW: Process struct/union definitions FIRST
+        // NEW: Process struct/union definitions FIRST
         if (child->name == "Declaration") {
             for (auto decl_spec : child->children) {
                 if (decl_spec->name == "DeclarationSpecifiers") {
@@ -196,9 +194,7 @@ void CodeGenerator::process_struct_union_definition(ASTNode* node, const std::st
     }
 }
 
-// =======================================================
 //  Function Definitions
-// =======================================================
 void CodeGenerator::generate_function_definition(ASTNode* node) {
     if (!node) return;
     
@@ -261,9 +257,7 @@ void CodeGenerator::generate_function_definition(ASTNode* node) {
     }
 }
 
-// =======================================================
 //  Compound / Statements
-// =======================================================
 
 void CodeGenerator::generate_compound_statement(ASTNode* node) {
     if (!node) return;
@@ -321,9 +315,7 @@ void CodeGenerator::generate_expression_statement(ASTNode* node) {
     for (auto child : node->children) generate_expression(child);
 }
 
-// =======================================================
 //  Expression Handling
-// =======================================================
 
 std::string CodeGenerator::generate_expression(ASTNode* node) {
     if (!node) return "";
@@ -1390,9 +1382,7 @@ std::string CodeGenerator::generate_array_element_address(ASTNode* node) {
     return final_addr;
 }
 
-// =======================================================
 //  Statement Types
-// =======================================================
 
 void CodeGenerator::generate_if_statement(ASTNode* node) {
     if (!node || node->children.size() < 2) return;
@@ -1784,9 +1774,7 @@ void CodeGenerator::generate_continue_statement(ASTNode* node) {
     }
 }
 
-// =======================================================
 //  Declaration + Array Tracking
-// =======================================================
 
 std::string CodeGenerator::flatten_array_initialization(const std::string &array_name,
                                                        const std::vector<int> &dims,
@@ -2152,9 +2140,7 @@ flatten_array_initialization(var_name, dims, init_node, empty_indices, empty_bas
 }
 
 
-// =======================================================
 //  Utility Functions
-// =======================================================
 std::string CodeGenerator::generate_member_address(ASTNode* node) {
     if (!node || node->children.size() < 2) return "";
     
@@ -2433,9 +2419,7 @@ int CodeGenerator::count_initializer_elements(ASTNode* init_node) {
     return 0;
 }
 
-// =======================================================
 //  Static Variable Helpers
-// =======================================================
 
 bool CodeGenerator::is_static_declaration(ASTNode* node) {
     if (!node) return false;

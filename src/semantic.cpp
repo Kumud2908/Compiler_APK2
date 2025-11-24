@@ -3347,9 +3347,7 @@ void SemanticAnalyzer::report_warning(const std::string& message, ASTNode* node)
 
 
 
-// ============================================
 // ADDITIONAL SEMANTIC CHECKS FOR FUNCTION POINTERS
-// ============================================
 
 void SemanticAnalyzer::check_function_pointer_assignment(ASTNode* node) {
     if (!node || node->name != "AssignmentExpression" || node->children.size() < 2) return;

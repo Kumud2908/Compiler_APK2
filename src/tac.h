@@ -13,7 +13,7 @@ public:
     std::string arg2;      // Second argument
     std::string result;    // Result
     std::string label;     // Label for jumps
-     std::string comment; // ✅ NEW: for comments
+     std::string comment; // NEW: for comments
 
     TACInstruction(const std::string& operation = "", 
                    const std::string& a1 = "", 
