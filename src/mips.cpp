@@ -316,7 +316,6 @@ void MIPSGenerator::translate_label(const TACInstruction& instr) {
     std::vector<std::string> to_remove;
     for (const auto& entry : var_to_reg) {
         const std::string& var = entry.first;
-        const std::string& reg = entry.second;
         
         // Only invalidate non-temporary user variables
         // Temporaries are single-assignment and safe to keep in registers

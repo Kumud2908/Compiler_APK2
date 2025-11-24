@@ -2917,7 +2917,6 @@ if (expr->name == "MemberAccess" && expr->children.size() >= 2) {
 bool SemanticAnalyzer::types_compatible(const std::string& type1, const std::string& type2) {
     if (type1 == type2) return true;
     
-    
     // RESOLVE TYPEDEFS
     std::string resolved_type1 = resolve_typedef(type1);
     std::string resolved_type2 = resolve_typedef(type2);
@@ -2970,6 +2969,43 @@ if ((resolved_type1.find("(*)") != std::string::npos &&
     // Check if both are the same enum type (even if one is resolved and one isn't)
 
     
+    // ARRAY TO POINTER DECAY - Must check BEFORE pointer compatibility
+    // Allow assigning array to pointer: int[5] -> int*
+    // Also handle array of pointers: int*[3] -> int**
+    if (is_pointer_type(resolved_type1) && resolved_type2.find('[') != std::string::npos) {
+        // Extract base type from array (remove [...] parts)
+        std::string array_base = resolved_type2;
+        size_t bracket_pos = array_base.find('[');
+        if (bracket_pos != std::string::npos) {
+            array_base = array_base.substr(0, bracket_pos);
+        }
+        
+        // Trim trailing whitespace from array_base
+        while (!array_base.empty() && array_base.back() == ' ') {
+            array_base.pop_back();
+        }
+        
+        // Extract base type from pointer (remove only ONE *)
+        // int** -> int* (strip one *), int*[3] decays to int** (pointer to int*)
+        std::string pointer_base = resolved_type1;
+        
+        // Remove ONE trailing * from pointer type
+        if (!pointer_base.empty() && pointer_base.back() == '*') {
+            pointer_base.pop_back();
+        }
+        
+        // Trim trailing whitespace
+        while (!pointer_base.empty() && pointer_base.back() == ' ') {
+            pointer_base.pop_back();
+        }
+        
+        // Check if base types match
+        // This handles both: int[5] -> int* AND int*[3] -> int**
+        if (array_base == pointer_base) {
+            return true; // Array-to-pointer decay is valid
+        }
+    }
+    
     // POINTER COMPATIBILITY CHECK
     if (is_pointer_type(resolved_type1) && is_pointer_type(resolved_type2)) {
         // void* is compatible with any pointer
@@ -3003,31 +3039,6 @@ if ((resolved_type1.find("(*)") != std::string::npos &&
         
         // Different pointer types are incompatible
         return false;
-    }
-    
-    // ARRAY TO POINTER DECAY
-    // Allow assigning array to pointer: int[5] -> int*
-    if (is_pointer_type(resolved_type1) && resolved_type2.find('[') != std::string::npos) {
-        // Extract base type from array (remove [...] parts)
-        std::string array_base = resolved_type2;
-        size_t bracket_pos = array_base.find('[');
-        if (bracket_pos != std::string::npos) {
-            array_base = array_base.substr(0, bracket_pos);
-        }
-        
-        // Extract base type from pointer (remove *)
-        std::string pointer_base = resolved_type1;
-        while (!pointer_base.empty() && pointer_base.back() == '*') {
-            pointer_base.pop_back();
-        }
-        while (!pointer_base.empty() && pointer_base.back() == ' ') {
-            pointer_base.pop_back();
-        }
-        
-        // Check if base types match
-        if (array_base == pointer_base) {
-            return true; // Array-to-pointer decay is valid
-        }
     }
     
     // ARRAY TO ARRAY COMPATIBILITY
