@@ -32,6 +32,7 @@ private:
     std::unordered_map<std::string, std::string> function_return_types;
     std::unordered_map<std::string, std::string> enum_constants;
     std::unordered_map<std::string, std::string> references;
+    std::unordered_map<std::string, std::vector<bool>> function_param_is_reference;  // func_name -> list of is_reference for each param
 
 std::unordered_map<std::string, int> member_offsets;        // "TypeName.member" -> offset
 std::unordered_map<std::string, std::string> member_types;   // "TypeName.member" -> member type
@@ -41,6 +42,7 @@ void process_struct_union_definition(ASTNode* node, const std::string& type_name
 
     // Expression code generation - returns the variable holding the result
     std::string generate_expression(ASTNode* node);
+    std::string generate_array_element_address(ASTNode* node);
   
     std::string current_break_label;
     std::string current_continue_label;
@@ -85,6 +87,10 @@ std::string generate_member_address(ASTNode* node);
     
     // Address-taken variable tracking
     void collect_address_taken_vars(ASTNode* node);
+    
+    // Extract parameter reference information from function declarator
+    void extract_param_reference_info(ASTNode* declarator, std::vector<bool>& param_refs);
+    bool has_reference_declarator(ASTNode* node);
 
 public:
     CodeGenerator(TACGenerator* generator) 

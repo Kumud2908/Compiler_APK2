@@ -1615,6 +1615,18 @@ void MIPSGenerator::translate_address_of(const TACInstruction& instr) {
         return;
     }
     
+    // Check if variable was spilled to stack
+    if (spilled_to_stack.find(var_name) != spilled_to_stack.end()) {
+        int offset = spilled_to_stack[var_name];
+        // Load address: result = $sp + offset
+        if (offset == 0) {
+            emit("move " + result_reg + ", $sp");
+        } else {
+            emit("addi " + result_reg + ", $sp, " + std::to_string(offset));
+        }
+        return;
+    }
+    
     // Check if this is a known array with size already calculated
     int alloc_size = 4; // default for scalar variables
     if (array_sizes.find(var_name) != array_sizes.end()) {
@@ -2120,5 +2132,4 @@ std::string MIPSGenerator::get_variable_type(const std::string& var) {
     }
     return "int"; // default
 }
-
 

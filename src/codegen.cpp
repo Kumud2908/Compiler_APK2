@@ -213,6 +213,16 @@ void CodeGenerator::generate_function_definition(ASTNode* node) {
     current_function_name = func_name;
     function_names.insert(func_name);  // Track this function name
     
+    // Extract parameter reference information
+    std::vector<bool> param_refs;
+    for (auto child : node->children) {
+        if (child->name == "Declarator" || child->name == "FunctionDeclarator") {
+            extract_param_reference_info(child, param_refs);
+            break;
+        }
+    }
+    function_param_is_reference[func_name] = param_refs;
+    
     // Pre-pass: collect variables whose addresses are taken
     address_taken_vars.clear();
     for (auto child : node->children) {
@@ -321,6 +331,15 @@ std::string CodeGenerator::generate_expression(ASTNode* node) {
     // Identifier
     if (node->name == "Identifier") {
         std::string var_name = node->lexeme;
+        
+        // Check if this is a reference parameter - need to dereference
+        if (node->symbol && node->symbol->is_reference) {
+            // Reference parameter - it holds an address, so dereference it
+            std::string result = tac->new_temp();
+            tac->generate_load(result, var_name);  // result = *var_name
+            return result;
+        }
+        
         auto ref_it = references.find(var_name);
         if (ref_it != references.end()) {
             std::string result = tac->new_temp();
@@ -378,14 +397,44 @@ std::string CodeGenerator::generate_expression(ASTNode* node) {
         
         if (member_addr.empty()) {
             // Fallback to old method if generate_member_address failed
-            std::string base = generate_expression(node->children[0]);
+            ASTNode* base_node = node->children[0];
             std::string field = node->children[1]->lexeme;
             
-            std::string addr_temp = tac->new_temp();
-            tac->generate_address_of(base, addr_temp);
+            std::string addr_temp;
+            std::string base_var;
+            std::string base_type;
             
-            // Get offset
-            auto it = variable_types.find(base);
+            // Check if base is a reference parameter by checking variable_types
+            if (base_node->name == "Identifier") {
+                base_var = base_node->lexeme;
+                auto type_it = variable_types.find(base_var);
+                if (type_it != variable_types.end()) {
+                    base_type = type_it->second;
+                    // Check if it's a reference type (ends with &)
+                    if (!base_type.empty() && base_type.back() == '&') {
+                        // Reference - already an address, just use it
+                        addr_temp = base_var;
+                    } else {
+                        // Regular variable - generate expression and take address
+                        std::string temp = generate_expression(base_node);
+                        addr_temp = tac->new_temp();
+                        tac->generate_address_of(temp, addr_temp);
+                    }
+                } else {
+                    // Type not found, use default behavior
+                    std::string temp = generate_expression(base_node);
+                    addr_temp = tac->new_temp();
+                    tac->generate_address_of(temp, addr_temp);
+                }
+            } else {
+                // Not an identifier, use default behavior
+                base_var = generate_expression(base_node);
+                addr_temp = tac->new_temp();
+                tac->generate_address_of(base_var, addr_temp);
+            }
+            
+            // Get offset - use base_type if we have it, otherwise look up
+            auto it = variable_types.find(base_var);
             int offset = 0;
             if (it != variable_types.end()) {
                 std::string key = it->second + "." + field;
@@ -419,6 +468,14 @@ std::string CodeGenerator::generate_expression(ASTNode* node) {
 
             if (lhs_node->name == "Identifier") {
                 std::string lhs_name = lhs_node->lexeme;
+                
+                // Check if it's a reference parameter
+                if (lhs_node->symbol && lhs_node->symbol->is_reference) {
+                    // Store through the reference (which holds an address)
+                    tac->generate_store(lhs_name, rhs);
+                    return rhs;
+                }
+                
                 auto ref_it = references.find(lhs_name);
                 if (ref_it != references.end()) {
                     tac->generate_store(lhs_name, rhs);
@@ -443,14 +500,53 @@ std::string CodeGenerator::generate_expression(ASTNode* node) {
                         tac->generate_store(member_addr, rhs);
                     } else {
                         // Fallback to old method
-                        std::string base = generate_expression(lhs_node->children[0]);
+                        ASTNode* base_node = lhs_node->children[0];
                         std::string field = lhs_node->children[1]->lexeme;
                         
-                        std::string addr_temp = tac->new_temp();
-                        tac->generate_address_of(base, addr_temp);
+                        std::string addr_temp;
+                        std::string base_var;
+                        std::string base_type;
                         
-                        // Get offset
-                        auto it = variable_types.find(base);
+                        // Check if base is a reference parameter by checking variable_types
+                        if (base_node->name == "Identifier") {
+                            base_var = base_node->lexeme;
+                            auto type_it = variable_types.find(base_var);
+                            if (type_it != variable_types.end()) {
+                                base_type = type_it->second;
+                                // Check if it's a reference type (ends with &)
+                                if (!base_type.empty() && base_type.back() == '&') {
+                                    // Reference - already an address, just use it
+                                    addr_temp = base_var;
+                                } else {
+                                    // Regular variable - generate expression and take address
+                                    std::string temp = generate_expression(base_node);
+                                    addr_temp = tac->new_temp();
+                                    tac->generate_address_of(temp, addr_temp);
+                                }
+                            } else {
+                                // Type not found, use default behavior
+                                std::string temp = generate_expression(base_node);
+                                addr_temp = tac->new_temp();
+                                tac->generate_address_of(temp, addr_temp);
+                            }
+                        } else {
+                            // Not an identifier, use default behavior
+                            base_var = generate_expression(base_node);
+                            addr_temp = tac->new_temp();
+                            tac->generate_address_of(base_var, addr_temp);
+                        }
+                        
+                        // Get offset - strip & from base_type for lookup
+                        std::string lookup_type = base_type;
+                        if (!lookup_type.empty() && lookup_type.back() == '&') {
+                            lookup_type.pop_back();
+                        }
+                        auto it = variable_types.find(base_var);
+                        if (it == variable_types.end() && !lookup_type.empty()) {
+                            // Use the type we determined earlier
+                            variable_types[base_var] = lookup_type;
+                            it = variable_types.find(base_var);
+                        }
                         int offset = 0;
                         if (it != variable_types.end()) {
                             std::string key = it->second + "." + field;
@@ -863,8 +959,34 @@ if (node->name == "FunctionCall") {
     std::string func_name = generate_expression(node->children[0]);
     int param_count = 0;
     
+    // Get function symbol to check parameter types OR use stored information
+    Symbol* func_symbol = nullptr;
+    std::string called_func_name = "";
+    if (node->children[0]->name == "Identifier") {
+        called_func_name = node->children[0]->lexeme;
+        if (node->children[0]->symbol) {
+            func_symbol = node->children[0]->symbol;
+        }
+    }
+    
     if (node->children.size() > 1 && node->children[1]->name == "ArgumentList") {
+        int arg_index = 0;
         for (auto arg : node->children[1]->children) {
+            // Check if this parameter is expected to be a reference
+            bool expects_reference = false;
+            
+            // First try stored map (most reliable since we extract it during function processing)
+            if (!called_func_name.empty() && function_param_is_reference.find(called_func_name) != function_param_is_reference.end()) {
+                const auto& ref_list = function_param_is_reference[called_func_name];
+                if (arg_index < (int)ref_list.size()) {
+                    expects_reference = ref_list[arg_index];
+                }
+            }
+            // Fallback to symbol table
+            if (!expects_reference && func_symbol && arg_index < (int)func_symbol->parameters.size()) {
+                expects_reference = func_symbol->parameters[arg_index]->is_reference;
+            }
+            
             // Check if argument is an array - pass address instead of value
             bool is_array = false;
             if (arg->name == "Identifier" && arg->symbol && arg->symbol->is_array) {
@@ -876,6 +998,19 @@ if (node->name == "FunctionCall") {
                 // For arrays, pass the address
                 param = tac->new_temp();
                 tac->generate_address_of(arg->lexeme, param);
+            } else if (expects_reference) {
+                // For reference parameters, pass the address of the variable
+                if (arg->name == "Identifier") {
+                    param = tac->new_temp();
+                    tac->generate_address_of(arg->lexeme, param);
+                } else if (arg->name == "ArraySubscript") {
+                    // For array elements, generate the address without dereferencing
+                    param = generate_array_element_address(arg);
+                } else {
+                    // For other complex expressions, generate them and then take address
+                    // This is tricky - for now, generate the expression
+                    param = generate_expression(arg);
+                }
             } else {
                 param = generate_expression(arg);
             }
@@ -894,9 +1029,14 @@ if (node->name == "FunctionCall") {
             }
             
             // If it's a struct type (not a pointer), we need to copy members
-            if (!param_type.empty() && param_type.find("struct ") == 0 && param_type.back() != '*') {
+            // BUT: Skip this if the parameter is a reference (already have address)
+            if (!expects_reference && !param_type.empty() && param_type.find("struct ") == 0 && param_type.back() != '*' && param_type.back() != '&') {
                 // Extract struct type name
                 std::string struct_type = param_type.substr(7); // Remove "struct "
+                // Also remove trailing & if present
+                if (!struct_type.empty() && struct_type.back() == '&') {
+                    struct_type.pop_back();
+                }
                 
                 // Check if this struct has members we know about
                 bool has_members = false;
@@ -929,6 +1069,7 @@ if (node->name == "FunctionCall") {
             // Normal parameter (not a struct or is a struct pointer)
             tac->generate_param(param);
             param_count++;
+            arg_index++;
         }
     }
     
@@ -1146,6 +1287,107 @@ if (node->name == "FunctionCall") {
     if (node->children.size() == 1) return generate_expression(node->children[0]);
     
     return "";
+}
+
+// Generate address of an array element (for passing to reference parameters)
+// Similar to generate_expression for ArraySubscript, but returns the address instead of loading the value
+std::string CodeGenerator::generate_array_element_address(ASTNode* node) {
+    if (!node || node->name != "ArraySubscript") {
+        return "";
+    }
+    
+    // Multi-dimensional array
+    if (node->children[0]->name == "ArraySubscript") {
+        std::string base_array = get_base_array_name(node);
+        std::vector<std::string> indices;
+        collect_array_indices(node, indices);
+        
+        if (array_dims.find(base_array) != array_dims.end()) {
+            const auto& dims = array_dims[base_array];
+            
+            int element_size = 4;
+            if (array_element_types.find(base_array) != array_element_types.end()) {
+                element_size = get_type_size(array_element_types[base_array]);
+            }
+            
+            std::string offset = "0";
+            for (size_t i = 0; i < indices.size(); ++i) {
+                int stride = 1;
+                for (size_t j = i + 1; j < dims.size(); ++j) {
+                    stride *= dims[j];
+                }
+                
+                if (stride == 1) {
+                    if (offset == "0") {
+                        offset = indices[i];
+                    } else {
+                        std::string temp = tac->new_temp();
+                        tac->generate_binary_op("+", offset, indices[i], temp);
+                        offset = temp;
+                    }
+                } else {
+                    std::string term = tac->new_temp();
+                    tac->generate_binary_op("*", indices[i], std::to_string(stride), term);
+                    
+                    if (offset == "0") {
+                        offset = term;
+                    } else {
+                        std::string temp = tac->new_temp();
+                        tac->generate_binary_op("+", offset, term, temp);
+                        offset = temp;
+                    }
+                }
+            }
+            
+            std::string byte_offset = tac->new_temp();
+            tac->generate_binary_op("*", offset, std::to_string(element_size), byte_offset);
+            
+            std::string base_addr = tac->new_temp();
+            tac->generate_address_of(base_array, base_addr);
+            
+            std::string final_addr = tac->new_temp();
+            tac->generate_binary_op("+", base_addr, byte_offset, final_addr);
+            
+            // Return the address, not the loaded value
+            return final_addr;
+        }
+    }
+    
+    // Simple 1D array
+    std::string index_val = generate_expression(node->children[1]);
+    ASTNode* array_node = node->children[0];
+    std::string array_name = generate_expression(array_node);
+    
+    int element_size = 4;
+    if (array_node && array_node->symbol && array_node->symbol->is_array) {
+        element_size = get_type_size(array_node->symbol->base_type);
+    } else if (array_element_types.find(array_name) != array_element_types.end()) {
+        element_size = get_type_size(array_element_types[array_name]);
+    }
+    
+    std::string byte_offset = tac->new_temp();
+    tac->generate_binary_op("*", index_val, std::to_string(element_size), byte_offset);
+    
+    std::string base_addr;
+    bool is_pointer_var = false;
+    if (array_node && array_node->symbol) {
+        if (array_node->symbol->is_pointer && !array_node->symbol->is_array) {
+            is_pointer_var = true;
+        }
+    }
+    
+    if (is_pointer_var) {
+        base_addr = array_name;
+    } else {
+        base_addr = tac->new_temp();
+        tac->generate_address_of(array_name, base_addr);
+    }
+    
+    std::string final_addr = tac->new_temp();
+    tac->generate_binary_op("+", base_addr, byte_offset, final_addr);
+    
+    // Return the address, not the loaded value
+    return final_addr;
 }
 
 // =======================================================
@@ -2016,8 +2258,17 @@ std::string CodeGenerator::generate_member_address(ASTNode* node) {
             base_addr = base_var;  // This will be loaded as a value, not &p
         } else {
             // For p.x, p is a struct, so get its address
-            base_addr = tac->new_temp();
-            tac->generate_address_of(base_var, base_addr);
+            // BUT: if p is a reference parameter, it's already an address!
+            // Check variable_types map to see if it's a reference
+            auto type_it = variable_types.find(base_var);
+            if (type_it != variable_types.end() && !type_it->second.empty() && type_it->second.back() == '&') {
+                // p is a reference - it's already an address, just use it
+                base_addr = base_var;
+            } else {
+                // p is a regular struct variable - get its address
+                base_addr = tac->new_temp();
+                tac->generate_address_of(base_var, base_addr);
+            }
         }
         
         // Get the type from symbol or variable_types map
@@ -2307,4 +2558,37 @@ void CodeGenerator::process_enum_declaration(ASTNode* node) {
             }
         }
     }
+}
+
+void CodeGenerator::extract_param_reference_info(ASTNode* declarator, std::vector<bool>& param_refs) {
+    if (!declarator) return;
+    
+    // Traverse to find ParameterList
+    for (auto child : declarator->children) {
+        if (child->name == "FunctionDeclarator") {
+            extract_param_reference_info(child, param_refs);
+            return;
+        }
+        if (child->name == "ParameterList") {
+            // Process each parameter
+            for (auto param : child->children) {
+                bool is_ref = false;
+                if (param->name == "ParameterDeclaration") {
+                    // Recursively check all descendants for ReferenceDeclarator
+                    is_ref = has_reference_declarator(param);
+                }
+                param_refs.push_back(is_ref);
+            }
+            return;
+        }
+    }
+}
+
+bool CodeGenerator::has_reference_declarator(ASTNode* node) {
+    if (!node) return false;
+    if (node->name == "ReferenceDeclarator") return true;
+    for (auto child : node->children) {
+        if (has_reference_declarator(child)) return true;
+    }
+    return false;
 }

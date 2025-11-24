@@ -326,10 +326,6 @@ void SemanticAnalyzer::traverse(ASTNode* node) {
         check_unary_operation(node);
         
     }
-    else if (node->name == "PostfixExpression") {
-        check_postfix_operation(node);
-        
-    }
     else if (node->name == "IfStatement" && node->children.size() > 0) {
         check_if_condition(node->children[0]);
     }
@@ -1977,8 +1973,13 @@ void SemanticAnalyzer::extract_type_info(ASTNode* declarator, Symbol* symbol) {
             if (!child) continue;
             
             if (child->name == "Pointer") {
+                // Direct Pointer child means this is a reference to pointer (e.g., int* &)
+                symbol->is_pointer = true;
+                symbol->pointer_level++;
+                // Check for nested pointers within this Pointer node (e.g., int** &)
                 extract_pointer_info(child, symbol);
-            } else if (child->name == "DirectDeclarator" || child->name == "ArrayDeclarator") {
+            } else if (child->name == "Declarator" || child->name == "DirectDeclarator" || child->name == "ArrayDeclarator") {
+                // Recursively process nested declarators to extract pointer/array info
                 extract_type_info(child, symbol);
             }
         }
@@ -2220,7 +2221,13 @@ void SemanticAnalyzer::check_member_access(ASTNode* node) {
     }
     
     // Extract struct name from "struct Name" or "union Name"
+    // Strip any trailing & or * symbols (for references and pointers)
     std::string struct_name = resolved_type.substr(resolved_type.find(' ') + 1);
+    
+    // Remove trailing & or * characters
+    while (!struct_name.empty() && (struct_name.back() == '&' || struct_name.back() == '*')) {
+        struct_name.pop_back();
+    }
     
     // Find the struct type definition
     Symbol* struct_sym = symbol_table->find_symbol(struct_name);
@@ -2618,27 +2625,6 @@ void SemanticAnalyzer::check_unary_operation(ASTNode* node) {
     }
 }
 
-void SemanticAnalyzer::check_postfix_operation(ASTNode* node) {
-    if (!node || node->children.empty()) return;
-
-    std::string operand_type = get_expression_type(node->children[0]);
-    std::string op = node->lexeme;
-
-    if (op == "++" || op == "--") {
-        if (!is_numeric_type(operand_type) && !is_pointer_type(operand_type)) {
-            reportError("Increment/decrement requires numeric or pointer type", node);
-        }
-        // Mark variable as initialized after increment/decrement
-        if (node->children[0]->name == "Identifier") {
-            std::string var_name = node->children[0]->lexeme;
-            Symbol* sym = symbol_table->find_symbol(var_name);
-            if (sym) {
-                sym->is_initialized = true;
-            }
-        }
-    }
-}
-
 void SemanticAnalyzer::check_division_by_zero(ASTNode* node) {
     if (!node || node->children.size() < 2) return;
     
@@ -2754,56 +2740,9 @@ std::string SemanticAnalyzer::get_expression_type(ASTNode* expr) {
     if (expr->name == "InitializerList") {
         if (expr->children.empty()) return "initializer_list";
         
-        // Special case: If this list has exactly 1 child that is also an InitializerList,
-        // check if that child contains only simple values (not more lists)
-        // This handles the parser's structure: Initializer -> InitializerList(wrapper) -> InitializerList(actual)
-        if (expr->children.size() == 1 && expr->children[0]->name == "InitializerList") {
-            ASTNode* inner_list = expr->children[0];
-            bool inner_has_lists = false;
-            
-            for (auto* grandchild : inner_list->children) {
-                if (grandchild && grandchild->name == "Initializer" && !grandchild->children.empty()) {
-                    if (grandchild->children[0]->name == "InitializerList") {
-                        inner_has_lists = true;
-                        break;
-                    }
-                } else if (grandchild && grandchild->name == "InitializerList") {
-                    inner_has_lists = true;
-                    break;
-                }
-            }
-            
-            if (!inner_has_lists) {
-                // Inner list has only simple values, treat as flat
-                return "initializer_list";
-            }
-        }
-        
-        // Check if this is a nested list (children are initializer lists)
-        // This distinguishes between:
-        // - Flat list for structs: {1, 2} -> "initializer_list"
-        // - Nested list for arrays: {{1, 2}, {3, 4}} -> "initializer_list<initializer_list<int>>"
-        bool has_nested_lists = false;
-        for (auto* child : expr->children) {
-            if (child && child->name == "InitializerList") {
-                has_nested_lists = true;
-                break;
-            } else if (child && child->name == "Initializer" && !child->children.empty()) {
-                if (child->children[0]->name == "InitializerList") {
-                    has_nested_lists = true;
-                    break;
-                }
-            }
-        }
-        
-        if (has_nested_lists) {
-            // Nested initializer (for multi-dimensional arrays)
-            std::string first_type = get_expression_type(expr->children[0]);
-            return "initializer_list<" + first_type + ">";
-        } else {
-            // Flat initializer (for structs or simple arrays)
-            return "initializer_list";
-        }
+        // Get type of first element to determine list type
+        std::string first_type = get_expression_type(expr->children[0]);
+        return "initializer_list<" + first_type + ">";
     }
 
     // ADD BRACED INIT LIST HANDLING  
@@ -2927,12 +2866,6 @@ if (expr->name == "MemberAccess" && expr->children.size() >= 2) {
         return operand_type;
     }
 
-    // PostfixExpression (++, --)
-    if (expr->name == "PostfixExpression" && !expr->children.empty()) {
-        // For postfix ++/--, return the operand's type
-        return get_expression_type(expr->children[0]);
-    }
-
     // Binary operations
     if (!expr->children.empty()) {
         std::string left_type = get_expression_type(expr->children[0]);
@@ -2941,30 +2874,16 @@ if (expr->name == "MemberAccess" && expr->children.size() >= 2) {
         if (expr->name == "AdditiveExpression" || expr->name == "MultiplicativeExpression") {
             // Handle pointer arithmetic: ptr + int = ptr, ptr - int = ptr
             if (expr->name == "AdditiveExpression") {
-                // Arrays decay to pointers in expression context
-                std::string left_decayed = left_type;
-                std::string right_decayed = right_type;
-                
-                // Convert array types to pointer types (e.g., "int[5]" -> "int*")
-                if (left_type.find('[') != std::string::npos) {
-                    size_t bracket_pos = left_type.find('[');
-                    left_decayed = left_type.substr(0, bracket_pos) + "*";
-                }
-                if (right_type.find('[') != std::string::npos) {
-                    size_t bracket_pos = right_type.find('[');
-                    right_decayed = right_type.substr(0, bracket_pos) + "*";
-                }
-                
-                bool left_is_pointer = is_pointer_type(left_decayed);
-                bool right_is_pointer = is_pointer_type(right_decayed);
+                bool left_is_pointer = is_pointer_type(left_type);
+                bool right_is_pointer = is_pointer_type(right_type);
                 
                 if (left_is_pointer && !right_is_pointer) {
                     // ptr + int or ptr - int = ptr
-                    return left_decayed;
+                    return left_type;
                 } else if (!left_is_pointer && right_is_pointer) {
                     // int + ptr = ptr (only for addition)
                     if (expr->lexeme == "+") {
-                        return right_decayed;
+                        return right_type;
                     }
                 } else if (left_is_pointer && right_is_pointer) {
                     // ptr - ptr = int (ptrdiff_t)
@@ -3005,12 +2924,8 @@ bool SemanticAnalyzer::types_compatible(const std::string& type1, const std::str
     
     if (resolved_type1 == resolved_type2) return true;
    
-    
-
-    if (is_struct_union_type(type1) && is_struct_union_type(type2)) {
-        return type1 == type2; // Only same exact types are compatible
-    }
-
+    // Strip reference markers (&) for compatibility checking
+    // This allows passing non-reference types to reference parameters
     std::string base_type1 = resolved_type1;
     std::string base_type2 = resolved_type2;
     
@@ -3023,6 +2938,11 @@ bool SemanticAnalyzer::types_compatible(const std::string& type1, const std::str
     
     // After stripping references, check if base types match
     if (base_type1 == base_type2) return true;
+    
+    // Check struct/union compatibility (after stripping references)
+    if (is_struct_union_type(base_type1) && is_struct_union_type(base_type2)) {
+        return base_type1 == base_type2; // Only same exact types are compatible
+    }
 
 
 // FUNCTION TO FUNCTION POINTER COMPATIBILITY (FIX)
