@@ -143,8 +143,8 @@ private:
     std::string get_mips_var_name(const std::string& var);
     
     // ===== Special Instruction Handlers =====
-    void handle_printf();
-    void handle_scanf();
+    void handle_printf(int num_params);
+    void handle_scanf(int num_params);
     void handle_syscall(const std::string& func_name);
     void print_literal_string(const std::string& text);
 

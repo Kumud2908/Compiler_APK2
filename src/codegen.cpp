@@ -711,8 +711,15 @@ std::string CodeGenerator::generate_expression(ASTNode* node) {
         std::string result = tac->new_temp();
 
         if (node->lexeme == "&") {
+            // Special case: &(struct.member) should compute address, not load value
+            if (node->children[0]->name == "MemberAccess" || node->children[0]->name == "StructMemberAccess") {
+                // Generate member address using generate_member_address
+                std::string member_addr = generate_member_address(node->children[0]);
+                tac->generate_assignment(result, member_addr);
+                return result;
+            }
             // Special case: &(array_subscript) should compute address, not load value
-            if (node->children[0]->name == "ArraySubscript") {
+            else if (node->children[0]->name == "ArraySubscript") {
                 // Generate address computation directly without dereferencing
                 ASTNode* array_node = node->children[0];
                 
@@ -858,7 +865,20 @@ if (node->name == "FunctionCall") {
     
     if (node->children.size() > 1 && node->children[1]->name == "ArgumentList") {
         for (auto arg : node->children[1]->children) {
-            std::string param = generate_expression(arg);
+            // Check if argument is an array - pass address instead of value
+            bool is_array = false;
+            if (arg->name == "Identifier" && arg->symbol && arg->symbol->is_array) {
+                is_array = true;
+            }
+            
+            std::string param;
+            if (is_array) {
+                // For arrays, pass the address
+                param = tac->new_temp();
+                tac->generate_address_of(arg->lexeme, param);
+            } else {
+                param = generate_expression(arg);
+            }
             
             // Check if this parameter is a struct being passed by value
             std::string param_type = "";
@@ -1073,8 +1093,25 @@ if (node->name == "FunctionCall") {
             std::string byte_offset = tac->new_temp();
             tac->generate_binary_op("*", index_val, std::to_string(element_size), byte_offset);
             
-            std::string base_addr = tac->new_temp();
-            tac->generate_address_of(array_name, base_addr);
+            std::string base_addr;
+            
+            // Check if this is a pointer variable or an actual array
+            bool is_pointer_var = false;
+            if (array_node && array_node->symbol) {
+                // It's a pointer if marked as pointer and not an array
+                if (array_node->symbol->is_pointer && !array_node->symbol->is_array) {
+                    is_pointer_var = true;
+                }
+            }
+            
+            if (is_pointer_var) {
+                // For pointer variables, use the value directly (it's already an address)
+                base_addr = array_name;
+            } else {
+                // For actual arrays, take the address
+                base_addr = tac->new_temp();
+                tac->generate_address_of(array_name, base_addr);
+            }
             
             std::string final_addr = tac->new_temp();
             tac->generate_binary_op("+", base_addr, byte_offset, final_addr);
