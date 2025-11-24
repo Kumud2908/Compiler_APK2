@@ -1770,6 +1770,28 @@ std::string MIPSGenerator::allocate_temp_register() {
 
 std::string MIPSGenerator::allocate_saved_register() {
     static int reg_index = 0;
+    
+    // Try to find an unused saved register
+    for (int attempts = 0; attempts < 8; attempts++) {
+        std::string reg = "$s" + std::to_string(reg_index % 8);
+        reg_index++;
+        
+        // Check if this register is currently in use
+        bool in_use = false;
+        for (const auto& entry : var_to_reg) {
+            if (entry.second == reg) {
+                in_use = true;
+                break;
+            }
+        }
+        
+        if (!in_use) {
+            return reg;
+        }
+    }
+    
+    // If all saved registers are in use, fall back to round-robin
+    // (This should rarely happen with 8 saved registers)
     std::string reg = "$s" + std::to_string(reg_index % 8);
     reg_index++;
     return reg;

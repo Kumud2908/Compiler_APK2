@@ -2729,9 +2729,56 @@ std::string SemanticAnalyzer::get_expression_type(ASTNode* expr) {
     if (expr->name == "InitializerList") {
         if (expr->children.empty()) return "initializer_list";
         
-        // Get type of first element to determine list type
-        std::string first_type = get_expression_type(expr->children[0]);
-        return "initializer_list<" + first_type + ">";
+        // Special case: If this list has exactly 1 child that is also an InitializerList,
+        // check if that child contains only simple values (not more lists)
+        // This handles the parser's structure: Initializer -> InitializerList(wrapper) -> InitializerList(actual)
+        if (expr->children.size() == 1 && expr->children[0]->name == "InitializerList") {
+            ASTNode* inner_list = expr->children[0];
+            bool inner_has_lists = false;
+            
+            for (auto* grandchild : inner_list->children) {
+                if (grandchild && grandchild->name == "Initializer" && !grandchild->children.empty()) {
+                    if (grandchild->children[0]->name == "InitializerList") {
+                        inner_has_lists = true;
+                        break;
+                    }
+                } else if (grandchild && grandchild->name == "InitializerList") {
+                    inner_has_lists = true;
+                    break;
+                }
+            }
+            
+            if (!inner_has_lists) {
+                // Inner list has only simple values, treat as flat
+                return "initializer_list";
+            }
+        }
+        
+        // Check if this is a nested list (children are initializer lists)
+        // This distinguishes between:
+        // - Flat list for structs: {1, 2} -> "initializer_list"
+        // - Nested list for arrays: {{1, 2}, {3, 4}} -> "initializer_list<initializer_list<int>>"
+        bool has_nested_lists = false;
+        for (auto* child : expr->children) {
+            if (child && child->name == "InitializerList") {
+                has_nested_lists = true;
+                break;
+            } else if (child && child->name == "Initializer" && !child->children.empty()) {
+                if (child->children[0]->name == "InitializerList") {
+                    has_nested_lists = true;
+                    break;
+                }
+            }
+        }
+        
+        if (has_nested_lists) {
+            // Nested initializer (for multi-dimensional arrays)
+            std::string first_type = get_expression_type(expr->children[0]);
+            return "initializer_list<" + first_type + ">";
+        } else {
+            // Flat initializer (for structs or simple arrays)
+            return "initializer_list";
+        }
     }
 
     // ADD BRACED INIT LIST HANDLING  
