@@ -1,0 +1,2688 @@
+C/C++ Syntax Analyzer with AST
+==============================
+
+Token: #include <stdio.h>   Type: PREPROCESSOR   
+Token: int                  Type: KEYWORD        
+Token: main                 Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: int                  Type: KEYWORD        
+Token: i                    Type: IDENTIFIER     
+Token: ;                    Type: SEMICOLON      
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "Test 1: break in for loop\n" Type: STRING_LITERAL 
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: for                  Type: KEYWORD        
+Token: (                    Type: LPAREN         
+Token: i                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: 0                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: i                    Type: IDENTIFIER     
+Token: <                    Type: RELATIONAL_OP  
+Token: 10                   Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: i                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: i                    Type: IDENTIFIER     
+Token: +                    Type: ARITHMETIC_OP  
+Token: 1                    Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: if                   Type: KEYWORD        
+Token: (                    Type: LPAREN         
+Token: i                    Type: IDENTIFIER     
+Token: ==                   Type: RELATIONAL_OP  
+Token: 5                    Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: break                Type: KEYWORD        
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "%d "                Type: STRING_LITERAL 
+Token: ,                    Type: COMMA          
+Token: i                    Type: IDENTIFIER     
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "\n"                 Type: STRING_LITERAL 
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "\nTest 2: continue in for loop\n" Type: STRING_LITERAL 
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: for                  Type: KEYWORD        
+Token: (                    Type: LPAREN         
+Token: i                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: 0                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: i                    Type: IDENTIFIER     
+Token: <                    Type: RELATIONAL_OP  
+Token: 10                   Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: i                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: i                    Type: IDENTIFIER     
+Token: +                    Type: ARITHMETIC_OP  
+Token: 1                    Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: if                   Type: KEYWORD        
+Token: (                    Type: LPAREN         
+Token: i                    Type: IDENTIFIER     
+Token: ==                   Type: RELATIONAL_OP  
+Token: 3                    Type: INTEGER_CONSTANT
+Token: ||                   Type: LOGICAL_OP     
+Token: i                    Type: IDENTIFIER     
+Token: ==                   Type: RELATIONAL_OP  
+Token: 7                    Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: continue             Type: KEYWORD        
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "%d "                Type: STRING_LITERAL 
+Token: ,                    Type: COMMA          
+Token: i                    Type: IDENTIFIER     
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "\n"                 Type: STRING_LITERAL 
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "\nTest 3: break in while loop\n" Type: STRING_LITERAL 
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: i                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: 0                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: while                Type: KEYWORD        
+Token: (                    Type: LPAREN         
+Token: i                    Type: IDENTIFIER     
+Token: <                    Type: RELATIONAL_OP  
+Token: 10                   Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: if                   Type: KEYWORD        
+Token: (                    Type: LPAREN         
+Token: i                    Type: IDENTIFIER     
+Token: ==                   Type: RELATIONAL_OP  
+Token: 6                    Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: break                Type: KEYWORD        
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "%d "                Type: STRING_LITERAL 
+Token: ,                    Type: COMMA          
+Token: i                    Type: IDENTIFIER     
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: i                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: i                    Type: IDENTIFIER     
+Token: +                    Type: ARITHMETIC_OP  
+Token: 1                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "\n"                 Type: STRING_LITERAL 
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "\nTest 4: continue in while loop\n" Type: STRING_LITERAL 
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: i                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: 0                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: while                Type: KEYWORD        
+Token: (                    Type: LPAREN         
+Token: i                    Type: IDENTIFIER     
+Token: <                    Type: RELATIONAL_OP  
+Token: 10                   Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: i                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: i                    Type: IDENTIFIER     
+Token: +                    Type: ARITHMETIC_OP  
+Token: 1                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: if                   Type: KEYWORD        
+Token: (                    Type: LPAREN         
+Token: i                    Type: IDENTIFIER     
+Token: ==                   Type: RELATIONAL_OP  
+Token: 4                    Type: INTEGER_CONSTANT
+Token: ||                   Type: LOGICAL_OP     
+Token: i                    Type: IDENTIFIER     
+Token: ==                   Type: RELATIONAL_OP  
+Token: 8                    Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: continue             Type: KEYWORD        
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "%d "                Type: STRING_LITERAL 
+Token: ,                    Type: COMMA          
+Token: i                    Type: IDENTIFIER     
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "\n"                 Type: STRING_LITERAL 
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "\nTest 5: break in do-while\n" Type: STRING_LITERAL 
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: i                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: 0                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: do                   Type: KEYWORD        
+Token: {                    Type: LBRACE         
+Token: if                   Type: KEYWORD        
+Token: (                    Type: LPAREN         
+Token: i                    Type: IDENTIFIER     
+Token: ==                   Type: RELATIONAL_OP  
+Token: 4                    Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: break                Type: KEYWORD        
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "%d "                Type: STRING_LITERAL 
+Token: ,                    Type: COMMA          
+Token: i                    Type: IDENTIFIER     
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: i                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: i                    Type: IDENTIFIER     
+Token: +                    Type: ARITHMETIC_OP  
+Token: 1                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: while                Type: KEYWORD        
+Token: (                    Type: LPAREN         
+Token: i                    Type: IDENTIFIER     
+Token: <                    Type: RELATIONAL_OP  
+Token: 10                   Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "\n"                 Type: STRING_LITERAL 
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "\nTest 6: continue in do-while\n" Type: STRING_LITERAL 
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: i                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: 0                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: do                   Type: KEYWORD        
+Token: {                    Type: LBRACE         
+Token: i                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: i                    Type: IDENTIFIER     
+Token: +                    Type: ARITHMETIC_OP  
+Token: 1                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: if                   Type: KEYWORD        
+Token: (                    Type: LPAREN         
+Token: i                    Type: IDENTIFIER     
+Token: ==                   Type: RELATIONAL_OP  
+Token: 2                    Type: INTEGER_CONSTANT
+Token: ||                   Type: LOGICAL_OP     
+Token: i                    Type: IDENTIFIER     
+Token: ==                   Type: RELATIONAL_OP  
+Token: 6                    Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: continue             Type: KEYWORD        
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "%d "                Type: STRING_LITERAL 
+Token: ,                    Type: COMMA          
+Token: i                    Type: IDENTIFIER     
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: while                Type: KEYWORD        
+Token: (                    Type: LPAREN         
+Token: i                    Type: IDENTIFIER     
+Token: <                    Type: RELATIONAL_OP  
+Token: 8                    Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "\n"                 Type: STRING_LITERAL 
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "\nTest 7: nested loops with break\n" Type: STRING_LITERAL 
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: int                  Type: KEYWORD        
+Token: j                    Type: IDENTIFIER     
+Token: ;                    Type: SEMICOLON      
+Token: for                  Type: KEYWORD        
+Token: (                    Type: LPAREN         
+Token: i                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: 0                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: i                    Type: IDENTIFIER     
+Token: <                    Type: RELATIONAL_OP  
+Token: 3                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: i                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: i                    Type: IDENTIFIER     
+Token: +                    Type: ARITHMETIC_OP  
+Token: 1                    Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: for                  Type: KEYWORD        
+Token: (                    Type: LPAREN         
+Token: j                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: 0                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: j                    Type: IDENTIFIER     
+Token: <                    Type: RELATIONAL_OP  
+Token: 5                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: j                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: j                    Type: IDENTIFIER     
+Token: +                    Type: ARITHMETIC_OP  
+Token: 1                    Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: if                   Type: KEYWORD        
+Token: (                    Type: LPAREN         
+Token: j                    Type: IDENTIFIER     
+Token: ==                   Type: RELATIONAL_OP  
+Token: 3                    Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: break                Type: KEYWORD        
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "(%d,%d) "           Type: STRING_LITERAL 
+Token: ,                    Type: COMMA          
+Token: i                    Type: IDENTIFIER     
+Token: ,                    Type: COMMA          
+Token: j                    Type: IDENTIFIER     
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "\n"                 Type: STRING_LITERAL 
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "\nTest 8: nested loops with continue\n" Type: STRING_LITERAL 
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: for                  Type: KEYWORD        
+Token: (                    Type: LPAREN         
+Token: i                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: 0                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: i                    Type: IDENTIFIER     
+Token: <                    Type: RELATIONAL_OP  
+Token: 3                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: i                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: i                    Type: IDENTIFIER     
+Token: +                    Type: ARITHMETIC_OP  
+Token: 1                    Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: for                  Type: KEYWORD        
+Token: (                    Type: LPAREN         
+Token: j                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: 0                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: j                    Type: IDENTIFIER     
+Token: <                    Type: RELATIONAL_OP  
+Token: 5                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: j                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: j                    Type: IDENTIFIER     
+Token: +                    Type: ARITHMETIC_OP  
+Token: 1                    Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: if                   Type: KEYWORD        
+Token: (                    Type: LPAREN         
+Token: j                    Type: IDENTIFIER     
+Token: ==                   Type: RELATIONAL_OP  
+Token: 2                    Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: continue             Type: KEYWORD        
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "(%d,%d) "           Type: STRING_LITERAL 
+Token: ,                    Type: COMMA          
+Token: i                    Type: IDENTIFIER     
+Token: ,                    Type: COMMA          
+Token: j                    Type: IDENTIFIER     
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "\n"                 Type: STRING_LITERAL 
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "\nTest 9: combined break and continue\n" Type: STRING_LITERAL 
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: for                  Type: KEYWORD        
+Token: (                    Type: LPAREN         
+Token: i                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: 0                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: i                    Type: IDENTIFIER     
+Token: <                    Type: RELATIONAL_OP  
+Token: 20                   Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: i                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: i                    Type: IDENTIFIER     
+Token: +                    Type: ARITHMETIC_OP  
+Token: 1                    Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: if                   Type: KEYWORD        
+Token: (                    Type: LPAREN         
+Token: i                    Type: IDENTIFIER     
+Token: <                    Type: RELATIONAL_OP  
+Token: 5                    Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: continue             Type: KEYWORD        
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: if                   Type: KEYWORD        
+Token: (                    Type: LPAREN         
+Token: i                    Type: IDENTIFIER     
+Token: >                    Type: RELATIONAL_OP  
+Token: 12                   Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: break                Type: KEYWORD        
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: if                   Type: KEYWORD        
+Token: (                    Type: LPAREN         
+Token: i                    Type: IDENTIFIER     
+Token: ==                   Type: RELATIONAL_OP  
+Token: 8                    Type: INTEGER_CONSTANT
+Token: ||                   Type: LOGICAL_OP     
+Token: i                    Type: IDENTIFIER     
+Token: ==                   Type: RELATIONAL_OP  
+Token: 10                   Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: continue             Type: KEYWORD        
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "%d "                Type: STRING_LITERAL 
+Token: ,                    Type: COMMA          
+Token: i                    Type: IDENTIFIER     
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "\n"                 Type: STRING_LITERAL 
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: return               Type: KEYWORD        
+Token: 0                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+
+=== PARSING SUCCESSFUL ===
+
+=== SEMANTIC ANALYSIS ===
+=== SEMANTIC ANALYSIS STARTED ===
+Line 8: WARNING: Assignment in loop condition - did you mean '=='?
+Line 18: WARNING: Assignment in loop condition - did you mean '=='?
+Line 58: WARNING: Assignment in loop condition - did you mean '=='?
+Line 66: WARNING: Assignment in loop condition - did you mean '=='?
+Line 77: WARNING: Assignment in loop condition - did you mean '=='?
+Line 78: WARNING: Assignment in loop condition - did you mean '=='?
+Line 89: WARNING: Assignment in loop condition - did you mean '=='?
+Line 90: WARNING: Assignment in loop condition - did you mean '=='?
+Line 101: WARNING: Assignment in loop condition - did you mean '=='?
+=== SEMANTIC ANALYSIS COMPLETED ===
+Found 0 semantic error(s)
+Found 9 warning(s)
+
+=== SYMBOL TABLE (ACTIVE SCOPES) ===
+Scope 0:
+  function 'main' : int (scope: 0, line: 116) [has_return]
+ (scope: 0, line: 116) [has_return]
+  constant 'NULL' : void* (scope: 0, line: 0)
+ (scope: 0, line: 0)
+
+ Semantic analysis passed with no errors.
+
+=== CODE GENERATION ===
+
+=== THREE ADDRESS CODE ===
+main:
+    param "Test 1: break in for loop\n"
+    t0 = call printf, 1
+    i = 0
+L0:
+    t1 = i < 10
+    ifFalse t1 goto L1
+    t2 = i == 5
+    ifFalse t2 goto L3
+    goto L1
+L3:
+    param "%d "
+    param i
+    t3 = call printf, 2
+L2:
+    t4 = i + 1
+    i = t4
+    goto L0
+L1:
+    param "\n"
+    t5 = call printf, 1
+    param "\nTest 2: continue in for loop\n"
+    t6 = call printf, 1
+    i = 0
+L5:
+    t7 = i < 10
+    ifFalse t7 goto L6
+    t8 = i == 3
+    t9 = i == 7
+    t10 = t8 || t9
+    ifFalse t10 goto L8
+    goto L7
+L8:
+    param "%d "
+    param i
+    t11 = call printf, 2
+L7:
+    t12 = i + 1
+    i = t12
+    goto L5
+L6:
+    param "\n"
+    t13 = call printf, 1
+    param "\nTest 3: break in while loop\n"
+    t14 = call printf, 1
+    i = 0
+L10:
+    t15 = i < 10
+    ifFalse t15 goto L11
+    t16 = i == 6
+    ifFalse t16 goto L12
+    goto L11
+L12:
+    param "%d "
+    param i
+    t17 = call printf, 2
+    t18 = i + 1
+    i = t18
+    goto L10
+L11:
+    param "\n"
+    t19 = call printf, 1
+    param "\nTest 4: continue in while loop\n"
+    t20 = call printf, 1
+    i = 0
+L14:
+    t21 = i < 10
+    ifFalse t21 goto L15
+    t22 = i + 1
+    i = t22
+    t23 = i == 4
+    t24 = i == 8
+    t25 = t23 || t24
+    ifFalse t25 goto L16
+    goto L14
+L16:
+    param "%d "
+    param i
+    t26 = call printf, 2
+    goto L14
+L15:
+    param "\n"
+    t27 = call printf, 1
+    param "\nTest 5: break in do-while\n"
+    t28 = call printf, 1
+    i = 0
+L18:
+    t29 = i == 4
+    ifFalse t29 goto L21
+    goto L20
+L21:
+    param "%d "
+    param i
+    t30 = call printf, 2
+    t31 = i + 1
+    i = t31
+L19:
+    t32 = i < 10
+    if t32 goto L18
+L20:
+    param "\n"
+    t33 = call printf, 1
+    param "\nTest 6: continue in do-while\n"
+    t34 = call printf, 1
+    i = 0
+L23:
+    t35 = i + 1
+    i = t35
+    t36 = i == 2
+    t37 = i == 6
+    t38 = t36 || t37
+    ifFalse t38 goto L26
+    goto L24
+L26:
+    param "%d "
+    param i
+    t39 = call printf, 2
+L24:
+    t40 = i < 8
+    if t40 goto L23
+L25:
+    param "\n"
+    t41 = call printf, 1
+    param "\nTest 7: nested loops with break\n"
+    t42 = call printf, 1
+    i = 0
+L28:
+    t43 = i < 3
+    ifFalse t43 goto L29
+    j = 0
+L31:
+    t44 = j < 5
+    ifFalse t44 goto L32
+    t45 = j == 3
+    ifFalse t45 goto L34
+    goto L32
+L34:
+    param "(%d,%d) "
+    param i
+    param j
+    t46 = call printf, 3
+L33:
+    t47 = j + 1
+    j = t47
+    goto L31
+L32:
+    param "\n"
+    t48 = call printf, 1
+L30:
+    t49 = i + 1
+    i = t49
+    goto L28
+L29:
+    param "\nTest 8: nested loops with continue\n"
+    t50 = call printf, 1
+    i = 0
+L36:
+    t51 = i < 3
+    ifFalse t51 goto L37
+    j = 0
+L39:
+    t52 = j < 5
+    ifFalse t52 goto L40
+    t53 = j == 2
+    ifFalse t53 goto L42
+    goto L41
+L42:
+    param "(%d,%d) "
+    param i
+    param j
+    t54 = call printf, 3
+L41:
+    t55 = j + 1
+    j = t55
+    goto L39
+L40:
+    param "\n"
+    t56 = call printf, 1
+L38:
+    t57 = i + 1
+    i = t57
+    goto L36
+L37:
+    param "\nTest 9: combined break and continue\n"
+    t58 = call printf, 1
+    i = 0
+L44:
+    t59 = i < 20
+    ifFalse t59 goto L45
+    t60 = i < 5
+    ifFalse t60 goto L47
+    goto L46
+L47:
+    t61 = i > 12
+    ifFalse t61 goto L49
+    goto L45
+L49:
+    t62 = i == 8
+    t63 = i == 10
+    t64 = t62 || t63
+    ifFalse t64 goto L51
+    goto L46
+L51:
+    param "%d "
+    param i
+    t65 = call printf, 2
+L46:
+    t66 = i + 1
+    i = t66
+    goto L44
+L45:
+    param "\n"
+    t67 = call printf, 1
+    return 0
+
+Total instructions: 214
+
+=== ABSTRACT SYNTAX TREE ===
+TranslationUnit :  (line 1)
+  Preprocessor : #include <stdio.h> (line 1)
+  FunctionDefinition :  (line 116)
+    DeclarationSpecifiers :  (line 3)
+      TypeSpecifier : int (line 3)
+    FunctionDeclarator :  (line 3)
+      DirectDeclarator : main (line 3)
+    CompoundStatement :  (line 116)
+      BlockItemList :  (line 4)
+        BlockItem :  (line 4)
+          Declaration :  (line 4)
+            DeclarationSpecifiers :  (line 4)
+              TypeSpecifier : int (line 4)
+            InitDeclaratorList :  (line 4)
+              InitDeclarator :  (line 4)
+                DirectDeclarator : i (line 4)
+        BlockItem :  (line 7)
+          ExpressionStatement :  (line 7)
+            FunctionCall :  (line 7)
+              Identifier : printf (line 7)
+              ArgumentList :  (line 7)
+                StringLiteral : "Test 1: break in for loop\n" (line 7)
+        BlockItem :  (line 13)
+          ForStatement :  (line 13)
+            ForInitStatement :  (line 8)
+              ExpressionStatement :  (line 8)
+                AssignmentExpression : = (line 8)
+                  Identifier : i (line 8)
+                  Constant : 0 (line 8)
+            ExpressionStatement :  (line 8)
+              RelationalExpression : < (line 8)
+                Identifier : i (line 8)
+                Constant : 10 (line 8)
+            AssignmentExpression : = (line 8)
+              Identifier : i (line 8)
+              AdditiveExpression : + (line 8)
+                Identifier : i (line 8)
+                Constant : 1 (line 8)
+            CompoundStatement :  (line 13)
+              BlockItemList :  (line 12)
+                BlockItem :  (line 12)
+                  IfStatement :  (line 12)
+                    EqualityExpression : == (line 9)
+                      Identifier : i (line 9)
+                      Constant : 5 (line 9)
+                    CompoundStatement :  (line 11)
+                      BlockItemList :  (line 10)
+                        BlockItem :  (line 10)
+                          BreakStatement :  (line 10)
+                BlockItem :  (line 12)
+                  ExpressionStatement :  (line 12)
+                    FunctionCall :  (line 12)
+                      Identifier : printf (line 12)
+                      ArgumentList :  (line 12)
+                        StringLiteral : "%d " (line 12)
+                        Identifier : i (line 12)
+        BlockItem :  (line 14)
+          ExpressionStatement :  (line 14)
+            FunctionCall :  (line 14)
+              Identifier : printf (line 14)
+              ArgumentList :  (line 14)
+                StringLiteral : "\n" (line 14)
+        BlockItem :  (line 17)
+          ExpressionStatement :  (line 17)
+            FunctionCall :  (line 17)
+              Identifier : printf (line 17)
+              ArgumentList :  (line 17)
+                StringLiteral : "\nTest 2: continue in for loop\n" (line 17)
+        BlockItem :  (line 23)
+          ForStatement :  (line 23)
+            ForInitStatement :  (line 18)
+              ExpressionStatement :  (line 18)
+                AssignmentExpression : = (line 18)
+                  Identifier : i (line 18)
+                  Constant : 0 (line 18)
+            ExpressionStatement :  (line 18)
+              RelationalExpression : < (line 18)
+                Identifier : i (line 18)
+                Constant : 10 (line 18)
+            AssignmentExpression : = (line 18)
+              Identifier : i (line 18)
+              AdditiveExpression : + (line 18)
+                Identifier : i (line 18)
+                Constant : 1 (line 18)
+            CompoundStatement :  (line 23)
+              BlockItemList :  (line 22)
+                BlockItem :  (line 22)
+                  IfStatement :  (line 22)
+                    LogicalOrExpression : || (line 19)
+                      EqualityExpression : == (line 19)
+                        Identifier : i (line 19)
+                        Constant : 3 (line 19)
+                      EqualityExpression : == (line 19)
+                        Identifier : i (line 19)
+                        Constant : 7 (line 19)
+                    CompoundStatement :  (line 21)
+                      BlockItemList :  (line 20)
+                        BlockItem :  (line 20)
+                          ContinueStatement :  (line 20)
+                BlockItem :  (line 22)
+                  ExpressionStatement :  (line 22)
+                    FunctionCall :  (line 22)
+                      Identifier : printf (line 22)
+                      ArgumentList :  (line 22)
+                        StringLiteral : "%d " (line 22)
+                        Identifier : i (line 22)
+        BlockItem :  (line 24)
+          ExpressionStatement :  (line 24)
+            FunctionCall :  (line 24)
+              Identifier : printf (line 24)
+              ArgumentList :  (line 24)
+                StringLiteral : "\n" (line 24)
+        BlockItem :  (line 27)
+          ExpressionStatement :  (line 27)
+            FunctionCall :  (line 27)
+              Identifier : printf (line 27)
+              ArgumentList :  (line 27)
+                StringLiteral : "\nTest 3: break in while loop\n" (line 27)
+        BlockItem :  (line 28)
+          ExpressionStatement :  (line 28)
+            AssignmentExpression : = (line 28)
+              Identifier : i (line 28)
+              Constant : 0 (line 28)
+        BlockItem :  (line 35)
+          WhileStatement :  (line 35)
+            RelationalExpression : < (line 29)
+              Identifier : i (line 29)
+              Constant : 10 (line 29)
+            CompoundStatement :  (line 35)
+              BlockItemList :  (line 33)
+                BlockItem :  (line 33)
+                  IfStatement :  (line 33)
+                    EqualityExpression : == (line 30)
+                      Identifier : i (line 30)
+                      Constant : 6 (line 30)
+                    CompoundStatement :  (line 32)
+                      BlockItemList :  (line 31)
+                        BlockItem :  (line 31)
+                          BreakStatement :  (line 31)
+                BlockItem :  (line 33)
+                  ExpressionStatement :  (line 33)
+                    FunctionCall :  (line 33)
+                      Identifier : printf (line 33)
+                      ArgumentList :  (line 33)
+                        StringLiteral : "%d " (line 33)
+                        Identifier : i (line 33)
+                BlockItem :  (line 34)
+                  ExpressionStatement :  (line 34)
+                    AssignmentExpression : = (line 34)
+                      Identifier : i (line 34)
+                      AdditiveExpression : + (line 34)
+                        Identifier : i (line 34)
+                        Constant : 1 (line 34)
+        BlockItem :  (line 36)
+          ExpressionStatement :  (line 36)
+            FunctionCall :  (line 36)
+              Identifier : printf (line 36)
+              ArgumentList :  (line 36)
+                StringLiteral : "\n" (line 36)
+        BlockItem :  (line 39)
+          ExpressionStatement :  (line 39)
+            FunctionCall :  (line 39)
+              Identifier : printf (line 39)
+              ArgumentList :  (line 39)
+                StringLiteral : "\nTest 4: continue in while loop\n" (line 39)
+        BlockItem :  (line 40)
+          ExpressionStatement :  (line 40)
+            AssignmentExpression : = (line 40)
+              Identifier : i (line 40)
+              Constant : 0 (line 40)
+        BlockItem :  (line 47)
+          WhileStatement :  (line 47)
+            RelationalExpression : < (line 41)
+              Identifier : i (line 41)
+              Constant : 10 (line 41)
+            CompoundStatement :  (line 47)
+              BlockItemList :  (line 42)
+                BlockItem :  (line 42)
+                  ExpressionStatement :  (line 42)
+                    AssignmentExpression : = (line 42)
+                      Identifier : i (line 42)
+                      AdditiveExpression : + (line 42)
+                        Identifier : i (line 42)
+                        Constant : 1 (line 42)
+                BlockItem :  (line 46)
+                  IfStatement :  (line 46)
+                    LogicalOrExpression : || (line 43)
+                      EqualityExpression : == (line 43)
+                        Identifier : i (line 43)
+                        Constant : 4 (line 43)
+                      EqualityExpression : == (line 43)
+                        Identifier : i (line 43)
+                        Constant : 8 (line 43)
+                    CompoundStatement :  (line 45)
+                      BlockItemList :  (line 44)
+                        BlockItem :  (line 44)
+                          ContinueStatement :  (line 44)
+                BlockItem :  (line 46)
+                  ExpressionStatement :  (line 46)
+                    FunctionCall :  (line 46)
+                      Identifier : printf (line 46)
+                      ArgumentList :  (line 46)
+                        StringLiteral : "%d " (line 46)
+                        Identifier : i (line 46)
+        BlockItem :  (line 48)
+          ExpressionStatement :  (line 48)
+            FunctionCall :  (line 48)
+              Identifier : printf (line 48)
+              ArgumentList :  (line 48)
+                StringLiteral : "\n" (line 48)
+        BlockItem :  (line 51)
+          ExpressionStatement :  (line 51)
+            FunctionCall :  (line 51)
+              Identifier : printf (line 51)
+              ArgumentList :  (line 51)
+                StringLiteral : "\nTest 5: break in do-while\n" (line 51)
+        BlockItem :  (line 52)
+          ExpressionStatement :  (line 52)
+            AssignmentExpression : = (line 52)
+              Identifier : i (line 52)
+              Constant : 0 (line 52)
+        BlockItem :  (line 59)
+          DoWhileStatement :  (line 59)
+            CompoundStatement :  (line 59)
+              BlockItemList :  (line 57)
+                BlockItem :  (line 57)
+                  IfStatement :  (line 57)
+                    EqualityExpression : == (line 54)
+                      Identifier : i (line 54)
+                      Constant : 4 (line 54)
+                    CompoundStatement :  (line 56)
+                      BlockItemList :  (line 55)
+                        BlockItem :  (line 55)
+                          BreakStatement :  (line 55)
+                BlockItem :  (line 57)
+                  ExpressionStatement :  (line 57)
+                    FunctionCall :  (line 57)
+                      Identifier : printf (line 57)
+                      ArgumentList :  (line 57)
+                        StringLiteral : "%d " (line 57)
+                        Identifier : i (line 57)
+                BlockItem :  (line 58)
+                  ExpressionStatement :  (line 58)
+                    AssignmentExpression : = (line 58)
+                      Identifier : i (line 58)
+                      AdditiveExpression : + (line 58)
+                        Identifier : i (line 58)
+                        Constant : 1 (line 58)
+            RelationalExpression : < (line 59)
+              Identifier : i (line 59)
+              Constant : 10 (line 59)
+        BlockItem :  (line 60)
+          ExpressionStatement :  (line 60)
+            FunctionCall :  (line 60)
+              Identifier : printf (line 60)
+              ArgumentList :  (line 60)
+                StringLiteral : "\n" (line 60)
+        BlockItem :  (line 63)
+          ExpressionStatement :  (line 63)
+            FunctionCall :  (line 63)
+              Identifier : printf (line 63)
+              ArgumentList :  (line 63)
+                StringLiteral : "\nTest 6: continue in do-while\n" (line 63)
+        BlockItem :  (line 64)
+          ExpressionStatement :  (line 64)
+            AssignmentExpression : = (line 64)
+              Identifier : i (line 64)
+              Constant : 0 (line 64)
+        BlockItem :  (line 71)
+          DoWhileStatement :  (line 71)
+            CompoundStatement :  (line 71)
+              BlockItemList :  (line 66)
+                BlockItem :  (line 66)
+                  ExpressionStatement :  (line 66)
+                    AssignmentExpression : = (line 66)
+                      Identifier : i (line 66)
+                      AdditiveExpression : + (line 66)
+                        Identifier : i (line 66)
+                        Constant : 1 (line 66)
+                BlockItem :  (line 70)
+                  IfStatement :  (line 70)
+                    LogicalOrExpression : || (line 67)
+                      EqualityExpression : == (line 67)
+                        Identifier : i (line 67)
+                        Constant : 2 (line 67)
+                      EqualityExpression : == (line 67)
+                        Identifier : i (line 67)
+                        Constant : 6 (line 67)
+                    CompoundStatement :  (line 69)
+                      BlockItemList :  (line 68)
+                        BlockItem :  (line 68)
+                          ContinueStatement :  (line 68)
+                BlockItem :  (line 70)
+                  ExpressionStatement :  (line 70)
+                    FunctionCall :  (line 70)
+                      Identifier : printf (line 70)
+                      ArgumentList :  (line 70)
+                        StringLiteral : "%d " (line 70)
+                        Identifier : i (line 70)
+            RelationalExpression : < (line 71)
+              Identifier : i (line 71)
+              Constant : 8 (line 71)
+        BlockItem :  (line 72)
+          ExpressionStatement :  (line 72)
+            FunctionCall :  (line 72)
+              Identifier : printf (line 72)
+              ArgumentList :  (line 72)
+                StringLiteral : "\n" (line 72)
+        BlockItem :  (line 75)
+          ExpressionStatement :  (line 75)
+            FunctionCall :  (line 75)
+              Identifier : printf (line 75)
+              ArgumentList :  (line 75)
+                StringLiteral : "\nTest 7: nested loops with break\n" (line 75)
+        BlockItem :  (line 76)
+          Declaration :  (line 76)
+            DeclarationSpecifiers :  (line 76)
+              TypeSpecifier : int (line 76)
+            InitDeclaratorList :  (line 76)
+              InitDeclarator :  (line 76)
+                DirectDeclarator : j (line 76)
+        BlockItem :  (line 85)
+          ForStatement :  (line 85)
+            ForInitStatement :  (line 77)
+              ExpressionStatement :  (line 77)
+                AssignmentExpression : = (line 77)
+                  Identifier : i (line 77)
+                  Constant : 0 (line 77)
+            ExpressionStatement :  (line 77)
+              RelationalExpression : < (line 77)
+                Identifier : i (line 77)
+                Constant : 3 (line 77)
+            AssignmentExpression : = (line 77)
+              Identifier : i (line 77)
+              AdditiveExpression : + (line 77)
+                Identifier : i (line 77)
+                Constant : 1 (line 77)
+            CompoundStatement :  (line 85)
+              BlockItemList :  (line 83)
+                BlockItem :  (line 83)
+                  ForStatement :  (line 83)
+                    ForInitStatement :  (line 78)
+                      ExpressionStatement :  (line 78)
+                        AssignmentExpression : = (line 78)
+                          Identifier : j (line 78)
+                          Constant : 0 (line 78)
+                    ExpressionStatement :  (line 78)
+                      RelationalExpression : < (line 78)
+                        Identifier : j (line 78)
+                        Constant : 5 (line 78)
+                    AssignmentExpression : = (line 78)
+                      Identifier : j (line 78)
+                      AdditiveExpression : + (line 78)
+                        Identifier : j (line 78)
+                        Constant : 1 (line 78)
+                    CompoundStatement :  (line 83)
+                      BlockItemList :  (line 82)
+                        BlockItem :  (line 82)
+                          IfStatement :  (line 82)
+                            EqualityExpression : == (line 79)
+                              Identifier : j (line 79)
+                              Constant : 3 (line 79)
+                            CompoundStatement :  (line 81)
+                              BlockItemList :  (line 80)
+                                BlockItem :  (line 80)
+                                  BreakStatement :  (line 80)
+                        BlockItem :  (line 82)
+                          ExpressionStatement :  (line 82)
+                            FunctionCall :  (line 82)
+                              Identifier : printf (line 82)
+                              ArgumentList :  (line 82)
+                                StringLiteral : "(%d,%d) " (line 82)
+                                Identifier : i (line 82)
+                                Identifier : j (line 82)
+                BlockItem :  (line 84)
+                  ExpressionStatement :  (line 84)
+                    FunctionCall :  (line 84)
+                      Identifier : printf (line 84)
+                      ArgumentList :  (line 84)
+                        StringLiteral : "\n" (line 84)
+        BlockItem :  (line 88)
+          ExpressionStatement :  (line 88)
+            FunctionCall :  (line 88)
+              Identifier : printf (line 88)
+              ArgumentList :  (line 88)
+                StringLiteral : "\nTest 8: nested loops with continue\n" (line 88)
+        BlockItem :  (line 97)
+          ForStatement :  (line 97)
+            ForInitStatement :  (line 89)
+              ExpressionStatement :  (line 89)
+                AssignmentExpression : = (line 89)
+                  Identifier : i (line 89)
+                  Constant : 0 (line 89)
+            ExpressionStatement :  (line 89)
+              RelationalExpression : < (line 89)
+                Identifier : i (line 89)
+                Constant : 3 (line 89)
+            AssignmentExpression : = (line 89)
+              Identifier : i (line 89)
+              AdditiveExpression : + (line 89)
+                Identifier : i (line 89)
+                Constant : 1 (line 89)
+            CompoundStatement :  (line 97)
+              BlockItemList :  (line 95)
+                BlockItem :  (line 95)
+                  ForStatement :  (line 95)
+                    ForInitStatement :  (line 90)
+                      ExpressionStatement :  (line 90)
+                        AssignmentExpression : = (line 90)
+                          Identifier : j (line 90)
+                          Constant : 0 (line 90)
+                    ExpressionStatement :  (line 90)
+                      RelationalExpression : < (line 90)
+                        Identifier : j (line 90)
+                        Constant : 5 (line 90)
+                    AssignmentExpression : = (line 90)
+                      Identifier : j (line 90)
+                      AdditiveExpression : + (line 90)
+                        Identifier : j (line 90)
+                        Constant : 1 (line 90)
+                    CompoundStatement :  (line 95)
+                      BlockItemList :  (line 94)
+                        BlockItem :  (line 94)
+                          IfStatement :  (line 94)
+                            EqualityExpression : == (line 91)
+                              Identifier : j (line 91)
+                              Constant : 2 (line 91)
+                            CompoundStatement :  (line 93)
+                              BlockItemList :  (line 92)
+                                BlockItem :  (line 92)
+                                  ContinueStatement :  (line 92)
+                        BlockItem :  (line 94)
+                          ExpressionStatement :  (line 94)
+                            FunctionCall :  (line 94)
+                              Identifier : printf (line 94)
+                              ArgumentList :  (line 94)
+                                StringLiteral : "(%d,%d) " (line 94)
+                                Identifier : i (line 94)
+                                Identifier : j (line 94)
+                BlockItem :  (line 96)
+                  ExpressionStatement :  (line 96)
+                    FunctionCall :  (line 96)
+                      Identifier : printf (line 96)
+                      ArgumentList :  (line 96)
+                        StringLiteral : "\n" (line 96)
+        BlockItem :  (line 100)
+          ExpressionStatement :  (line 100)
+            FunctionCall :  (line 100)
+              Identifier : printf (line 100)
+              ArgumentList :  (line 100)
+                StringLiteral : "\nTest 9: combined break and continue\n" (line 100)
+        BlockItem :  (line 112)
+          ForStatement :  (line 112)
+            ForInitStatement :  (line 101)
+              ExpressionStatement :  (line 101)
+                AssignmentExpression : = (line 101)
+                  Identifier : i (line 101)
+                  Constant : 0 (line 101)
+            ExpressionStatement :  (line 101)
+              RelationalExpression : < (line 101)
+                Identifier : i (line 101)
+                Constant : 20 (line 101)
+            AssignmentExpression : = (line 101)
+              Identifier : i (line 101)
+              AdditiveExpression : + (line 101)
+                Identifier : i (line 101)
+                Constant : 1 (line 101)
+            CompoundStatement :  (line 112)
+              BlockItemList :  (line 105)
+                BlockItem :  (line 105)
+                  IfStatement :  (line 105)
+                    RelationalExpression : < (line 102)
+                      Identifier : i (line 102)
+                      Constant : 5 (line 102)
+                    CompoundStatement :  (line 104)
+                      BlockItemList :  (line 103)
+                        BlockItem :  (line 103)
+                          ContinueStatement :  (line 103)
+                BlockItem :  (line 108)
+                  IfStatement :  (line 108)
+                    RelationalExpression : > (line 105)
+                      Identifier : i (line 105)
+                      Constant : 12 (line 105)
+                    CompoundStatement :  (line 107)
+                      BlockItemList :  (line 106)
+                        BlockItem :  (line 106)
+                          BreakStatement :  (line 106)
+                BlockItem :  (line 111)
+                  IfStatement :  (line 111)
+                    LogicalOrExpression : || (line 108)
+                      EqualityExpression : == (line 108)
+                        Identifier : i (line 108)
+                        Constant : 8 (line 108)
+                      EqualityExpression : == (line 108)
+                        Identifier : i (line 108)
+                        Constant : 10 (line 108)
+                    CompoundStatement :  (line 110)
+                      BlockItemList :  (line 109)
+                        BlockItem :  (line 109)
+                          ContinueStatement :  (line 109)
+                BlockItem :  (line 111)
+                  ExpressionStatement :  (line 111)
+                    FunctionCall :  (line 111)
+                      Identifier : printf (line 111)
+                      ArgumentList :  (line 111)
+                        StringLiteral : "%d " (line 111)
+                        Identifier : i (line 111)
+        BlockItem :  (line 113)
+          ExpressionStatement :  (line 113)
+            FunctionCall :  (line 113)
+              Identifier : printf (line 113)
+              ArgumentList :  (line 113)
+                StringLiteral : "\n" (line 113)
+        BlockItem :  (line 115)
+          ReturnStatement :  (line 115)
+            Constant : 0 (line 115)
+
+AST DOT file generated: ast.dot
+TAC file generated: output.tac
+
+=== MIPS ASSEMBLY GENERATION ===
+
+=== MIPS ASSEMBLY CODE ===
+    # ==============================================
+    #   MIPS Assembly Code
+    #   Generated from Three-Address Code
+    # ==============================================
+
+.data
+.align 2
+str_11: .asciiz "\nTest 9: combined break and continue\n"
+.align 2
+str_10: .asciiz "\nTest 8: nested loops with continue\n"
+.align 2
+str_9: .asciiz "(%d,%d) "
+.align 2
+str_8: .asciiz "\nTest 7: nested loops with break\n"
+.align 2
+str_5: .asciiz "\nTest 4: continue in while loop\n"
+.align 2
+str_7: .asciiz "\nTest 6: continue in do-while\n"
+.align 2
+str_4: .asciiz "\nTest 3: break in while loop\n"
+.align 2
+str_6: .asciiz "\nTest 5: break in do-while\n"
+.align 2
+str_3: .asciiz "\nTest 2: continue in for loop\n"
+.align 2
+str_1: .asciiz "%d "
+.align 2
+str_2: .asciiz "\n"
+.align 2
+str_0: .asciiz "Test 1: break in for loop\n"
+.align 2
+newline: .asciiz "\n"
+
+.text
+.globl main
+
+
+    # Function: main
+main:
+    # Reserve stack space for register spills
+    addi $sp, $sp, -256
+    la $s0, str_0
+    # Save string param str_0 to $s0
+    # Call printf
+    li $v0, 11
+    li $a0, 84
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 115
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 49
+    syscall
+    li $v0, 11
+    li $a0, 58
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 98
+    syscall
+    li $v0, 11
+    li $a0, 114
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 97
+    syscall
+    li $v0, 11
+    li $a0, 107
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 110
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 102
+    syscall
+    li $v0, 11
+    li $a0, 111
+    syscall
+    li $v0, 11
+    li $a0, 114
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 108
+    syscall
+    li $v0, 11
+    li $a0, 111
+    syscall
+    li $v0, 11
+    li $a0, 111
+    syscall
+    li $v0, 11
+    li $a0, 112
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    li $t0, 0
+    sw $t0, 0($sp)
+L0:
+    # Reloading i from stack
+    lw $t1, 0($sp)
+    li $t2, 10
+    slt $t0, $t1, $t2
+    beq $t0, $zero, L1
+    li $t2, 5
+    seq $t0, $t1, $t2
+    beq $t0, $zero, L3
+    j L1
+L3:
+    la $s1, str_1
+    # Save string param str_1 to $s1
+    # Reloading i from stack
+    lw $t0, 0($sp)
+    move $s2, $t0
+    # Save param i to $s2
+    # Call printf
+    # Print integer
+    li $v0, 1
+    move $a0, $s2
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+L2:
+    # Reloading i from stack
+    lw $t1, 0($sp)
+    li $t2, 1
+    add $t0, $t1, $t2
+    move $t1, $t0
+    sw $t1, 0($sp)
+    j L0
+L1:
+    la $s3, str_2
+    # Save string param str_2 to $s3
+    # Call printf
+    li $v0, 11
+    li $a0, 10
+    syscall
+    la $s4, str_3
+    # Save string param str_3 to $s4
+    # Call printf
+    li $v0, 11
+    li $a0, 10
+    syscall
+    li $v0, 11
+    li $a0, 84
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 115
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 50
+    syscall
+    li $v0, 11
+    li $a0, 58
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 99
+    syscall
+    li $v0, 11
+    li $a0, 111
+    syscall
+    li $v0, 11
+    li $a0, 110
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 110
+    syscall
+    li $v0, 11
+    li $a0, 117
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 110
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 102
+    syscall
+    li $v0, 11
+    li $a0, 111
+    syscall
+    li $v0, 11
+    li $a0, 114
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 108
+    syscall
+    li $v0, 11
+    li $a0, 111
+    syscall
+    li $v0, 11
+    li $a0, 111
+    syscall
+    li $v0, 11
+    li $a0, 112
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    # Reloading i from stack
+    lw $t0, 0($sp)
+    li $t0, 0
+    sw $t0, 0($sp)
+L5:
+    # Reloading i from stack
+    lw $t1, 0($sp)
+    li $t2, 10
+    slt $t0, $t1, $t2
+    beq $t0, $zero, L6
+    li $t2, 3
+    seq $t0, $t1, $t2
+    li $t3, 7
+    seq $t2, $t1, $t3
+    or $t4, $t0, $t2
+    sne $t3, $t4, $zero
+    beq $t3, $zero, L8
+    j L7
+L8:
+    la $s5, str_1
+    # Save string param str_1 to $s5
+    # Reloading i from stack
+    lw $t0, 0($sp)
+    move $s6, $t0
+    # Save param i to $s6
+    # Call printf
+    # Print integer
+    li $v0, 1
+    move $a0, $s6
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+L7:
+    # Reloading i from stack
+    lw $t1, 0($sp)
+    li $t2, 1
+    add $t0, $t1, $t2
+    move $t1, $t0
+    sw $t1, 0($sp)
+    j L5
+L6:
+    la $s7, str_2
+    # Save string param str_2 to $s7
+    # Call printf
+    li $v0, 11
+    li $a0, 10
+    syscall
+    la $s0, str_4
+    # Save string param str_4 to $s0
+    # Call printf
+    li $v0, 11
+    li $a0, 10
+    syscall
+    li $v0, 11
+    li $a0, 84
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 115
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 51
+    syscall
+    li $v0, 11
+    li $a0, 58
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 98
+    syscall
+    li $v0, 11
+    li $a0, 114
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 97
+    syscall
+    li $v0, 11
+    li $a0, 107
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 110
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 119
+    syscall
+    li $v0, 11
+    li $a0, 104
+    syscall
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 108
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 108
+    syscall
+    li $v0, 11
+    li $a0, 111
+    syscall
+    li $v0, 11
+    li $a0, 111
+    syscall
+    li $v0, 11
+    li $a0, 112
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    # Reloading i from stack
+    lw $t0, 0($sp)
+    li $t0, 0
+    sw $t0, 0($sp)
+L10:
+    # Reloading i from stack
+    lw $t1, 0($sp)
+    li $t2, 10
+    slt $t0, $t1, $t2
+    beq $t0, $zero, L11
+    li $t2, 6
+    seq $t0, $t1, $t2
+    beq $t0, $zero, L12
+    j L11
+L12:
+    la $s1, str_1
+    # Save string param str_1 to $s1
+    # Reloading i from stack
+    lw $t0, 0($sp)
+    move $s2, $t0
+    # Save param i to $s2
+    # Call printf
+    # Print integer
+    li $v0, 1
+    move $a0, $s2
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    # Reloading i from stack
+    lw $t1, 0($sp)
+    li $t2, 1
+    add $t0, $t1, $t2
+    move $t1, $t0
+    sw $t1, 0($sp)
+    j L10
+L11:
+    la $s3, str_2
+    # Save string param str_2 to $s3
+    # Call printf
+    li $v0, 11
+    li $a0, 10
+    syscall
+    la $s4, str_5
+    # Save string param str_5 to $s4
+    # Call printf
+    li $v0, 11
+    li $a0, 10
+    syscall
+    li $v0, 11
+    li $a0, 84
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 115
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 52
+    syscall
+    li $v0, 11
+    li $a0, 58
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 99
+    syscall
+    li $v0, 11
+    li $a0, 111
+    syscall
+    li $v0, 11
+    li $a0, 110
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 110
+    syscall
+    li $v0, 11
+    li $a0, 117
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 110
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 119
+    syscall
+    li $v0, 11
+    li $a0, 104
+    syscall
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 108
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 108
+    syscall
+    li $v0, 11
+    li $a0, 111
+    syscall
+    li $v0, 11
+    li $a0, 111
+    syscall
+    li $v0, 11
+    li $a0, 112
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    # Reloading i from stack
+    lw $t0, 0($sp)
+    li $t0, 0
+    sw $t0, 0($sp)
+L14:
+    # Reloading i from stack
+    lw $t1, 0($sp)
+    li $t2, 10
+    slt $t0, $t1, $t2
+    beq $t0, $zero, L15
+    li $t2, 1
+    add $t0, $t1, $t2
+    move $t1, $t0
+    sw $t1, 0($sp)
+    # Reloading i from stack
+    lw $t1, 0($sp)
+    li $t2, 4
+    seq $t0, $t1, $t2
+    li $t3, 8
+    seq $t2, $t1, $t3
+    or $t4, $t0, $t2
+    sne $t3, $t4, $zero
+    beq $t3, $zero, L16
+    j L14
+L16:
+    la $s5, str_1
+    # Save string param str_1 to $s5
+    # Reloading i from stack
+    lw $t0, 0($sp)
+    move $s6, $t0
+    # Save param i to $s6
+    # Call printf
+    # Print integer
+    li $v0, 1
+    move $a0, $s6
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    j L14
+L15:
+    la $s7, str_2
+    # Save string param str_2 to $s7
+    # Call printf
+    li $v0, 11
+    li $a0, 10
+    syscall
+    la $s0, str_6
+    # Save string param str_6 to $s0
+    # Call printf
+    li $v0, 11
+    li $a0, 10
+    syscall
+    li $v0, 11
+    li $a0, 84
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 115
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 53
+    syscall
+    li $v0, 11
+    li $a0, 58
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 98
+    syscall
+    li $v0, 11
+    li $a0, 114
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 97
+    syscall
+    li $v0, 11
+    li $a0, 107
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 110
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 100
+    syscall
+    li $v0, 11
+    li $a0, 111
+    syscall
+    li $v0, 11
+    li $a0, 45
+    syscall
+    li $v0, 11
+    li $a0, 119
+    syscall
+    li $v0, 11
+    li $a0, 104
+    syscall
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 108
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    # Reloading i from stack
+    lw $t0, 0($sp)
+    li $t0, 0
+    sw $t0, 0($sp)
+L18:
+    # Reloading i from stack
+    lw $t1, 0($sp)
+    li $t2, 4
+    seq $t0, $t1, $t2
+    beq $t0, $zero, L21
+    j L20
+L21:
+    la $s1, str_1
+    # Save string param str_1 to $s1
+    # Reloading i from stack
+    lw $t0, 0($sp)
+    move $s2, $t0
+    # Save param i to $s2
+    # Call printf
+    # Print integer
+    li $v0, 1
+    move $a0, $s2
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    # Reloading i from stack
+    lw $t1, 0($sp)
+    li $t2, 1
+    add $t0, $t1, $t2
+    move $t1, $t0
+    sw $t1, 0($sp)
+L19:
+    # Reloading i from stack
+    lw $t1, 0($sp)
+    li $t2, 10
+    slt $t0, $t1, $t2
+    bne $t0, $zero, L18
+L20:
+    la $s3, str_2
+    # Save string param str_2 to $s3
+    # Call printf
+    li $v0, 11
+    li $a0, 10
+    syscall
+    la $s4, str_7
+    # Save string param str_7 to $s4
+    # Call printf
+    li $v0, 11
+    li $a0, 10
+    syscall
+    li $v0, 11
+    li $a0, 84
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 115
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 54
+    syscall
+    li $v0, 11
+    li $a0, 58
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 99
+    syscall
+    li $v0, 11
+    li $a0, 111
+    syscall
+    li $v0, 11
+    li $a0, 110
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 110
+    syscall
+    li $v0, 11
+    li $a0, 117
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 110
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 100
+    syscall
+    li $v0, 11
+    li $a0, 111
+    syscall
+    li $v0, 11
+    li $a0, 45
+    syscall
+    li $v0, 11
+    li $a0, 119
+    syscall
+    li $v0, 11
+    li $a0, 104
+    syscall
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 108
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    # Reloading i from stack
+    lw $t0, 0($sp)
+    li $t0, 0
+    sw $t0, 0($sp)
+L23:
+    # Reloading i from stack
+    lw $t1, 0($sp)
+    li $t2, 1
+    add $t0, $t1, $t2
+    move $t1, $t0
+    sw $t1, 0($sp)
+    # Reloading i from stack
+    lw $t1, 0($sp)
+    li $t2, 2
+    seq $t0, $t1, $t2
+    li $t3, 6
+    seq $t2, $t1, $t3
+    or $t4, $t0, $t2
+    sne $t3, $t4, $zero
+    beq $t3, $zero, L26
+    j L24
+L26:
+    la $s5, str_1
+    # Save string param str_1 to $s5
+    # Reloading i from stack
+    lw $t0, 0($sp)
+    move $s6, $t0
+    # Save param i to $s6
+    # Call printf
+    # Print integer
+    li $v0, 1
+    move $a0, $s6
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+L24:
+    # Reloading i from stack
+    lw $t1, 0($sp)
+    li $t2, 8
+    slt $t0, $t1, $t2
+    bne $t0, $zero, L23
+L25:
+    la $s7, str_2
+    # Save string param str_2 to $s7
+    # Call printf
+    li $v0, 11
+    li $a0, 10
+    syscall
+    la $s0, str_8
+    # Save string param str_8 to $s0
+    # Call printf
+    li $v0, 11
+    li $a0, 10
+    syscall
+    li $v0, 11
+    li $a0, 84
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 115
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 55
+    syscall
+    li $v0, 11
+    li $a0, 58
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 110
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 115
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 100
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 108
+    syscall
+    li $v0, 11
+    li $a0, 111
+    syscall
+    li $v0, 11
+    li $a0, 111
+    syscall
+    li $v0, 11
+    li $a0, 112
+    syscall
+    li $v0, 11
+    li $a0, 115
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 119
+    syscall
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 104
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 98
+    syscall
+    li $v0, 11
+    li $a0, 114
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 97
+    syscall
+    li $v0, 11
+    li $a0, 107
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    # Reloading i from stack
+    lw $t0, 0($sp)
+    li $t0, 0
+    sw $t0, 0($sp)
+L28:
+    # Reloading i from stack
+    lw $t1, 0($sp)
+    li $t2, 3
+    slt $t0, $t1, $t2
+    beq $t0, $zero, L29
+    li $t0, 0
+    sw $t0, 4($sp)
+L31:
+    # Reloading j from stack
+    lw $t1, 4($sp)
+    li $t2, 5
+    slt $t0, $t1, $t2
+    beq $t0, $zero, L32
+    li $t2, 3
+    seq $t0, $t1, $t2
+    beq $t0, $zero, L34
+    j L32
+L34:
+    la $s1, str_9
+    # Save string param str_9 to $s1
+    # Reloading i from stack
+    lw $t0, 0($sp)
+    move $s2, $t0
+    # Save param i to $s2
+    # Reloading j from stack
+    lw $t1, 4($sp)
+    move $s3, $t1
+    # Save param j to $s3
+    # Call printf
+    li $v0, 11
+    li $a0, 40
+    syscall
+    # Print integer
+    li $v0, 1
+    move $a0, $s2
+    syscall
+    li $v0, 11
+    li $a0, 44
+    syscall
+    # Print integer
+    li $v0, 1
+    move $a0, $s3
+    syscall
+    li $v0, 11
+    li $a0, 41
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+L33:
+    # Reloading j from stack
+    lw $t1, 4($sp)
+    li $t2, 1
+    add $t0, $t1, $t2
+    move $t1, $t0
+    sw $t1, 4($sp)
+    j L31
+L32:
+    la $s4, str_2
+    # Save string param str_2 to $s4
+    # Call printf
+    li $v0, 11
+    li $a0, 10
+    syscall
+L30:
+    # Reloading i from stack
+    lw $t1, 0($sp)
+    li $t2, 1
+    add $t0, $t1, $t2
+    move $t1, $t0
+    sw $t1, 0($sp)
+    j L28
+L29:
+    la $s5, str_10
+    # Save string param str_10 to $s5
+    # Call printf
+    li $v0, 11
+    li $a0, 10
+    syscall
+    li $v0, 11
+    li $a0, 84
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 115
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 56
+    syscall
+    li $v0, 11
+    li $a0, 58
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 110
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 115
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 100
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 108
+    syscall
+    li $v0, 11
+    li $a0, 111
+    syscall
+    li $v0, 11
+    li $a0, 111
+    syscall
+    li $v0, 11
+    li $a0, 112
+    syscall
+    li $v0, 11
+    li $a0, 115
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 119
+    syscall
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 104
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 99
+    syscall
+    li $v0, 11
+    li $a0, 111
+    syscall
+    li $v0, 11
+    li $a0, 110
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 110
+    syscall
+    li $v0, 11
+    li $a0, 117
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    # Reloading i from stack
+    lw $t0, 0($sp)
+    li $t0, 0
+    sw $t0, 0($sp)
+L36:
+    # Reloading i from stack
+    lw $t1, 0($sp)
+    li $t2, 3
+    slt $t0, $t1, $t2
+    beq $t0, $zero, L37
+    # Reloading j from stack
+    lw $t0, 4($sp)
+    li $t0, 0
+    sw $t0, 4($sp)
+L39:
+    # Reloading j from stack
+    lw $t1, 4($sp)
+    li $t2, 5
+    slt $t0, $t1, $t2
+    beq $t0, $zero, L40
+    li $t2, 2
+    seq $t0, $t1, $t2
+    beq $t0, $zero, L42
+    j L41
+L42:
+    la $s6, str_9
+    # Save string param str_9 to $s6
+    # Reloading i from stack
+    lw $t0, 0($sp)
+    move $s7, $t0
+    # Save param i to $s7
+    # Reloading j from stack
+    lw $t1, 4($sp)
+    move $s0, $t1
+    # Save param j to $s0
+    # Call printf
+    li $v0, 11
+    li $a0, 40
+    syscall
+    # Print integer
+    li $v0, 1
+    move $a0, $s7
+    syscall
+    li $v0, 11
+    li $a0, 44
+    syscall
+    # Print integer
+    li $v0, 1
+    move $a0, $s0
+    syscall
+    li $v0, 11
+    li $a0, 41
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+L41:
+    # Reloading j from stack
+    lw $t1, 4($sp)
+    li $t2, 1
+    add $t0, $t1, $t2
+    move $t1, $t0
+    sw $t1, 4($sp)
+    j L39
+L40:
+    la $s1, str_2
+    # Save string param str_2 to $s1
+    # Call printf
+    li $v0, 11
+    li $a0, 10
+    syscall
+L38:
+    # Reloading i from stack
+    lw $t1, 0($sp)
+    li $t2, 1
+    add $t0, $t1, $t2
+    move $t1, $t0
+    sw $t1, 0($sp)
+    j L36
+L37:
+    la $s2, str_11
+    # Save string param str_11 to $s2
+    # Call printf
+    li $v0, 11
+    li $a0, 10
+    syscall
+    li $v0, 11
+    li $a0, 84
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 115
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 57
+    syscall
+    li $v0, 11
+    li $a0, 58
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 99
+    syscall
+    li $v0, 11
+    li $a0, 111
+    syscall
+    li $v0, 11
+    li $a0, 109
+    syscall
+    li $v0, 11
+    li $a0, 98
+    syscall
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 110
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 100
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 98
+    syscall
+    li $v0, 11
+    li $a0, 114
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 97
+    syscall
+    li $v0, 11
+    li $a0, 107
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 97
+    syscall
+    li $v0, 11
+    li $a0, 110
+    syscall
+    li $v0, 11
+    li $a0, 100
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 99
+    syscall
+    li $v0, 11
+    li $a0, 111
+    syscall
+    li $v0, 11
+    li $a0, 110
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 110
+    syscall
+    li $v0, 11
+    li $a0, 117
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    # Reloading i from stack
+    lw $t0, 0($sp)
+    li $t0, 0
+    sw $t0, 0($sp)
+L44:
+    # Reloading i from stack
+    lw $t1, 0($sp)
+    li $t2, 20
+    slt $t0, $t1, $t2
+    beq $t0, $zero, L45
+    li $t2, 5
+    slt $t0, $t1, $t2
+    beq $t0, $zero, L47
+    j L46
+L47:
+    # Reloading i from stack
+    lw $t1, 0($sp)
+    li $t2, 12
+    sgt $t0, $t1, $t2
+    beq $t0, $zero, L49
+    j L45
+L49:
+    # Reloading i from stack
+    lw $t1, 0($sp)
+    li $t2, 8
+    seq $t0, $t1, $t2
+    li $t3, 10
+    seq $t2, $t1, $t3
+    or $t4, $t0, $t2
+    sne $t3, $t4, $zero
+    beq $t3, $zero, L51
+    j L46
+L51:
+    la $s3, str_1
+    # Save string param str_1 to $s3
+    # Reloading i from stack
+    lw $t0, 0($sp)
+    move $s4, $t0
+    # Save param i to $s4
+    # Call printf
+    # Print integer
+    li $v0, 1
+    move $a0, $s4
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+L46:
+    # Reloading i from stack
+    lw $t1, 0($sp)
+    li $t2, 1
+    add $t0, $t1, $t2
+    move $t1, $t0
+    sw $t1, 0($sp)
+    j L44
+L45:
+    la $s5, str_2
+    # Save string param str_2 to $s5
+    # Call printf
+    li $v0, 11
+    li $a0, 10
+    syscall
+    li $v0, 0
+    # Restore stack and exit program
+    addi $sp, $sp, 256
+    li $v0, 10
+    syscall
+
+MIPS file generated: output.s
+
+==================================================
+COMPILATION SUCCESSFUL
+==================================================

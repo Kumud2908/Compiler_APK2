@@ -1,0 +1,74 @@
+C/C++ Syntax Analyzer with AST
+==============================
+
+Token: #include <stdio.h>   Type: PREPROCESSOR   
+Token: int                  Type: KEYWORD        
+Token: main                 Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: }                    Type: RBRACE         
+
+=== PARSING SUCCESSFUL ===
+
+=== SEMANTIC ANALYSIS ===
+=== SEMANTIC ANALYSIS STARTED ===
+=== SEMANTIC ANALYSIS COMPLETED ===
+Found 0 semantic error(s)
+Found 0 warning(s)
+
+=== SYMBOL TABLE (ACTIVE SCOPES) ===
+Scope 0:
+  function 'main' : int (scope: 0, line: 6)
+ (scope: 0, line: 6)
+  constant 'NULL' : void* (scope: 0, line: 0)
+ (scope: 0, line: 0)
+
+ Semantic analysis passed with no errors.
+
+=== CODE GENERATION ===
+
+=== THREE ADDRESS CODE ===
+main:
+
+Total instructions: 1
+
+=== ABSTRACT SYNTAX TREE ===
+TranslationUnit :  (line 2)
+  Preprocessor : #include <stdio.h> (line 2)
+  FunctionDefinition :  (line 6)
+    DeclarationSpecifiers :  (line 4)
+      TypeSpecifier : int (line 4)
+    FunctionDeclarator :  (line 4)
+      DirectDeclarator : main (line 4)
+    CompoundStatement :  (line 6)
+
+AST DOT file generated: ast.dot
+TAC file generated: output.tac
+
+=== MIPS ASSEMBLY GENERATION ===
+
+=== MIPS ASSEMBLY CODE ===
+    # ==============================================
+    #   MIPS Assembly Code
+    #   Generated from Three-Address Code
+    # ==============================================
+
+.data
+.align 2
+newline: .asciiz "\n"
+
+.text
+.globl main
+
+
+    # Function: main
+main:
+    # Reserve stack space for register spills
+    addi $sp, $sp, -256
+
+MIPS file generated: output.s
+
+==================================================
+COMPILATION SUCCESSFUL
+==================================================

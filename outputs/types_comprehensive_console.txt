@@ -1,0 +1,89 @@
+C/C++ Syntax Analyzer with AST
+==============================
+
+Token: #include <stdio.h>   Type: PREPROCESSOR   
+Token: int                  Type: KEYWORD        
+Token: main                 Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: int                  Type: KEYWORD        
+Token: i                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: 10                   Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: float                Type: KEYWORD        
+Token: f                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: i                    Type: IDENTIFIER     
+Token: ;                    Type: SEMICOLON      
+Token: int                  Type: KEYWORD        
+Token: *                    Type: ARITHMETIC_OP  
+Token: ip                   Type: IDENTIFIER     
+Token: ;                    Type: SEMICOLON      
+Token: float                Type: KEYWORD        
+Token: *                    Type: ARITHMETIC_OP  
+Token: fp                   Type: IDENTIFIER     
+Token: ;                    Type: SEMICOLON      
+Token: ip                   Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: fp                   Type: IDENTIFIER     
+Token: ;                    Type: SEMICOLON      
+Token: int                  Type: KEYWORD        
+Token: *                    Type: ARITHMETIC_OP  
+Token: bad                  Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: &                    Type: BITWISE_OP     
+Token: 5                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: int                  Type: KEYWORD        
+Token: x                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: 5                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: int                  Type: KEYWORD        
+Token: y                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: *                    Type: ARITHMETIC_OP  
+Token: x                    Type: IDENTIFIER     
+Token: ;                    Type: SEMICOLON      
+Token: int                  Type: KEYWORD        
+Token: *                    Type: ARITHMETIC_OP  
+Token: ptr                  Type: IDENTIFIER     
+Token: ;                    Type: SEMICOLON      
+Token: ptr                  Type: IDENTIFIER     
+Token: ++                   Type: POSTFIX_OP     
+Token: ;                    Type: SEMICOLON      
+Token: return               Type: KEYWORD        
+Token: 0                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+
+=== PARSING SUCCESSFUL ===
+
+=== SEMANTIC ANALYSIS ===
+=== SEMANTIC ANALYSIS STARTED ===
+Line 6: WARNING: Implicit type conversion in initialization: 'int' to 'float'
+Line 6: WARNING: Implicit type conversion in initialization: 'int' to 'float'
+Line 11: SEMANTIC ERROR: Incompatible types in assignment: cannot assign 'float*' to 'int*'
+Line 11: WARNING: Variable 'fp' may be uninitialized
+Line 14: SEMANTIC ERROR: Operand of '&' must be an lvalue
+Line 18: SEMANTIC ERROR: Cannot dereference non-pointer type 'int'
+=== SEMANTIC ANALYSIS COMPLETED ===
+Found 3 semantic error(s)
+Found 3 warning(s)
+
+=== SYMBOL TABLE (ACTIVE SCOPES) ===
+Scope 0:
+  function 'main' : int (scope: 0, line: 25) [has_return]
+ (scope: 0, line: 25) [has_return]
+  constant 'NULL' : void* (scope: 0, line: 0)
+ (scope: 0, line: 0)
+
+==================================================
+COMPILATION FAILED
+==================================================
+Semantic errors found (see above)
+Code generation has been skipped.
+Please fix the errors and recompile.
+==================================================

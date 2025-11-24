@@ -1,0 +1,1947 @@
+C/C++ Syntax Analyzer with AST
+==============================
+
+Token: #include <stdio.h>   Type: PREPROCESSOR   
+Token: int                  Type: KEYWORD        
+Token: main                 Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: int                  Type: KEYWORD        
+Token: matrix1              Type: IDENTIFIER     
+Token: [                    Type: LBRACKET       
+Token: 3                    Type: INTEGER_CONSTANT
+Token: ]                    Type: RBRACKET       
+Token: [                    Type: LBRACKET       
+Token: 3                    Type: INTEGER_CONSTANT
+Token: ]                    Type: RBRACKET       
+Token: =                    Type: ASSIGN         
+Token: {                    Type: LBRACE         
+Token: {                    Type: LBRACE         
+Token: 1                    Type: INTEGER_CONSTANT
+Token: ,                    Type: COMMA          
+Token: 2                    Type: INTEGER_CONSTANT
+Token: ,                    Type: COMMA          
+Token: 3                    Type: INTEGER_CONSTANT
+Token: }                    Type: RBRACE         
+Token: ,                    Type: COMMA          
+Token: {                    Type: LBRACE         
+Token: 4                    Type: INTEGER_CONSTANT
+Token: ,                    Type: COMMA          
+Token: 5                    Type: INTEGER_CONSTANT
+Token: ,                    Type: COMMA          
+Token: 6                    Type: INTEGER_CONSTANT
+Token: }                    Type: RBRACE         
+Token: ,                    Type: COMMA          
+Token: {                    Type: LBRACE         
+Token: 7                    Type: INTEGER_CONSTANT
+Token: ,                    Type: COMMA          
+Token: 8                    Type: INTEGER_CONSTANT
+Token: ,                    Type: COMMA          
+Token: 9                    Type: INTEGER_CONSTANT
+Token: }                    Type: RBRACE         
+Token: }                    Type: RBRACE         
+Token: ;                    Type: SEMICOLON      
+Token: int                  Type: KEYWORD        
+Token: matrix2              Type: IDENTIFIER     
+Token: [                    Type: LBRACKET       
+Token: 3                    Type: INTEGER_CONSTANT
+Token: ]                    Type: RBRACKET       
+Token: [                    Type: LBRACKET       
+Token: 3                    Type: INTEGER_CONSTANT
+Token: ]                    Type: RBRACKET       
+Token: =                    Type: ASSIGN         
+Token: {                    Type: LBRACE         
+Token: {                    Type: LBRACE         
+Token: 9                    Type: INTEGER_CONSTANT
+Token: ,                    Type: COMMA          
+Token: 8                    Type: INTEGER_CONSTANT
+Token: ,                    Type: COMMA          
+Token: 7                    Type: INTEGER_CONSTANT
+Token: }                    Type: RBRACE         
+Token: ,                    Type: COMMA          
+Token: {                    Type: LBRACE         
+Token: 6                    Type: INTEGER_CONSTANT
+Token: ,                    Type: COMMA          
+Token: 5                    Type: INTEGER_CONSTANT
+Token: ,                    Type: COMMA          
+Token: 4                    Type: INTEGER_CONSTANT
+Token: }                    Type: RBRACE         
+Token: ,                    Type: COMMA          
+Token: {                    Type: LBRACE         
+Token: 3                    Type: INTEGER_CONSTANT
+Token: ,                    Type: COMMA          
+Token: 2                    Type: INTEGER_CONSTANT
+Token: ,                    Type: COMMA          
+Token: 1                    Type: INTEGER_CONSTANT
+Token: }                    Type: RBRACE         
+Token: }                    Type: RBRACE         
+Token: ;                    Type: SEMICOLON      
+Token: int                  Type: KEYWORD        
+Token: transposed           Type: IDENTIFIER     
+Token: [                    Type: LBRACKET       
+Token: 3                    Type: INTEGER_CONSTANT
+Token: ]                    Type: RBRACKET       
+Token: [                    Type: LBRACKET       
+Token: 3                    Type: INTEGER_CONSTANT
+Token: ]                    Type: RBRACKET       
+Token: ;                    Type: SEMICOLON      
+Token: int                  Type: KEYWORD        
+Token: product              Type: IDENTIFIER     
+Token: [                    Type: LBRACKET       
+Token: 3                    Type: INTEGER_CONSTANT
+Token: ]                    Type: RBRACKET       
+Token: [                    Type: LBRACKET       
+Token: 3                    Type: INTEGER_CONSTANT
+Token: ]                    Type: RBRACKET       
+Token: ;                    Type: SEMICOLON      
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "Matrix 1:\n"        Type: STRING_LITERAL 
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: for                  Type: KEYWORD        
+Token: (                    Type: LPAREN         
+Token: int                  Type: KEYWORD        
+Token: i                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: 0                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: i                    Type: IDENTIFIER     
+Token: <                    Type: RELATIONAL_OP  
+Token: 3                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: i                    Type: IDENTIFIER     
+Token: ++                   Type: POSTFIX_OP     
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: for                  Type: KEYWORD        
+Token: (                    Type: LPAREN         
+Token: int                  Type: KEYWORD        
+Token: j                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: 0                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: j                    Type: IDENTIFIER     
+Token: <                    Type: RELATIONAL_OP  
+Token: 3                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: j                    Type: IDENTIFIER     
+Token: ++                   Type: POSTFIX_OP     
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "%d "                Type: STRING_LITERAL 
+Token: ,                    Type: COMMA          
+Token: matrix1              Type: IDENTIFIER     
+Token: [                    Type: LBRACKET       
+Token: i                    Type: IDENTIFIER     
+Token: ]                    Type: RBRACKET       
+Token: [                    Type: LBRACKET       
+Token: j                    Type: IDENTIFIER     
+Token: ]                    Type: RBRACKET       
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "\n"                 Type: STRING_LITERAL 
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "\nMatrix 2:\n"      Type: STRING_LITERAL 
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: for                  Type: KEYWORD        
+Token: (                    Type: LPAREN         
+Token: int                  Type: KEYWORD        
+Token: i                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: 0                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: i                    Type: IDENTIFIER     
+Token: <                    Type: RELATIONAL_OP  
+Token: 3                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: i                    Type: IDENTIFIER     
+Token: ++                   Type: POSTFIX_OP     
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: for                  Type: KEYWORD        
+Token: (                    Type: LPAREN         
+Token: int                  Type: KEYWORD        
+Token: j                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: 0                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: j                    Type: IDENTIFIER     
+Token: <                    Type: RELATIONAL_OP  
+Token: 3                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: j                    Type: IDENTIFIER     
+Token: ++                   Type: POSTFIX_OP     
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "%d "                Type: STRING_LITERAL 
+Token: ,                    Type: COMMA          
+Token: matrix2              Type: IDENTIFIER     
+Token: [                    Type: LBRACKET       
+Token: i                    Type: IDENTIFIER     
+Token: ]                    Type: RBRACKET       
+Token: [                    Type: LBRACKET       
+Token: j                    Type: IDENTIFIER     
+Token: ]                    Type: RBRACKET       
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "\n"                 Type: STRING_LITERAL 
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: for                  Type: KEYWORD        
+Token: (                    Type: LPAREN         
+Token: int                  Type: KEYWORD        
+Token: i                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: 0                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: i                    Type: IDENTIFIER     
+Token: <                    Type: RELATIONAL_OP  
+Token: 3                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: i                    Type: IDENTIFIER     
+Token: ++                   Type: POSTFIX_OP     
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: for                  Type: KEYWORD        
+Token: (                    Type: LPAREN         
+Token: int                  Type: KEYWORD        
+Token: j                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: 0                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: j                    Type: IDENTIFIER     
+Token: <                    Type: RELATIONAL_OP  
+Token: 3                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: j                    Type: IDENTIFIER     
+Token: ++                   Type: POSTFIX_OP     
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: transposed           Type: IDENTIFIER     
+Token: [                    Type: LBRACKET       
+Token: j                    Type: IDENTIFIER     
+Token: ]                    Type: RBRACKET       
+Token: [                    Type: LBRACKET       
+Token: i                    Type: IDENTIFIER     
+Token: ]                    Type: RBRACKET       
+Token: =                    Type: ASSIGN         
+Token: matrix1              Type: IDENTIFIER     
+Token: [                    Type: LBRACKET       
+Token: i                    Type: IDENTIFIER     
+Token: ]                    Type: RBRACKET       
+Token: [                    Type: LBRACKET       
+Token: j                    Type: IDENTIFIER     
+Token: ]                    Type: RBRACKET       
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: }                    Type: RBRACE         
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "\nTransposed Matrix 1:\n" Type: STRING_LITERAL 
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: for                  Type: KEYWORD        
+Token: (                    Type: LPAREN         
+Token: int                  Type: KEYWORD        
+Token: i                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: 0                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: i                    Type: IDENTIFIER     
+Token: <                    Type: RELATIONAL_OP  
+Token: 3                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: i                    Type: IDENTIFIER     
+Token: ++                   Type: POSTFIX_OP     
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: for                  Type: KEYWORD        
+Token: (                    Type: LPAREN         
+Token: int                  Type: KEYWORD        
+Token: j                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: 0                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: j                    Type: IDENTIFIER     
+Token: <                    Type: RELATIONAL_OP  
+Token: 3                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: j                    Type: IDENTIFIER     
+Token: ++                   Type: POSTFIX_OP     
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "%d "                Type: STRING_LITERAL 
+Token: ,                    Type: COMMA          
+Token: transposed           Type: IDENTIFIER     
+Token: [                    Type: LBRACKET       
+Token: i                    Type: IDENTIFIER     
+Token: ]                    Type: RBRACKET       
+Token: [                    Type: LBRACKET       
+Token: j                    Type: IDENTIFIER     
+Token: ]                    Type: RBRACKET       
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "\n"                 Type: STRING_LITERAL 
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: for                  Type: KEYWORD        
+Token: (                    Type: LPAREN         
+Token: int                  Type: KEYWORD        
+Token: i                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: 0                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: i                    Type: IDENTIFIER     
+Token: <                    Type: RELATIONAL_OP  
+Token: 3                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: i                    Type: IDENTIFIER     
+Token: ++                   Type: POSTFIX_OP     
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: for                  Type: KEYWORD        
+Token: (                    Type: LPAREN         
+Token: int                  Type: KEYWORD        
+Token: j                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: 0                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: j                    Type: IDENTIFIER     
+Token: <                    Type: RELATIONAL_OP  
+Token: 3                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: j                    Type: IDENTIFIER     
+Token: ++                   Type: POSTFIX_OP     
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: product              Type: IDENTIFIER     
+Token: [                    Type: LBRACKET       
+Token: i                    Type: IDENTIFIER     
+Token: ]                    Type: RBRACKET       
+Token: [                    Type: LBRACKET       
+Token: j                    Type: IDENTIFIER     
+Token: ]                    Type: RBRACKET       
+Token: =                    Type: ASSIGN         
+Token: 0                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: for                  Type: KEYWORD        
+Token: (                    Type: LPAREN         
+Token: int                  Type: KEYWORD        
+Token: k                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: 0                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: k                    Type: IDENTIFIER     
+Token: <                    Type: RELATIONAL_OP  
+Token: 3                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: k                    Type: IDENTIFIER     
+Token: ++                   Type: POSTFIX_OP     
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: product              Type: IDENTIFIER     
+Token: [                    Type: LBRACKET       
+Token: i                    Type: IDENTIFIER     
+Token: ]                    Type: RBRACKET       
+Token: [                    Type: LBRACKET       
+Token: j                    Type: IDENTIFIER     
+Token: ]                    Type: RBRACKET       
+Token: +=                   Type: ASSIGN_OP      
+Token: matrix1              Type: IDENTIFIER     
+Token: [                    Type: LBRACKET       
+Token: i                    Type: IDENTIFIER     
+Token: ]                    Type: RBRACKET       
+Token: [                    Type: LBRACKET       
+Token: k                    Type: IDENTIFIER     
+Token: ]                    Type: RBRACKET       
+Token: *                    Type: ARITHMETIC_OP  
+Token: matrix2              Type: IDENTIFIER     
+Token: [                    Type: LBRACKET       
+Token: k                    Type: IDENTIFIER     
+Token: ]                    Type: RBRACKET       
+Token: [                    Type: LBRACKET       
+Token: j                    Type: IDENTIFIER     
+Token: ]                    Type: RBRACKET       
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: }                    Type: RBRACE         
+Token: }                    Type: RBRACE         
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "\nMatrix 1 * Matrix 2:\n" Type: STRING_LITERAL 
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: for                  Type: KEYWORD        
+Token: (                    Type: LPAREN         
+Token: int                  Type: KEYWORD        
+Token: i                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: 0                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: i                    Type: IDENTIFIER     
+Token: <                    Type: RELATIONAL_OP  
+Token: 3                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: i                    Type: IDENTIFIER     
+Token: ++                   Type: POSTFIX_OP     
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: for                  Type: KEYWORD        
+Token: (                    Type: LPAREN         
+Token: int                  Type: KEYWORD        
+Token: j                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: 0                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: j                    Type: IDENTIFIER     
+Token: <                    Type: RELATIONAL_OP  
+Token: 3                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: j                    Type: IDENTIFIER     
+Token: ++                   Type: POSTFIX_OP     
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "%d "                Type: STRING_LITERAL 
+Token: ,                    Type: COMMA          
+Token: product              Type: IDENTIFIER     
+Token: [                    Type: LBRACKET       
+Token: i                    Type: IDENTIFIER     
+Token: ]                    Type: RBRACKET       
+Token: [                    Type: LBRACKET       
+Token: j                    Type: IDENTIFIER     
+Token: ]                    Type: RBRACKET       
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "\n"                 Type: STRING_LITERAL 
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: return               Type: KEYWORD        
+Token: 0                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+
+=== PARSING SUCCESSFUL ===
+
+=== SEMANTIC ANALYSIS ===
+=== SEMANTIC ANALYSIS STARTED ===
+=== SEMANTIC ANALYSIS COMPLETED ===
+Found 0 semantic error(s)
+Found 0 warning(s)
+
+=== SYMBOL TABLE (ACTIVE SCOPES) ===
+Scope 0:
+  function 'main' : int (scope: 0, line: 60) [has_return]
+ (scope: 0, line: 60) [has_return]
+  constant 'NULL' : void* (scope: 0, line: 0)
+ (scope: 0, line: 0)
+
+ Semantic analysis passed with no errors.
+
+=== CODE GENERATION ===
+
+=== THREE ADDRESS CODE ===
+main:
+    t0 = &matrix1
+    *t0 = 1
+    t1 = t0 + 4
+    *t1 = 2
+    t2 = t0 + 8
+    *t2 = 3
+    t3 = t0 + 12
+    *t3 = 4
+    t4 = t0 + 16
+    *t4 = 5
+    t5 = t0 + 20
+    *t5 = 6
+    t6 = t0 + 24
+    *t6 = 7
+    t7 = t0 + 28
+    *t7 = 8
+    t8 = t0 + 32
+    *t8 = 9
+    t9 = &matrix2
+    *t9 = 9
+    t10 = t9 + 4
+    *t10 = 8
+    t11 = t9 + 8
+    *t11 = 7
+    t12 = t9 + 12
+    *t12 = 6
+    t13 = t9 + 16
+    *t13 = 5
+    t14 = t9 + 20
+    *t14 = 4
+    t15 = t9 + 24
+    *t15 = 3
+    t16 = t9 + 28
+    *t16 = 2
+    t17 = t9 + 32
+    *t17 = 1
+    param "Matrix 1:\n"
+    t18 = call printf, 1
+    i = 0
+L0:
+    t19 = i < 3
+    ifFalse t19 goto L1
+    j = 0
+L3:
+    t20 = j < 3
+    ifFalse t20 goto L4
+    param "%d "
+    t21 = i * 3
+    t22 = t21 + j
+    t23 = t22 * 4
+    t24 = &matrix1
+    t25 = t24 + t23
+    t26 = *t25
+    param t26
+    t27 = call printf, 2
+L5:
+    t28 = j
+    j = j + 1
+    goto L3
+L4:
+    param "\n"
+    t29 = call printf, 1
+L2:
+    t30 = i
+    i = i + 1
+    goto L0
+L1:
+    param "\nMatrix 2:\n"
+    t31 = call printf, 1
+    i = 0
+L6:
+    t32 = i < 3
+    ifFalse t32 goto L7
+    j = 0
+L9:
+    t33 = j < 3
+    ifFalse t33 goto L10
+    param "%d "
+    t34 = i * 3
+    t35 = t34 + j
+    t36 = t35 * 4
+    t37 = &matrix2
+    t38 = t37 + t36
+    t39 = *t38
+    param t39
+    t40 = call printf, 2
+L11:
+    t41 = j
+    j = j + 1
+    goto L9
+L10:
+    param "\n"
+    t42 = call printf, 1
+L8:
+    t43 = i
+    i = i + 1
+    goto L6
+L7:
+    i = 0
+L12:
+    t44 = i < 3
+    ifFalse t44 goto L13
+    j = 0
+L15:
+    t45 = j < 3
+    ifFalse t45 goto L16
+    t46 = i * 3
+    t47 = t46 + j
+    t48 = t47 * 4
+    t49 = &matrix1
+    t50 = t49 + t48
+    t51 = *t50
+    t52 = j * 3
+    t53 = t52 + i
+    t54 = t53 * 4
+    t55 = &transposed
+    t56 = t55 + t54
+    *t56 = t51
+L17:
+    t57 = j
+    j = j + 1
+    goto L15
+L16:
+L14:
+    t58 = i
+    i = i + 1
+    goto L12
+L13:
+    param "\nTransposed Matrix 1:\n"
+    t59 = call printf, 1
+    i = 0
+L18:
+    t60 = i < 3
+    ifFalse t60 goto L19
+    j = 0
+L21:
+    t61 = j < 3
+    ifFalse t61 goto L22
+    param "%d "
+    t62 = i * 3
+    t63 = t62 + j
+    t64 = t63 * 4
+    t65 = &transposed
+    t66 = t65 + t64
+    t67 = *t66
+    param t67
+    t68 = call printf, 2
+L23:
+    t69 = j
+    j = j + 1
+    goto L21
+L22:
+    param "\n"
+    t70 = call printf, 1
+L20:
+    t71 = i
+    i = i + 1
+    goto L18
+L19:
+    i = 0
+L24:
+    t72 = i < 3
+    ifFalse t72 goto L25
+    j = 0
+L27:
+    t73 = j < 3
+    ifFalse t73 goto L28
+    t74 = i * 3
+    t75 = t74 + j
+    t76 = t75 * 4
+    t77 = &product
+    t78 = t77 + t76
+    *t78 = 0
+    k = 0
+L30:
+    t79 = k < 3
+    ifFalse t79 goto L31
+    t80 = i * 3
+    t81 = t80 + k
+    t82 = t81 * 4
+    t83 = &matrix1
+    t84 = t83 + t82
+    t85 = *t84
+    t86 = k * 3
+    t87 = t86 + j
+    t88 = t87 * 4
+    t89 = &matrix2
+    t90 = t89 + t88
+    t91 = *t90
+    t92 = t85 * t91
+    t93 = i * 3
+    t94 = t93 + j
+    t95 = t94 * 4
+    t96 = &product
+    t97 = t96 + t95
+    t98 = *t97
+    t99 = t98 + t92
+    *t97 = t99
+L32:
+    t100 = k
+    k = k + 1
+    goto L30
+L31:
+L29:
+    t101 = j
+    j = j + 1
+    goto L27
+L28:
+L26:
+    t102 = i
+    i = i + 1
+    goto L24
+L25:
+    param "\nMatrix 1 * Matrix 2:\n"
+    t103 = call printf, 1
+    i = 0
+L33:
+    t104 = i < 3
+    ifFalse t104 goto L34
+    j = 0
+L36:
+    t105 = j < 3
+    ifFalse t105 goto L37
+    param "%d "
+    t106 = i * 3
+    t107 = t106 + j
+    t108 = t107 * 4
+    t109 = &product
+    t110 = t109 + t108
+    t111 = *t110
+    param t111
+    t112 = call printf, 2
+L38:
+    t113 = j
+    j = j + 1
+    goto L36
+L37:
+    param "\n"
+    t114 = call printf, 1
+L35:
+    t115 = i
+    i = i + 1
+    goto L33
+L34:
+    return 0
+
+Total instructions: 246
+
+=== ABSTRACT SYNTAX TREE ===
+TranslationUnit :  (line 2)
+  Preprocessor : #include <stdio.h> (line 2)
+  FunctionDefinition :  (line 60)
+    DeclarationSpecifiers :  (line 4)
+      TypeSpecifier : int (line 4)
+    FunctionDeclarator :  (line 4)
+      DirectDeclarator : main (line 4)
+    CompoundStatement :  (line 60)
+      BlockItemList :  (line 5)
+        BlockItem :  (line 5)
+          Declaration :  (line 5)
+            DeclarationSpecifiers :  (line 5)
+              TypeSpecifier : int (line 5)
+            InitDeclaratorList :  (line 5)
+              InitDeclarator :  (line 5)
+                ArrayDeclarator :  (line 5)
+                  ArrayDeclarator :  (line 5)
+                    DirectDeclarator : matrix1 (line 5)
+                    Constant : 3 (line 5)
+                  Constant : 3 (line 5)
+                InitializerList :  (line 5)
+                  InitializerList :  (line 5)
+                    InitializerList :  (line 5)
+                      InitializerList :  (line 5)
+                        Initializer :  (line 5)
+                          Constant : 1 (line 5)
+                        Initializer :  (line 5)
+                          Constant : 2 (line 5)
+                        Initializer :  (line 5)
+                          Constant : 3 (line 5)
+                    InitializerList :  (line 5)
+                      InitializerList :  (line 5)
+                        Initializer :  (line 5)
+                          Constant : 4 (line 5)
+                        Initializer :  (line 5)
+                          Constant : 5 (line 5)
+                        Initializer :  (line 5)
+                          Constant : 6 (line 5)
+                    InitializerList :  (line 5)
+                      InitializerList :  (line 5)
+                        Initializer :  (line 5)
+                          Constant : 7 (line 5)
+                        Initializer :  (line 5)
+                          Constant : 8 (line 5)
+                        Initializer :  (line 5)
+                          Constant : 9 (line 5)
+        BlockItem :  (line 6)
+          Declaration :  (line 6)
+            DeclarationSpecifiers :  (line 6)
+              TypeSpecifier : int (line 6)
+            InitDeclaratorList :  (line 6)
+              InitDeclarator :  (line 6)
+                ArrayDeclarator :  (line 6)
+                  ArrayDeclarator :  (line 6)
+                    DirectDeclarator : matrix2 (line 6)
+                    Constant : 3 (line 6)
+                  Constant : 3 (line 6)
+                InitializerList :  (line 6)
+                  InitializerList :  (line 6)
+                    InitializerList :  (line 6)
+                      InitializerList :  (line 6)
+                        Initializer :  (line 6)
+                          Constant : 9 (line 6)
+                        Initializer :  (line 6)
+                          Constant : 8 (line 6)
+                        Initializer :  (line 6)
+                          Constant : 7 (line 6)
+                    InitializerList :  (line 6)
+                      InitializerList :  (line 6)
+                        Initializer :  (line 6)
+                          Constant : 6 (line 6)
+                        Initializer :  (line 6)
+                          Constant : 5 (line 6)
+                        Initializer :  (line 6)
+                          Constant : 4 (line 6)
+                    InitializerList :  (line 6)
+                      InitializerList :  (line 6)
+                        Initializer :  (line 6)
+                          Constant : 3 (line 6)
+                        Initializer :  (line 6)
+                          Constant : 2 (line 6)
+                        Initializer :  (line 6)
+                          Constant : 1 (line 6)
+        BlockItem :  (line 7)
+          Declaration :  (line 7)
+            DeclarationSpecifiers :  (line 7)
+              TypeSpecifier : int (line 7)
+            InitDeclaratorList :  (line 7)
+              InitDeclarator :  (line 7)
+                ArrayDeclarator :  (line 7)
+                  ArrayDeclarator :  (line 7)
+                    DirectDeclarator : transposed (line 7)
+                    Constant : 3 (line 7)
+                  Constant : 3 (line 7)
+        BlockItem :  (line 8)
+          Declaration :  (line 8)
+            DeclarationSpecifiers :  (line 8)
+              TypeSpecifier : int (line 8)
+            InitDeclaratorList :  (line 8)
+              InitDeclarator :  (line 8)
+                ArrayDeclarator :  (line 8)
+                  ArrayDeclarator :  (line 8)
+                    DirectDeclarator : product (line 8)
+                    Constant : 3 (line 8)
+                  Constant : 3 (line 8)
+        BlockItem :  (line 10)
+          ExpressionStatement :  (line 10)
+            FunctionCall :  (line 10)
+              Identifier : printf (line 10)
+              ArgumentList :  (line 10)
+                StringLiteral : "Matrix 1:\n" (line 10)
+        BlockItem :  (line 16)
+          ForStatement :  (line 16)
+            ForInitStatement :  (line 11)
+              Declaration :  (line 11)
+                DeclarationSpecifiers :  (line 11)
+                  TypeSpecifier : int (line 11)
+                InitDeclaratorList :  (line 11)
+                  InitDeclarator :  (line 11)
+                    DirectDeclarator : i (line 11)
+                    Initializer :  (line 11)
+                      Constant : 0 (line 11)
+            ExpressionStatement :  (line 11)
+              RelationalExpression : < (line 11)
+                Identifier : i (line 11)
+                Constant : 3 (line 11)
+            PostfixExpression : ++ (line 11)
+              Identifier : i (line 11)
+            CompoundStatement :  (line 16)
+              BlockItemList :  (line 14)
+                BlockItem :  (line 14)
+                  ForStatement :  (line 14)
+                    ForInitStatement :  (line 12)
+                      Declaration :  (line 12)
+                        DeclarationSpecifiers :  (line 12)
+                          TypeSpecifier : int (line 12)
+                        InitDeclaratorList :  (line 12)
+                          InitDeclarator :  (line 12)
+                            DirectDeclarator : j (line 12)
+                            Initializer :  (line 12)
+                              Constant : 0 (line 12)
+                    ExpressionStatement :  (line 12)
+                      RelationalExpression : < (line 12)
+                        Identifier : j (line 12)
+                        Constant : 3 (line 12)
+                    PostfixExpression : ++ (line 12)
+                      Identifier : j (line 12)
+                    CompoundStatement :  (line 14)
+                      BlockItemList :  (line 13)
+                        BlockItem :  (line 13)
+                          ExpressionStatement :  (line 13)
+                            FunctionCall :  (line 13)
+                              Identifier : printf (line 13)
+                              ArgumentList :  (line 13)
+                                StringLiteral : "%d " (line 13)
+                                ArraySubscript :  (line 13)
+                                  ArraySubscript :  (line 13)
+                                    Identifier : matrix1 (line 13)
+                                    Identifier : i (line 13)
+                                  Identifier : j (line 13)
+                BlockItem :  (line 15)
+                  ExpressionStatement :  (line 15)
+                    FunctionCall :  (line 15)
+                      Identifier : printf (line 15)
+                      ArgumentList :  (line 15)
+                        StringLiteral : "\n" (line 15)
+        BlockItem :  (line 18)
+          ExpressionStatement :  (line 18)
+            FunctionCall :  (line 18)
+              Identifier : printf (line 18)
+              ArgumentList :  (line 18)
+                StringLiteral : "\nMatrix 2:\n" (line 18)
+        BlockItem :  (line 24)
+          ForStatement :  (line 24)
+            ForInitStatement :  (line 19)
+              Declaration :  (line 19)
+                DeclarationSpecifiers :  (line 19)
+                  TypeSpecifier : int (line 19)
+                InitDeclaratorList :  (line 19)
+                  InitDeclarator :  (line 19)
+                    DirectDeclarator : i (line 19)
+                    Initializer :  (line 19)
+                      Constant : 0 (line 19)
+            ExpressionStatement :  (line 19)
+              RelationalExpression : < (line 19)
+                Identifier : i (line 19)
+                Constant : 3 (line 19)
+            PostfixExpression : ++ (line 19)
+              Identifier : i (line 19)
+            CompoundStatement :  (line 24)
+              BlockItemList :  (line 22)
+                BlockItem :  (line 22)
+                  ForStatement :  (line 22)
+                    ForInitStatement :  (line 20)
+                      Declaration :  (line 20)
+                        DeclarationSpecifiers :  (line 20)
+                          TypeSpecifier : int (line 20)
+                        InitDeclaratorList :  (line 20)
+                          InitDeclarator :  (line 20)
+                            DirectDeclarator : j (line 20)
+                            Initializer :  (line 20)
+                              Constant : 0 (line 20)
+                    ExpressionStatement :  (line 20)
+                      RelationalExpression : < (line 20)
+                        Identifier : j (line 20)
+                        Constant : 3 (line 20)
+                    PostfixExpression : ++ (line 20)
+                      Identifier : j (line 20)
+                    CompoundStatement :  (line 22)
+                      BlockItemList :  (line 21)
+                        BlockItem :  (line 21)
+                          ExpressionStatement :  (line 21)
+                            FunctionCall :  (line 21)
+                              Identifier : printf (line 21)
+                              ArgumentList :  (line 21)
+                                StringLiteral : "%d " (line 21)
+                                ArraySubscript :  (line 21)
+                                  ArraySubscript :  (line 21)
+                                    Identifier : matrix2 (line 21)
+                                    Identifier : i (line 21)
+                                  Identifier : j (line 21)
+                BlockItem :  (line 23)
+                  ExpressionStatement :  (line 23)
+                    FunctionCall :  (line 23)
+                      Identifier : printf (line 23)
+                      ArgumentList :  (line 23)
+                        StringLiteral : "\n" (line 23)
+        BlockItem :  (line 31)
+          ForStatement :  (line 31)
+            ForInitStatement :  (line 27)
+              Declaration :  (line 27)
+                DeclarationSpecifiers :  (line 27)
+                  TypeSpecifier : int (line 27)
+                InitDeclaratorList :  (line 27)
+                  InitDeclarator :  (line 27)
+                    DirectDeclarator : i (line 27)
+                    Initializer :  (line 27)
+                      Constant : 0 (line 27)
+            ExpressionStatement :  (line 27)
+              RelationalExpression : < (line 27)
+                Identifier : i (line 27)
+                Constant : 3 (line 27)
+            PostfixExpression : ++ (line 27)
+              Identifier : i (line 27)
+            CompoundStatement :  (line 31)
+              BlockItemList :  (line 30)
+                BlockItem :  (line 30)
+                  ForStatement :  (line 30)
+                    ForInitStatement :  (line 28)
+                      Declaration :  (line 28)
+                        DeclarationSpecifiers :  (line 28)
+                          TypeSpecifier : int (line 28)
+                        InitDeclaratorList :  (line 28)
+                          InitDeclarator :  (line 28)
+                            DirectDeclarator : j (line 28)
+                            Initializer :  (line 28)
+                              Constant : 0 (line 28)
+                    ExpressionStatement :  (line 28)
+                      RelationalExpression : < (line 28)
+                        Identifier : j (line 28)
+                        Constant : 3 (line 28)
+                    PostfixExpression : ++ (line 28)
+                      Identifier : j (line 28)
+                    CompoundStatement :  (line 30)
+                      BlockItemList :  (line 29)
+                        BlockItem :  (line 29)
+                          ExpressionStatement :  (line 29)
+                            AssignmentExpression : = (line 29)
+                              ArraySubscript :  (line 29)
+                                ArraySubscript :  (line 29)
+                                  Identifier : transposed (line 29)
+                                  Identifier : j (line 29)
+                                Identifier : i (line 29)
+                              ArraySubscript :  (line 29)
+                                ArraySubscript :  (line 29)
+                                  Identifier : matrix1 (line 29)
+                                  Identifier : i (line 29)
+                                Identifier : j (line 29)
+        BlockItem :  (line 33)
+          ExpressionStatement :  (line 33)
+            FunctionCall :  (line 33)
+              Identifier : printf (line 33)
+              ArgumentList :  (line 33)
+                StringLiteral : "\nTransposed Matrix 1:\n" (line 33)
+        BlockItem :  (line 39)
+          ForStatement :  (line 39)
+            ForInitStatement :  (line 34)
+              Declaration :  (line 34)
+                DeclarationSpecifiers :  (line 34)
+                  TypeSpecifier : int (line 34)
+                InitDeclaratorList :  (line 34)
+                  InitDeclarator :  (line 34)
+                    DirectDeclarator : i (line 34)
+                    Initializer :  (line 34)
+                      Constant : 0 (line 34)
+            ExpressionStatement :  (line 34)
+              RelationalExpression : < (line 34)
+                Identifier : i (line 34)
+                Constant : 3 (line 34)
+            PostfixExpression : ++ (line 34)
+              Identifier : i (line 34)
+            CompoundStatement :  (line 39)
+              BlockItemList :  (line 37)
+                BlockItem :  (line 37)
+                  ForStatement :  (line 37)
+                    ForInitStatement :  (line 35)
+                      Declaration :  (line 35)
+                        DeclarationSpecifiers :  (line 35)
+                          TypeSpecifier : int (line 35)
+                        InitDeclaratorList :  (line 35)
+                          InitDeclarator :  (line 35)
+                            DirectDeclarator : j (line 35)
+                            Initializer :  (line 35)
+                              Constant : 0 (line 35)
+                    ExpressionStatement :  (line 35)
+                      RelationalExpression : < (line 35)
+                        Identifier : j (line 35)
+                        Constant : 3 (line 35)
+                    PostfixExpression : ++ (line 35)
+                      Identifier : j (line 35)
+                    CompoundStatement :  (line 37)
+                      BlockItemList :  (line 36)
+                        BlockItem :  (line 36)
+                          ExpressionStatement :  (line 36)
+                            FunctionCall :  (line 36)
+                              Identifier : printf (line 36)
+                              ArgumentList :  (line 36)
+                                StringLiteral : "%d " (line 36)
+                                ArraySubscript :  (line 36)
+                                  ArraySubscript :  (line 36)
+                                    Identifier : transposed (line 36)
+                                    Identifier : i (line 36)
+                                  Identifier : j (line 36)
+                BlockItem :  (line 38)
+                  ExpressionStatement :  (line 38)
+                    FunctionCall :  (line 38)
+                      Identifier : printf (line 38)
+                      ArgumentList :  (line 38)
+                        StringLiteral : "\n" (line 38)
+        BlockItem :  (line 49)
+          ForStatement :  (line 49)
+            ForInitStatement :  (line 42)
+              Declaration :  (line 42)
+                DeclarationSpecifiers :  (line 42)
+                  TypeSpecifier : int (line 42)
+                InitDeclaratorList :  (line 42)
+                  InitDeclarator :  (line 42)
+                    DirectDeclarator : i (line 42)
+                    Initializer :  (line 42)
+                      Constant : 0 (line 42)
+            ExpressionStatement :  (line 42)
+              RelationalExpression : < (line 42)
+                Identifier : i (line 42)
+                Constant : 3 (line 42)
+            PostfixExpression : ++ (line 42)
+              Identifier : i (line 42)
+            CompoundStatement :  (line 49)
+              BlockItemList :  (line 48)
+                BlockItem :  (line 48)
+                  ForStatement :  (line 48)
+                    ForInitStatement :  (line 43)
+                      Declaration :  (line 43)
+                        DeclarationSpecifiers :  (line 43)
+                          TypeSpecifier : int (line 43)
+                        InitDeclaratorList :  (line 43)
+                          InitDeclarator :  (line 43)
+                            DirectDeclarator : j (line 43)
+                            Initializer :  (line 43)
+                              Constant : 0 (line 43)
+                    ExpressionStatement :  (line 43)
+                      RelationalExpression : < (line 43)
+                        Identifier : j (line 43)
+                        Constant : 3 (line 43)
+                    PostfixExpression : ++ (line 43)
+                      Identifier : j (line 43)
+                    CompoundStatement :  (line 48)
+                      BlockItemList :  (line 44)
+                        BlockItem :  (line 44)
+                          ExpressionStatement :  (line 44)
+                            AssignmentExpression : = (line 44)
+                              ArraySubscript :  (line 44)
+                                ArraySubscript :  (line 44)
+                                  Identifier : product (line 44)
+                                  Identifier : i (line 44)
+                                Identifier : j (line 44)
+                              Constant : 0 (line 44)
+                        BlockItem :  (line 47)
+                          ForStatement :  (line 47)
+                            ForInitStatement :  (line 45)
+                              Declaration :  (line 45)
+                                DeclarationSpecifiers :  (line 45)
+                                  TypeSpecifier : int (line 45)
+                                InitDeclaratorList :  (line 45)
+                                  InitDeclarator :  (line 45)
+                                    DirectDeclarator : k (line 45)
+                                    Initializer :  (line 45)
+                                      Constant : 0 (line 45)
+                            ExpressionStatement :  (line 45)
+                              RelationalExpression : < (line 45)
+                                Identifier : k (line 45)
+                                Constant : 3 (line 45)
+                            PostfixExpression : ++ (line 45)
+                              Identifier : k (line 45)
+                            CompoundStatement :  (line 47)
+                              BlockItemList :  (line 46)
+                                BlockItem :  (line 46)
+                                  ExpressionStatement :  (line 46)
+                                    AssignmentExpression : += (line 46)
+                                      ArraySubscript :  (line 46)
+                                        ArraySubscript :  (line 46)
+                                          Identifier : product (line 46)
+                                          Identifier : i (line 46)
+                                        Identifier : j (line 46)
+                                      MultiplicativeExpression : * (line 46)
+                                        ArraySubscript :  (line 46)
+                                          ArraySubscript :  (line 46)
+                                            Identifier : matrix1 (line 46)
+                                            Identifier : i (line 46)
+                                          Identifier : k (line 46)
+                                        ArraySubscript :  (line 46)
+                                          ArraySubscript :  (line 46)
+                                            Identifier : matrix2 (line 46)
+                                            Identifier : k (line 46)
+                                          Identifier : j (line 46)
+        BlockItem :  (line 51)
+          ExpressionStatement :  (line 51)
+            FunctionCall :  (line 51)
+              Identifier : printf (line 51)
+              ArgumentList :  (line 51)
+                StringLiteral : "\nMatrix 1 * Matrix 2:\n" (line 51)
+        BlockItem :  (line 57)
+          ForStatement :  (line 57)
+            ForInitStatement :  (line 52)
+              Declaration :  (line 52)
+                DeclarationSpecifiers :  (line 52)
+                  TypeSpecifier : int (line 52)
+                InitDeclaratorList :  (line 52)
+                  InitDeclarator :  (line 52)
+                    DirectDeclarator : i (line 52)
+                    Initializer :  (line 52)
+                      Constant : 0 (line 52)
+            ExpressionStatement :  (line 52)
+              RelationalExpression : < (line 52)
+                Identifier : i (line 52)
+                Constant : 3 (line 52)
+            PostfixExpression : ++ (line 52)
+              Identifier : i (line 52)
+            CompoundStatement :  (line 57)
+              BlockItemList :  (line 55)
+                BlockItem :  (line 55)
+                  ForStatement :  (line 55)
+                    ForInitStatement :  (line 53)
+                      Declaration :  (line 53)
+                        DeclarationSpecifiers :  (line 53)
+                          TypeSpecifier : int (line 53)
+                        InitDeclaratorList :  (line 53)
+                          InitDeclarator :  (line 53)
+                            DirectDeclarator : j (line 53)
+                            Initializer :  (line 53)
+                              Constant : 0 (line 53)
+                    ExpressionStatement :  (line 53)
+                      RelationalExpression : < (line 53)
+                        Identifier : j (line 53)
+                        Constant : 3 (line 53)
+                    PostfixExpression : ++ (line 53)
+                      Identifier : j (line 53)
+                    CompoundStatement :  (line 55)
+                      BlockItemList :  (line 54)
+                        BlockItem :  (line 54)
+                          ExpressionStatement :  (line 54)
+                            FunctionCall :  (line 54)
+                              Identifier : printf (line 54)
+                              ArgumentList :  (line 54)
+                                StringLiteral : "%d " (line 54)
+                                ArraySubscript :  (line 54)
+                                  ArraySubscript :  (line 54)
+                                    Identifier : product (line 54)
+                                    Identifier : i (line 54)
+                                  Identifier : j (line 54)
+                BlockItem :  (line 56)
+                  ExpressionStatement :  (line 56)
+                    FunctionCall :  (line 56)
+                      Identifier : printf (line 56)
+                      ArgumentList :  (line 56)
+                        StringLiteral : "\n" (line 56)
+        BlockItem :  (line 59)
+          ReturnStatement :  (line 59)
+            Constant : 0 (line 59)
+
+AST DOT file generated: ast.dot
+TAC file generated: output.tac
+
+=== MIPS ASSEMBLY GENERATION ===
+
+=== MIPS ASSEMBLY CODE ===
+    # ==============================================
+    #   MIPS Assembly Code
+    #   Generated from Three-Address Code
+    # ==============================================
+
+.data
+.align 2
+str_5: .asciiz "\nMatrix 1 * Matrix 2:\n"
+.align 2
+str_4: .asciiz "\nTransposed Matrix 1:\n"
+.align 2
+str_3: .asciiz "\nMatrix 2:\n"
+.align 2
+str_2: .asciiz "\n"
+.align 2
+str_1: .asciiz "%d "
+.align 2
+str_0: .asciiz "Matrix 1:\n"
+.align 2
+newline: .asciiz "\n"
+.align 2
+product: .space 36
+.align 2
+transposed: .space 36
+.align 2
+matrix2: .space 36
+.align 2
+matrix1: .space 36
+
+.text
+.globl main
+
+
+    # Function: main
+main:
+    # Reserve stack space for register spills
+    addi $sp, $sp, -256
+    la $t0, matrix1
+    li $t1, 1
+    sw $t1, 0($t0)
+    li $t2, 4
+    add $t1, $t0, $t2
+    li $t2, 2
+    sw $t2, 0($t1)
+    li $t3, 8
+    add $t2, $t0, $t3
+    li $t3, 3
+    sw $t3, 0($t2)
+    li $t4, 12
+    add $t3, $t0, $t4
+    li $t4, 4
+    sw $t4, 0($t3)
+    li $t5, 16
+    add $t4, $t0, $t5
+    li $t5, 5
+    sw $t5, 0($t4)
+    li $t6, 20
+    add $t5, $t0, $t6
+    li $t6, 6
+    sw $t6, 0($t5)
+    li $t7, 24
+    add $t6, $t0, $t7
+    li $t7, 7
+    sw $t7, 0($t6)
+    li $t8, 28
+    add $t7, $t0, $t8
+    li $t8, 8
+    sw $t8, 0($t7)
+    li $t9, 32
+    add $t8, $t0, $t9
+    li $t0, 9
+    sw $t0, 0($t8)
+    la $t0, matrix2
+    li $t9, 9
+    sw $t9, 0($t0)
+    li $s0, 4
+    add $t9, $t0, $s0
+    li $s0, 8
+    sw $s0, 0($t9)
+    li $s1, 8
+    add $s0, $t0, $s1
+    li $s1, 7
+    sw $s1, 0($s0)
+    li $s2, 12
+    add $s1, $t0, $s2
+    li $s2, 6
+    sw $s2, 0($s1)
+    li $s3, 16
+    add $s2, $t0, $s3
+    li $s3, 5
+    sw $s3, 0($s2)
+    li $s4, 20
+    add $s3, $t0, $s4
+    li $s4, 4
+    sw $s4, 0($s3)
+    li $s5, 24
+    add $s4, $t0, $s5
+    li $s5, 3
+    sw $s5, 0($s4)
+    li $s6, 28
+    add $s5, $t0, $s6
+    li $s6, 2
+    sw $s6, 0($s5)
+    li $s7, 32
+    add $s6, $t0, $s7
+    li $t0, 1
+    sw $t0, 0($s6)
+    la $s0, str_0
+    # Save string param str_0 to $s0
+    # Call printf
+    li $v0, 11
+    li $a0, 77
+    syscall
+    li $v0, 11
+    li $a0, 97
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 114
+    syscall
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 120
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 49
+    syscall
+    li $v0, 11
+    li $a0, 58
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    li $t0, 0
+    sw $t0, 0($sp)
+L0:
+    # Reloading i from stack
+    lw $s7, 0($sp)
+    # Spilling t17 to stack
+    sw $s6, 4($sp)
+    li $s6, 3
+    slt $t0, $s7, $s6
+    beq $t0, $zero, L1
+    li $t0, 0
+    sw $t0, 8($sp)
+L3:
+    # Reloading j from stack
+    lw $s6, 8($sp)
+    # Spilling t16 to stack
+    sw $s5, 12($sp)
+    li $s5, 3
+    slt $t0, $s6, $s5
+    beq $t0, $zero, L4
+    la $s1, str_1
+    # Save string param str_1 to $s1
+    li $s5, 3
+    mul $t0, $s7, $s5
+    add $s5, $t0, $s6
+    # Spilling t15 to stack
+    sw $s4, 16($sp)
+    li $s4, 4
+    mul $t0, $s5, $s4
+    la $s4, matrix1
+    add $s5, $s4, $t0
+    lw $t0, 0($s5)
+    move $s2, $t0
+    # Save param t26 to $s2
+    # Call printf
+    # Print integer
+    li $v0, 1
+    move $a0, $s2
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+L5:
+    move $t0, $s6
+    li $s4, 1
+    add $s6, $s6, $s4
+    sw $s6, 8($sp)
+    j L3
+L4:
+    la $s3, str_2
+    # Save string param str_2 to $s3
+    # Call printf
+    li $v0, 11
+    li $a0, 10
+    syscall
+L2:
+    move $s4, $s7
+    li $s5, 1
+    add $s7, $s7, $s5
+    sw $s7, 0($sp)
+    j L0
+L1:
+    la $s4, str_3
+    # Save string param str_3 to $s4
+    # Call printf
+    li $v0, 11
+    li $a0, 10
+    syscall
+    li $v0, 11
+    li $a0, 77
+    syscall
+    li $v0, 11
+    li $a0, 97
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 114
+    syscall
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 120
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 50
+    syscall
+    li $v0, 11
+    li $a0, 58
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    # Reloading i from stack
+    lw $s5, 0($sp)
+    li $s5, 0
+    sw $s5, 0($sp)
+L6:
+    # Reloading i from stack
+    lw $s6, 0($sp)
+    li $s7, 3
+    slt $s5, $s6, $s7
+    beq $s5, $zero, L7
+    # Reloading j from stack
+    lw $s5, 8($sp)
+    li $s5, 0
+    sw $s5, 8($sp)
+L9:
+    # Reloading j from stack
+    lw $s7, 8($sp)
+    # Spilling t30 to stack
+    sw $s4, 20($sp)
+    li $s4, 3
+    slt $s5, $s7, $s4
+    beq $s5, $zero, L10
+    la $s5, str_1
+    # Save string param str_1 to $s5
+    li $s5, 3
+    mul $s4, $s6, $s5
+    add $s5, $s4, $s7
+    # Spilling t28 to stack
+    sw $t0, 24($sp)
+    li $t0, 4
+    mul $s4, $s5, $t0
+    la $t0, matrix2
+    add $s5, $t0, $s4
+    lw $t0, 0($s5)
+    move $s6, $t0
+    # Save param t39 to $s6
+    # Call printf
+    # Print integer
+    li $v0, 1
+    move $a0, $s6
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+L11:
+    move $t0, $s7
+    li $s4, 1
+    add $s7, $s7, $s4
+    sw $s7, 8($sp)
+    j L9
+L10:
+    la $s7, str_2
+    # Save string param str_2 to $s7
+    # Call printf
+    li $v0, 11
+    li $a0, 10
+    syscall
+L8:
+    move $s4, $s6
+    li $s5, 1
+    add $s6, $s6, $s5
+    sw $s6, 0($sp)
+    j L6
+L7:
+    # Reloading i from stack
+    lw $s5, 0($sp)
+    li $s5, 0
+    sw $s5, 0($sp)
+L12:
+    # Reloading i from stack
+    lw $s6, 0($sp)
+    li $s7, 3
+    slt $s5, $s6, $s7
+    beq $s5, $zero, L13
+    # Reloading j from stack
+    lw $s5, 8($sp)
+    li $s5, 0
+    sw $s5, 8($sp)
+L15:
+    # Reloading j from stack
+    lw $s7, 8($sp)
+    # Spilling t43 to stack
+    sw $s4, 28($sp)
+    li $s4, 3
+    slt $s5, $s7, $s4
+    beq $s5, $zero, L16
+    li $s5, 3
+    mul $s4, $s6, $s5
+    add $s5, $s4, $s7
+    # Spilling t41 to stack
+    sw $t0, 32($sp)
+    li $t0, 4
+    mul $s4, $s5, $t0
+    la $t0, matrix1
+    add $s5, $t0, $s4
+    lw $t0, 0($s5)
+    li $s5, 3
+    mul $s4, $s7, $s5
+    add $s5, $s4, $s6
+    # Spilling t11 to stack
+    sw $s0, 36($sp)
+    li $s0, 4
+    mul $s4, $s5, $s0
+    la $s0, transposed
+    add $s5, $s0, $s4
+    sw $t0, 0($s5)
+L17:
+    move $t0, $s7
+    li $s0, 1
+    add $s7, $s7, $s0
+    sw $s7, 8($sp)
+    j L15
+L16:
+L14:
+    move $s0, $s6
+    li $s4, 1
+    add $s6, $s6, $s4
+    sw $s6, 0($sp)
+    j L12
+L13:
+    la $s0, str_4
+    # Save string param str_4 to $s0
+    # Call printf
+    li $v0, 11
+    li $a0, 10
+    syscall
+    li $v0, 11
+    li $a0, 84
+    syscall
+    li $v0, 11
+    li $a0, 114
+    syscall
+    li $v0, 11
+    li $a0, 97
+    syscall
+    li $v0, 11
+    li $a0, 110
+    syscall
+    li $v0, 11
+    li $a0, 115
+    syscall
+    li $v0, 11
+    li $a0, 112
+    syscall
+    li $v0, 11
+    li $a0, 111
+    syscall
+    li $v0, 11
+    li $a0, 115
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 100
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 77
+    syscall
+    li $v0, 11
+    li $a0, 97
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 114
+    syscall
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 120
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 49
+    syscall
+    li $v0, 11
+    li $a0, 58
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    # Reloading i from stack
+    lw $s4, 0($sp)
+    li $s4, 0
+    sw $s4, 0($sp)
+L18:
+    # Reloading i from stack
+    lw $s6, 0($sp)
+    li $s7, 3
+    slt $s4, $s6, $s7
+    beq $s4, $zero, L19
+    # Reloading j from stack
+    lw $s4, 8($sp)
+    li $s4, 0
+    sw $s4, 8($sp)
+L21:
+    # Reloading j from stack
+    lw $s7, 8($sp)
+    # Spilling t58 to stack
+    sw $s0, 40($sp)
+    li $s0, 3
+    slt $s4, $s7, $s0
+    beq $s4, $zero, L22
+    la $s1, str_1
+    # Save string param str_1 to $s1
+    li $s4, 3
+    mul $s0, $s6, $s4
+    add $s4, $s0, $s7
+    # Spilling t57 to stack
+    sw $t0, 44($sp)
+    li $t0, 4
+    mul $s0, $s4, $t0
+    la $t0, transposed
+    add $s4, $t0, $s0
+    lw $t0, 0($s4)
+    move $s2, $t0
+    # Save param t67 to $s2
+    # Call printf
+    # Print integer
+    li $v0, 1
+    move $a0, $s2
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+L23:
+    move $t0, $s7
+    li $s0, 1
+    add $s7, $s7, $s0
+    sw $s7, 8($sp)
+    j L21
+L22:
+    la $s3, str_2
+    # Save string param str_2 to $s3
+    # Call printf
+    li $v0, 11
+    li $a0, 10
+    syscall
+L20:
+    move $s0, $s6
+    li $s4, 1
+    add $s6, $s6, $s4
+    sw $s6, 0($sp)
+    j L18
+L19:
+    # Reloading i from stack
+    lw $s4, 0($sp)
+    li $s4, 0
+    sw $s4, 0($sp)
+L24:
+    # Reloading i from stack
+    lw $s6, 0($sp)
+    li $s7, 3
+    slt $s4, $s6, $s7
+    beq $s4, $zero, L25
+    # Reloading j from stack
+    lw $s4, 8($sp)
+    li $s4, 0
+    sw $s4, 8($sp)
+L27:
+    # Reloading j from stack
+    lw $s7, 8($sp)
+    # Spilling t71 to stack
+    sw $s0, 48($sp)
+    li $s0, 3
+    slt $s4, $s7, $s0
+    beq $s4, $zero, L28
+    li $s4, 3
+    mul $s0, $s6, $s4
+    add $s4, $s0, $s7
+    # Spilling t69 to stack
+    sw $t0, 52($sp)
+    li $t0, 4
+    mul $s0, $s4, $t0
+    la $t0, product
+    add $s4, $t0, $s0
+    li $t0, 0
+    sw $t0, 0($s4)
+    li $t0, 0
+    sw $t0, 56($sp)
+L30:
+    # Reloading k from stack
+    lw $s0, 56($sp)
+    # Spilling t78 to stack
+    sw $s4, 60($sp)
+    li $s4, 3
+    slt $t0, $s0, $s4
+    beq $t0, $zero, L31
+    li $s4, 3
+    mul $t0, $s6, $s4
+    add $s4, $t0, $s0
+    # Spilling t56 to stack
+    sw $s5, 64($sp)
+    li $s5, 4
+    mul $t0, $s4, $s5
+    la $s4, matrix1
+    add $s5, $s4, $t0
+    lw $t0, 0($s5)
+    li $s5, 3
+    mul $s4, $s0, $s5
+    add $s5, $s4, $s7
+    # Spilling t1 to stack
+    sw $t1, 68($sp)
+    li $t1, 4
+    mul $s4, $s5, $t1
+    la $t1, matrix2
+    add $s5, $t1, $s4
+    lw $t1, 0($s5)
+    mul $s4, $t0, $t1
+    li $t1, 3
+    mul $t0, $s6, $t1
+    add $t1, $t0, $s7
+    li $s5, 4
+    mul $t0, $t1, $s5
+    la $t1, product
+    add $s5, $t1, $t0
+    lw $t0, 0($s5)
+    add $t1, $t0, $s4
+    sw $t1, 0($t0)
+L32:
+    move $t1, $s0
+    li $s4, 1
+    add $s0, $s0, $s4
+    sw $s0, 56($sp)
+    j L30
+L31:
+L29:
+    move $s0, $s7
+    li $s4, 1
+    add $s7, $s7, $s4
+    sw $s7, 8($sp)
+    j L27
+L28:
+L26:
+    move $s4, $s6
+    li $s5, 1
+    add $s6, $s6, $s5
+    sw $s6, 0($sp)
+    j L24
+L25:
+    la $s4, str_5
+    # Save string param str_5 to $s4
+    # Call printf
+    li $v0, 11
+    li $a0, 10
+    syscall
+    li $v0, 11
+    li $a0, 77
+    syscall
+    li $v0, 11
+    li $a0, 97
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 114
+    syscall
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 120
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 49
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 42
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 77
+    syscall
+    li $v0, 11
+    li $a0, 97
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 114
+    syscall
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 120
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 50
+    syscall
+    li $v0, 11
+    li $a0, 58
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    # Reloading i from stack
+    lw $s5, 0($sp)
+    li $s5, 0
+    sw $s5, 0($sp)
+L33:
+    # Reloading i from stack
+    lw $s6, 0($sp)
+    li $s7, 3
+    slt $s5, $s6, $s7
+    beq $s5, $zero, L34
+    # Reloading j from stack
+    lw $s5, 8($sp)
+    li $s5, 0
+    sw $s5, 8($sp)
+L36:
+    # Reloading j from stack
+    lw $s7, 8($sp)
+    # Spilling t102 to stack
+    sw $s4, 72($sp)
+    li $s4, 3
+    slt $s5, $s7, $s4
+    beq $s5, $zero, L37
+    la $s5, str_1
+    # Save string param str_1 to $s5
+    li $s5, 3
+    mul $s4, $s6, $s5
+    add $s5, $s4, $s7
+    # Spilling t101 to stack
+    sw $s0, 76($sp)
+    li $s0, 4
+    mul $s4, $s5, $s0
+    la $s0, product
+    add $s5, $s0, $s4
+    lw $s0, 0($s5)
+    move $s6, $s0
+    # Save param t111 to $s6
+    # Call printf
+    # Print integer
+    li $v0, 1
+    move $a0, $s6
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+L38:
+    move $s0, $s7
+    li $s4, 1
+    add $s7, $s7, $s4
+    sw $s7, 8($sp)
+    j L36
+L37:
+    la $s7, str_2
+    # Save string param str_2 to $s7
+    # Call printf
+    li $v0, 11
+    li $a0, 10
+    syscall
+L35:
+    move $s4, $s6
+    li $s5, 1
+    add $s6, $s6, $s5
+    sw $s6, 0($sp)
+    j L33
+L34:
+    li $v0, 0
+    # Restore stack and exit program
+    addi $sp, $sp, 256
+    li $v0, 10
+    syscall
+
+MIPS file generated: output.s
+
+==================================================
+COMPILATION SUCCESSFUL
+==================================================

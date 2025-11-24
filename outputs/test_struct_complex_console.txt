@@ -1,0 +1,804 @@
+C/C++ Syntax Analyzer with AST
+==============================
+
+Token: #include <stdio.h>   Type: PREPROCESSOR   
+Token: struct               Type: KEYWORD        
+Token: Point                Type: IDENTIFIER     
+Token: {                    Type: LBRACE         
+Token: int                  Type: KEYWORD        
+Token: x                    Type: IDENTIFIER     
+Token: ;                    Type: SEMICOLON      
+Token: int                  Type: KEYWORD        
+Token: y                    Type: IDENTIFIER     
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: ;                    Type: SEMICOLON      
+Token: struct               Type: KEYWORD        
+Token: Rectangle            Type: IDENTIFIER     
+Token: {                    Type: LBRACE         
+Token: struct               Type: KEYWORD        
+Token: Point                Type: TYPEDEF_NAME   
+Token: topLeft              Type: IDENTIFIER     
+Token: ;                    Type: SEMICOLON      
+Token: struct               Type: KEYWORD        
+Token: Point                Type: TYPEDEF_NAME   
+Token: bottomRight          Type: IDENTIFIER     
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: ;                    Type: SEMICOLON      
+Token: int                  Type: KEYWORD        
+Token: area                 Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: struct               Type: KEYWORD        
+Token: Rectangle            Type: TYPEDEF_NAME   
+Token: r                    Type: IDENTIFIER     
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: int                  Type: KEYWORD        
+Token: width                Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: r                    Type: IDENTIFIER     
+Token: .                    Type: DOT            
+Token: bottomRight          Type: IDENTIFIER     
+Token: .                    Type: DOT            
+Token: x                    Type: IDENTIFIER     
+Token: -                    Type: ARITHMETIC_OP  
+Token: r                    Type: IDENTIFIER     
+Token: .                    Type: DOT            
+Token: topLeft              Type: IDENTIFIER     
+Token: .                    Type: DOT            
+Token: x                    Type: IDENTIFIER     
+Token: ;                    Type: SEMICOLON      
+Token: int                  Type: KEYWORD        
+Token: height               Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: r                    Type: IDENTIFIER     
+Token: .                    Type: DOT            
+Token: bottomRight          Type: IDENTIFIER     
+Token: .                    Type: DOT            
+Token: y                    Type: IDENTIFIER     
+Token: -                    Type: ARITHMETIC_OP  
+Token: r                    Type: IDENTIFIER     
+Token: .                    Type: DOT            
+Token: topLeft              Type: IDENTIFIER     
+Token: .                    Type: DOT            
+Token: y                    Type: IDENTIFIER     
+Token: ;                    Type: SEMICOLON      
+Token: return               Type: KEYWORD        
+Token: width                Type: IDENTIFIER     
+Token: *                    Type: ARITHMETIC_OP  
+Token: height               Type: IDENTIFIER     
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: int                  Type: KEYWORD        
+Token: main                 Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: struct               Type: KEYWORD        
+Token: Point                Type: TYPEDEF_NAME   
+Token: p1                   Type: IDENTIFIER     
+Token: ;                    Type: SEMICOLON      
+Token: p1                   Type: IDENTIFIER     
+Token: .                    Type: DOT            
+Token: x                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: 0                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: p1                   Type: IDENTIFIER     
+Token: .                    Type: DOT            
+Token: y                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: 0                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: struct               Type: KEYWORD        
+Token: Point                Type: TYPEDEF_NAME   
+Token: p2                   Type: IDENTIFIER     
+Token: ;                    Type: SEMICOLON      
+Token: p2                   Type: IDENTIFIER     
+Token: .                    Type: DOT            
+Token: x                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: 10                   Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: p2                   Type: IDENTIFIER     
+Token: .                    Type: DOT            
+Token: y                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: 5                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: struct               Type: KEYWORD        
+Token: Rectangle            Type: TYPEDEF_NAME   
+Token: rect                 Type: IDENTIFIER     
+Token: ;                    Type: SEMICOLON      
+Token: rect                 Type: IDENTIFIER     
+Token: .                    Type: DOT            
+Token: topLeft              Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: p1                   Type: IDENTIFIER     
+Token: ;                    Type: SEMICOLON      
+Token: rect                 Type: IDENTIFIER     
+Token: .                    Type: DOT            
+Token: bottomRight          Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: p2                   Type: IDENTIFIER     
+Token: ;                    Type: SEMICOLON      
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "Rectangle area: %d\n" Type: STRING_LITERAL 
+Token: ,                    Type: COMMA          
+Token: area                 Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: rect                 Type: IDENTIFIER     
+Token: )                    Type: RPAREN         
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: struct               Type: KEYWORD        
+Token: Point                Type: TYPEDEF_NAME   
+Token: *                    Type: ARITHMETIC_OP  
+Token: ptr                  Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: &                    Type: BITWISE_OP     
+Token: p1                   Type: IDENTIFIER     
+Token: ;                    Type: SEMICOLON      
+Token: ptr                  Type: IDENTIFIER     
+Token: ->                   Type: ARROW          
+Token: x                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: 5                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: ptr                  Type: IDENTIFIER     
+Token: ->                   Type: ARROW          
+Token: y                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: 3                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "Point: (%d, %d)\n"  Type: STRING_LITERAL 
+Token: ,                    Type: COMMA          
+Token: ptr                  Type: IDENTIFIER     
+Token: ->                   Type: ARROW          
+Token: x                    Type: IDENTIFIER     
+Token: ,                    Type: COMMA          
+Token: ptr                  Type: IDENTIFIER     
+Token: ->                   Type: ARROW          
+Token: y                    Type: IDENTIFIER     
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: return               Type: KEYWORD        
+Token: 0                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+
+=== PARSING SUCCESSFUL ===
+
+=== SEMANTIC ANALYSIS ===
+=== SEMANTIC ANALYSIS STARTED ===
+Line 30: WARNING: Variable 'p1' may be uninitialized
+Line 31: WARNING: Variable 'p2' may be uninitialized
+Line 33: WARNING: Variable 'rect' may be uninitialized
+=== SEMANTIC ANALYSIS COMPLETED ===
+Found 0 semantic error(s)
+Found 3 warning(s)
+
+=== SYMBOL TABLE (ACTIVE SCOPES) ===
+Scope 0:
+  function 'main' : int (scope: 0, line: 43) [has_return]
+ (scope: 0, line: 43) [has_return]
+  struct 'Rectangle' : struct (scope: 0, line: 12)
+    member 'topLeft' : struct Point (scope: 0, line: 0)
+ (scope: 0, line: 0)
+    member 'bottomRight' : struct Point (scope: 0, line: 0)
+ (scope: 0, line: 0)
+ (scope: 0, line: 12)
+    Members:
+    member 'topLeft' : struct Point (scope: 0, line: 0)
+ (scope: 0, line: 0)
+    member 'bottomRight' : struct Point (scope: 0, line: 0)
+ (scope: 0, line: 0)
+  function 'area' : int(struct Rectangle) (scope: 0, line: 18) [has_return]
+    parameter 'r' : struct Rectangle (scope: 0, line: 0)
+ (scope: 0, line: 0)
+ (struct Rectangle r) (scope: 0, line: 18) [has_return]
+  struct 'Point' : struct (scope: 0, line: 7)
+    member 'x' : int (scope: 0, line: 0)
+ (scope: 0, line: 0)
+    member 'y' : int (scope: 0, line: 0)
+ (scope: 0, line: 0)
+ (scope: 0, line: 7)
+    Members:
+    member 'x' : int (scope: 0, line: 0)
+ (scope: 0, line: 0)
+    member 'y' : int (scope: 0, line: 0)
+ (scope: 0, line: 0)
+  constant 'NULL' : void* (scope: 0, line: 0)
+ (scope: 0, line: 0)
+
+ Semantic analysis passed with no errors.
+
+=== CODE GENERATION ===
+
+=== THREE ADDRESS CODE ===
+area:
+     = r param_decl struct Rectangle
+    t0 = &r
+    t1 = t0 + 8
+    t2 = *t1
+    t3 = &r
+    t4 = *t3
+    t5 = t2 - t4
+    width = t5
+    t6 = &r
+    t7 = t6 + 8
+    t8 = *t7
+    t9 = &r
+    t10 = *t9
+    t11 = t8 - t10
+    height = t11
+    t12 = width * height
+    return t12
+main:
+    t13 = &p1
+    *t13 = 0
+    t14 = &p1
+    t15 = t14 + 4
+    *t15 = 0
+    t16 = &p2
+    *t16 = 10
+    t17 = &p2
+    t18 = t17 + 4
+    *t18 = 5
+    t19 = p1[0]
+    t20 = &rect
+    *t20 = t19
+    t21 = &rect
+    t22 = t21 + 8
+    *t22 = p2
+    param "Rectangle area: %d\n"
+    t24 = &rect
+    t25 = t24 + 0
+    t25 = *t23
+    param t23
+    t27 = &rect
+    t28 = t27 + 4
+    t28 = *t26
+    param t26
+    t30 = &rect
+    t31 = t30 + 8
+    t31 = *t29
+    param t29
+    t33 = &rect
+    t34 = t33 + 12
+    t34 = *t32
+    param t32
+    t35 = call area, 4
+    param t35
+    t36 = call printf, 2
+    t37 = &p1
+    ptr = t37
+    *ptr = 5
+    t38 = ptr + 4
+    *t38 = 3
+    param "Point: (%d, %d)\n"
+    t39 = *ptr
+    param t39
+    t40 = ptr + 4
+    t41 = *t40
+    param t41
+    t42 = call printf, 3
+    return 0
+
+Total instructions: 68
+
+=== ABSTRACT SYNTAX TREE ===
+TranslationUnit :  (line 2)
+  Preprocessor : #include <stdio.h> (line 2)
+  Declaration :  (line 7)
+    DeclarationSpecifiers :  (line 7)
+      StructOrUnionSpecifier :  (line 7)
+        StructOrUnion : struct (line 7)
+        Identifier : Point (line 7)
+        StructDeclarationList :  (line 5)
+          StructDeclaration :  (line 5)
+            TypeSpecifier : int (line 5)
+            StructDeclaratorList :  (line 5)
+              DirectDeclarator : x (line 5)
+          StructDeclaration :  (line 6)
+            TypeSpecifier : int (line 6)
+            StructDeclaratorList :  (line 6)
+              DirectDeclarator : y (line 6)
+  Declaration :  (line 12)
+    DeclarationSpecifiers :  (line 12)
+      StructOrUnionSpecifier :  (line 12)
+        StructOrUnion : struct (line 12)
+        Identifier : Rectangle (line 12)
+        StructDeclarationList :  (line 10)
+          StructDeclaration :  (line 10)
+            StructOrUnionSpecifier :  (line 10)
+              StructOrUnion : struct (line 10)
+              Identifier : Point (line 10)
+            StructDeclaratorList :  (line 10)
+              DirectDeclarator : topLeft (line 10)
+          StructDeclaration :  (line 11)
+            StructOrUnionSpecifier :  (line 11)
+              StructOrUnion : struct (line 11)
+              Identifier : Point (line 11)
+            StructDeclaratorList :  (line 11)
+              DirectDeclarator : bottomRight (line 11)
+  FunctionDefinition :  (line 18)
+    DeclarationSpecifiers :  (line 14)
+      TypeSpecifier : int (line 14)
+    FunctionDeclarator :  (line 14)
+      DirectDeclarator : area (line 14)
+      ParameterList :  (line 14)
+        ParameterDeclaration :  (line 14)
+          DeclarationSpecifiers :  (line 14)
+            StructOrUnionSpecifier :  (line 14)
+              StructOrUnion : struct (line 14)
+              Identifier : Rectangle (line 14)
+          DirectDeclarator : r (line 14)
+    CompoundStatement :  (line 18)
+      BlockItemList :  (line 15)
+        BlockItem :  (line 15)
+          Declaration :  (line 15)
+            DeclarationSpecifiers :  (line 15)
+              TypeSpecifier : int (line 15)
+            InitDeclaratorList :  (line 15)
+              InitDeclarator :  (line 15)
+                DirectDeclarator : width (line 15)
+                Initializer :  (line 15)
+                  AdditiveExpression : - (line 15)
+                    MemberAccess : . (line 15)
+                      MemberAccess : . (line 15)
+                        Identifier : r (line 15)
+                        Identifier : bottomRight (line 15)
+                      Identifier : x (line 15)
+                    MemberAccess : . (line 15)
+                      MemberAccess : . (line 15)
+                        Identifier : r (line 15)
+                        Identifier : topLeft (line 15)
+                      Identifier : x (line 15)
+        BlockItem :  (line 16)
+          Declaration :  (line 16)
+            DeclarationSpecifiers :  (line 16)
+              TypeSpecifier : int (line 16)
+            InitDeclaratorList :  (line 16)
+              InitDeclarator :  (line 16)
+                DirectDeclarator : height (line 16)
+                Initializer :  (line 16)
+                  AdditiveExpression : - (line 16)
+                    MemberAccess : . (line 16)
+                      MemberAccess : . (line 16)
+                        Identifier : r (line 16)
+                        Identifier : bottomRight (line 16)
+                      Identifier : y (line 16)
+                    MemberAccess : . (line 16)
+                      MemberAccess : . (line 16)
+                        Identifier : r (line 16)
+                        Identifier : topLeft (line 16)
+                      Identifier : y (line 16)
+        BlockItem :  (line 17)
+          ReturnStatement :  (line 17)
+            MultiplicativeExpression : * (line 17)
+              Identifier : width (line 17)
+              Identifier : height (line 17)
+  FunctionDefinition :  (line 43)
+    DeclarationSpecifiers :  (line 20)
+      TypeSpecifier : int (line 20)
+    FunctionDeclarator :  (line 20)
+      DirectDeclarator : main (line 20)
+    CompoundStatement :  (line 43)
+      BlockItemList :  (line 21)
+        BlockItem :  (line 21)
+          Declaration :  (line 21)
+            DeclarationSpecifiers :  (line 21)
+              StructOrUnionSpecifier :  (line 21)
+                StructOrUnion : struct (line 21)
+                Identifier : Point (line 21)
+            InitDeclaratorList :  (line 21)
+              InitDeclarator :  (line 21)
+                DirectDeclarator : p1 (line 21)
+        BlockItem :  (line 22)
+          ExpressionStatement :  (line 22)
+            AssignmentExpression : = (line 22)
+              MemberAccess : . (line 22)
+                Identifier : p1 (line 22)
+                Identifier : x (line 22)
+              Constant : 0 (line 22)
+        BlockItem :  (line 23)
+          ExpressionStatement :  (line 23)
+            AssignmentExpression : = (line 23)
+              MemberAccess : . (line 23)
+                Identifier : p1 (line 23)
+                Identifier : y (line 23)
+              Constant : 0 (line 23)
+        BlockItem :  (line 25)
+          Declaration :  (line 25)
+            DeclarationSpecifiers :  (line 25)
+              StructOrUnionSpecifier :  (line 25)
+                StructOrUnion : struct (line 25)
+                Identifier : Point (line 25)
+            InitDeclaratorList :  (line 25)
+              InitDeclarator :  (line 25)
+                DirectDeclarator : p2 (line 25)
+        BlockItem :  (line 26)
+          ExpressionStatement :  (line 26)
+            AssignmentExpression : = (line 26)
+              MemberAccess : . (line 26)
+                Identifier : p2 (line 26)
+                Identifier : x (line 26)
+              Constant : 10 (line 26)
+        BlockItem :  (line 27)
+          ExpressionStatement :  (line 27)
+            AssignmentExpression : = (line 27)
+              MemberAccess : . (line 27)
+                Identifier : p2 (line 27)
+                Identifier : y (line 27)
+              Constant : 5 (line 27)
+        BlockItem :  (line 29)
+          Declaration :  (line 29)
+            DeclarationSpecifiers :  (line 29)
+              StructOrUnionSpecifier :  (line 29)
+                StructOrUnion : struct (line 29)
+                Identifier : Rectangle (line 29)
+            InitDeclaratorList :  (line 29)
+              InitDeclarator :  (line 29)
+                DirectDeclarator : rect (line 29)
+        BlockItem :  (line 30)
+          ExpressionStatement :  (line 30)
+            AssignmentExpression : = (line 30)
+              MemberAccess : . (line 30)
+                Identifier : rect (line 30)
+                Identifier : topLeft (line 30)
+              Identifier : p1 (line 30)
+        BlockItem :  (line 31)
+          ExpressionStatement :  (line 31)
+            AssignmentExpression : = (line 31)
+              MemberAccess : . (line 31)
+                Identifier : rect (line 31)
+                Identifier : bottomRight (line 31)
+              Identifier : p2 (line 31)
+        BlockItem :  (line 33)
+          ExpressionStatement :  (line 33)
+            FunctionCall :  (line 33)
+              Identifier : printf (line 33)
+              ArgumentList :  (line 33)
+                StringLiteral : "Rectangle area: %d\n" (line 33)
+                FunctionCall :  (line 33)
+                  Identifier : area (line 33)
+                  ArgumentList :  (line 33)
+                    Identifier : rect (line 33)
+        BlockItem :  (line 36)
+          Declaration :  (line 36)
+            DeclarationSpecifiers :  (line 36)
+              StructOrUnionSpecifier :  (line 36)
+                StructOrUnion : struct (line 36)
+                Identifier : Point (line 36)
+            InitDeclaratorList :  (line 36)
+              InitDeclarator :  (line 36)
+                Declarator :  (line 36)
+                  Pointer :  (line 36)
+                  DirectDeclarator : ptr (line 36)
+                Initializer :  (line 36)
+                  UnaryExpression : & (line 36)
+                    Identifier : p1 (line 36)
+        BlockItem :  (line 37)
+          ExpressionStatement :  (line 37)
+            AssignmentExpression : = (line 37)
+              MemberAccess : -> (line 37)
+                Identifier : ptr (line 37)
+                Identifier : x (line 37)
+              Constant : 5 (line 37)
+        BlockItem :  (line 38)
+          ExpressionStatement :  (line 38)
+            AssignmentExpression : = (line 38)
+              MemberAccess : -> (line 38)
+                Identifier : ptr (line 38)
+                Identifier : y (line 38)
+              Constant : 3 (line 38)
+        BlockItem :  (line 40)
+          ExpressionStatement :  (line 40)
+            FunctionCall :  (line 40)
+              Identifier : printf (line 40)
+              ArgumentList :  (line 40)
+                StringLiteral : "Point: (%d, %d)\n" (line 40)
+                MemberAccess : -> (line 40)
+                  Identifier : ptr (line 40)
+                  Identifier : x (line 40)
+                MemberAccess : -> (line 40)
+                  Identifier : ptr (line 40)
+                  Identifier : y (line 40)
+        BlockItem :  (line 42)
+          ReturnStatement :  (line 42)
+            Constant : 0 (line 42)
+
+AST DOT file generated: ast.dot
+TAC file generated: output.tac
+
+=== MIPS ASSEMBLY GENERATION ===
+
+=== MIPS ASSEMBLY CODE ===
+    # ==============================================
+    #   MIPS Assembly Code
+    #   Generated from Three-Address Code
+    # ==============================================
+
+.data
+.align 2
+str_1: .asciiz "Point: (%d, %d)\n"
+.align 2
+str_0: .asciiz "Rectangle area: %d\n"
+.align 2
+newline: .asciiz "\n"
+.align 2
+var_p1: .space 4
+.align 2
+var_r: .space 400
+.align 2
+var_p2: .space 400
+.align 2
+rect: .space 400
+
+.text
+.globl main
+
+
+    # Function: area
+func_area:
+    # Function prologue
+    addi $sp, $sp, -56
+    sw $ra, 52($sp)
+    sw $fp, 48($sp)
+    addi $fp, $sp, 56
+    sw $a0, 44($sp)
+    sw $a1, 40($sp)
+    sw $a2, 36($sp)
+    sw $a3, 32($sp)
+    sw $s0, 28($sp)
+    sw $s1, 24($sp)
+    sw $s2, 20($sp)
+    sw $s3, 16($sp)
+    sw $s4, 12($sp)
+    sw $s5, 8($sp)
+    sw $s6, 4($sp)
+    sw $s7, 0($sp)
+    # Parameter r is struct struct Rectangle
+    la $t0, var_r
+    li $t2, 8
+    add $t1, $t0, $t2
+    lw $t0, 0($t1)
+    la $t1, var_r
+    lw $t2, 0($t1)
+    sub $t1, $t0, $t2
+    move $t0, $t1
+    sw $t0, 0($sp)
+    la $t0, var_r
+    li $t2, 8
+    add $t1, $t0, $t2
+    lw $t0, 0($t1)
+    la $t1, var_r
+    lw $t2, 0($t1)
+    sub $t1, $t0, $t2
+    move $t0, $t1
+    sw $t0, 4($sp)
+    # Reloading width from stack
+    lw $t1, 0($sp)
+    # Reloading height from stack
+    lw $t2, 4($sp)
+    mul $t0, $t1, $t2
+    move $v0, $t0
+    # Function epilogue
+    lw $s0, 28($sp)
+    lw $s1, 24($sp)
+    lw $s2, 20($sp)
+    lw $s3, 16($sp)
+    lw $s4, 12($sp)
+    lw $s5, 8($sp)
+    lw $s6, 4($sp)
+    lw $s7, 0($sp)
+    lw $fp, 48($sp)
+    lw $ra, 52($sp)
+    addi $sp, $sp, 56
+    jr $ra
+
+    # Function: main
+main:
+    # Reserve stack space for register spills
+    addi $sp, $sp, -256
+    la $t0, var_p1
+    li $t1, 0
+    sw $t1, 0($t0)
+    la $t1, var_p1
+    li $t3, 4
+    add $t2, $t1, $t3
+    li $t1, 0
+    sw $t1, 0($t2)
+    la $t1, var_p2
+    li $t3, 10
+    sw $t3, 0($t1)
+    la $t3, var_p2
+    li $t5, 4
+    add $t4, $t3, $t5
+    li $t3, 5
+    sw $t3, 0($t4)
+    li $t3, 0
+    la $t5, var_p1
+    add $t6, $t5, $t3
+    lw $t3, 0($t6)
+    la $t5, rect
+    sw $t3, 0($t5)
+    la $t3, rect
+    li $t7, 8
+    add $t6, $t3, $t7
+    sw $t3, 0($t6)
+    la $s0, str_0
+    # Save string param str_0 to $s0
+    la $t7, rect
+    li $t9, 0
+    add $t8, $t7, $t9
+    lw $t8, 0($t7)
+    move $s1, $t7
+    # Save param t23 to $s1
+    la $t7, rect
+    li $s0, 4
+    add $t9, $t7, $s0
+    lw $t9, 0($t7)
+    move $s2, $t7
+    # Save param t26 to $s2
+    la $t7, rect
+    li $s1, 8
+    add $s0, $t7, $s1
+    lw $s0, 0($t7)
+    move $s3, $t7
+    # Save param t29 to $s3
+    la $t7, rect
+    li $s2, 12
+    add $s1, $t7, $s2
+    lw $s1, 0($t7)
+    move $s4, $t7
+    # Save param t32 to $s4
+    # Call area
+    move $a0, $s1
+    move $a1, $s2
+    move $a2, $s3
+    move $a3, $s4
+    # Spilling p2 before function call
+    sw $t3, 0($sp)
+    jal func_area
+    move $s5, $v0
+    move $s6, $s5
+    # Save param t35 to $s6
+    # Call printf
+    li $v0, 11
+    li $a0, 82
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 99
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 97
+    syscall
+    li $v0, 11
+    li $a0, 110
+    syscall
+    li $v0, 11
+    li $a0, 103
+    syscall
+    li $v0, 11
+    li $a0, 108
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 97
+    syscall
+    li $v0, 11
+    li $a0, 114
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 97
+    syscall
+    li $v0, 11
+    li $a0, 58
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    # Print integer
+    li $v0, 1
+    move $a0, $s6
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    la $t0, var_p1
+    move $t1, $t0
+    sw $t1, 4($sp)
+    # Reloading ptr from stack
+    lw $t0, 4($sp)
+    li $t1, 5
+    sw $t1, 0($t0)
+    li $t2, 4
+    add $t1, $t0, $t2
+    li $t2, 3
+    sw $t2, 0($t1)
+    la $s7, str_1
+    # Save string param str_1 to $s7
+    lw $t2, 0($t0)
+    move $s0, $t2
+    # Save param t39 to $s0
+    li $t3, 4
+    add $t2, $t0, $t3
+    lw $t3, 0($t2)
+    move $s1, $t3
+    # Save param t41 to $s1
+    # Call printf
+    li $v0, 11
+    li $a0, 80
+    syscall
+    li $v0, 11
+    li $a0, 111
+    syscall
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 110
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 58
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 40
+    syscall
+    # Print integer
+    li $v0, 1
+    move $a0, $s0
+    syscall
+    li $v0, 11
+    li $a0, 44
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    # Print integer
+    li $v0, 1
+    move $a0, $s1
+    syscall
+    li $v0, 11
+    li $a0, 41
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    li $v0, 0
+    # Restore stack and exit program
+    addi $sp, $sp, 256
+    li $v0, 10
+    syscall
+
+MIPS file generated: output.s
+
+==================================================
+COMPILATION SUCCESSFUL
+==================================================

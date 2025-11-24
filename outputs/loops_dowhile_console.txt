@@ -1,0 +1,499 @@
+C/C++ Syntax Analyzer with AST
+==============================
+
+Token:     #include <stdio.h> Type: PREPROCESSOR   
+Token: int                  Type: KEYWORD        
+Token: main                 Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: int                  Type: KEYWORD        
+Token: i                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: 0                    Type: INTEGER_CONSTANT
+Token: ,                    Type: COMMA          
+Token: j                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: 0                    Type: INTEGER_CONSTANT
+Token: ,                    Type: COMMA          
+Token: sum                  Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: 0                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: int                  Type: KEYWORD        
+Token: limit                Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: 5                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: do                   Type: KEYWORD        
+Token: {                    Type: LBRACE         
+Token: j                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: 0                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: do                   Type: KEYWORD        
+Token: {                    Type: LBRACE         
+Token: sum                  Type: IDENTIFIER     
+Token: +=                   Type: ASSIGN_OP      
+Token: i                    Type: IDENTIFIER     
+Token: *                    Type: ARITHMETIC_OP  
+Token: j                    Type: IDENTIFIER     
+Token: ;                    Type: SEMICOLON      
+Token: if                   Type: KEYWORD        
+Token: (                    Type: LPAREN         
+Token: (                    Type: LPAREN         
+Token: i                    Type: IDENTIFIER     
+Token: +                    Type: ARITHMETIC_OP  
+Token: j                    Type: IDENTIFIER     
+Token: )                    Type: RPAREN         
+Token: %                    Type: ARITHMETIC_OP  
+Token: 2                    Type: INTEGER_CONSTANT
+Token: ==                   Type: RELATIONAL_OP  
+Token: 0                    Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: sum                  Type: IDENTIFIER     
+Token: +=                   Type: ASSIGN_OP      
+Token: 1                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: else                 Type: KEYWORD        
+Token: {                    Type: LBRACE         
+Token: sum                  Type: IDENTIFIER     
+Token: -=                   Type: ASSIGN_OP      
+Token: 1                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: j                    Type: IDENTIFIER     
+Token: ++                   Type: POSTFIX_OP     
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: while                Type: KEYWORD        
+Token: (                    Type: LPAREN         
+Token: j                    Type: IDENTIFIER     
+Token: <                    Type: RELATIONAL_OP  
+Token: limit                Type: IDENTIFIER     
+Token: -                    Type: ARITHMETIC_OP  
+Token: i                    Type: IDENTIFIER     
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: if                   Type: KEYWORD        
+Token: (                    Type: LPAREN         
+Token: sum                  Type: IDENTIFIER     
+Token: %                    Type: ARITHMETIC_OP  
+Token: 10                   Type: INTEGER_CONSTANT
+Token: ==                   Type: RELATIONAL_OP  
+Token: 0                    Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: i                    Type: IDENTIFIER     
+Token: +=                   Type: ASSIGN_OP      
+Token: 2                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: else                 Type: KEYWORD        
+Token: {                    Type: LBRACE         
+Token: i                    Type: IDENTIFIER     
+Token: ++                   Type: POSTFIX_OP     
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "i=%d, sum=%d\n"     Type: STRING_LITERAL 
+Token: ,                    Type: COMMA          
+Token: i                    Type: IDENTIFIER     
+Token: ,                    Type: COMMA          
+Token: sum                  Type: IDENTIFIER     
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: while                Type: KEYWORD        
+Token: (                    Type: LPAREN         
+Token: i                    Type: IDENTIFIER     
+Token: <                    Type: RELATIONAL_OP  
+Token: limit                Type: IDENTIFIER     
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: return               Type: KEYWORD        
+Token: 0                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+
+=== PARSING SUCCESSFUL ===
+
+=== SEMANTIC ANALYSIS ===
+=== SEMANTIC ANALYSIS STARTED ===
+Line 9: WARNING: Assignment in loop condition - did you mean '=='?
+Line 11: WARNING: Assignment in loop condition - did you mean '=='?
+Line 13: WARNING: Assignment in loop condition - did you mean '=='?
+Line 15: WARNING: Assignment in loop condition - did you mean '=='?
+Line 21: WARNING: Assignment in loop condition - did you mean '=='?
+Line 11: WARNING: Assignment in loop condition - did you mean '=='?
+Line 13: WARNING: Assignment in loop condition - did you mean '=='?
+Line 15: WARNING: Assignment in loop condition - did you mean '=='?
+=== SEMANTIC ANALYSIS COMPLETED ===
+Found 0 semantic error(s)
+Found 8 warning(s)
+
+=== SYMBOL TABLE (ACTIVE SCOPES) ===
+Scope 0:
+  function 'main' : int (scope: 0, line: 31) [has_return]
+ (scope: 0, line: 31) [has_return]
+  constant 'NULL' : void* (scope: 0, line: 0)
+ (scope: 0, line: 0)
+
+ Semantic analysis passed with no errors.
+
+=== CODE GENERATION ===
+
+=== THREE ADDRESS CODE ===
+main:
+    i = 0
+    j = 0
+    sum = 0
+    limit = 5
+L0:
+    j = 0
+L3:
+    t0 = i * j
+    t1 = sum + t0
+    sum = t1
+    t2 = i + j
+    t3 = t2 % 2
+    t4 = t3 == 0
+    ifFalse t4 goto L6
+    t5 = sum + 1
+    sum = t5
+    goto L7
+L6:
+    t6 = sum - 1
+    sum = t6
+L7:
+    t7 = j
+    j = j + 1
+L4:
+    t8 = limit - i
+    t9 = j < t8
+    if t9 goto L3
+L5:
+    t10 = sum % 10
+    t11 = t10 == 0
+    ifFalse t11 goto L8
+    t12 = i + 2
+    i = t12
+    goto L9
+L8:
+    t13 = i
+    i = i + 1
+L9:
+    param "i=%d, sum=%d\n"
+    param i
+    param sum
+    t14 = call printf, 3
+L1:
+    t15 = i < limit
+    if t15 goto L0
+L2:
+    return 0
+
+Total instructions: 48
+
+=== ABSTRACT SYNTAX TREE ===
+TranslationUnit :  (line 2)
+  Preprocessor :     #include <stdio.h> (line 2)
+  FunctionDefinition :  (line 31)
+    DeclarationSpecifiers :  (line 4)
+      TypeSpecifier : int (line 4)
+    FunctionDeclarator :  (line 4)
+      DirectDeclarator : main (line 4)
+    CompoundStatement :  (line 31)
+      BlockItemList :  (line 5)
+        BlockItem :  (line 5)
+          Declaration :  (line 5)
+            DeclarationSpecifiers :  (line 5)
+              TypeSpecifier : int (line 5)
+            InitDeclaratorList :  (line 5)
+              InitDeclarator :  (line 5)
+                DirectDeclarator : i (line 5)
+                Initializer :  (line 5)
+                  Constant : 0 (line 5)
+              InitDeclarator :  (line 5)
+                DirectDeclarator : j (line 5)
+                Initializer :  (line 5)
+                  Constant : 0 (line 5)
+              InitDeclarator :  (line 5)
+                DirectDeclarator : sum (line 5)
+                Initializer :  (line 5)
+                  Constant : 0 (line 5)
+        BlockItem :  (line 6)
+          Declaration :  (line 6)
+            DeclarationSpecifiers :  (line 6)
+              TypeSpecifier : int (line 6)
+            InitDeclaratorList :  (line 6)
+              InitDeclarator :  (line 6)
+                DirectDeclarator : limit (line 6)
+                Initializer :  (line 6)
+                  Constant : 5 (line 6)
+        BlockItem :  (line 28)
+          DoWhileStatement :  (line 28)
+            CompoundStatement :  (line 28)
+              BlockItemList :  (line 9)
+                BlockItem :  (line 9)
+                  ExpressionStatement :  (line 9)
+                    AssignmentExpression : = (line 9)
+                      Identifier : j (line 9)
+                      Constant : 0 (line 9)
+                BlockItem :  (line 18)
+                  DoWhileStatement :  (line 18)
+                    CompoundStatement :  (line 18)
+                      BlockItemList :  (line 11)
+                        BlockItem :  (line 11)
+                          ExpressionStatement :  (line 11)
+                            AssignmentExpression : += (line 11)
+                              Identifier : sum (line 11)
+                              MultiplicativeExpression : * (line 11)
+                                Identifier : i (line 11)
+                                Identifier : j (line 11)
+                        BlockItem :  (line 16)
+                          IfStatement :  (line 16)
+                            EqualityExpression : == (line 12)
+                              MultiplicativeExpression : % (line 12)
+                                AdditiveExpression : + (line 12)
+                                  Identifier : i (line 12)
+                                  Identifier : j (line 12)
+                                Constant : 2 (line 12)
+                              Constant : 0 (line 12)
+                            CompoundStatement :  (line 14)
+                              BlockItemList :  (line 13)
+                                BlockItem :  (line 13)
+                                  ExpressionStatement :  (line 13)
+                                    AssignmentExpression : += (line 13)
+                                      Identifier : sum (line 13)
+                                      Constant : 1 (line 13)
+                            CompoundStatement :  (line 16)
+                              BlockItemList :  (line 15)
+                                BlockItem :  (line 15)
+                                  ExpressionStatement :  (line 15)
+                                    AssignmentExpression : -= (line 15)
+                                      Identifier : sum (line 15)
+                                      Constant : 1 (line 15)
+                        BlockItem :  (line 17)
+                          ExpressionStatement :  (line 17)
+                            PostfixExpression : ++ (line 17)
+                              Identifier : j (line 17)
+                    RelationalExpression : < (line 18)
+                      Identifier : j (line 18)
+                      AdditiveExpression : - (line 18)
+                        Identifier : limit (line 18)
+                        Identifier : i (line 18)
+                BlockItem :  (line 24)
+                  IfStatement :  (line 24)
+                    EqualityExpression : == (line 20)
+                      MultiplicativeExpression : % (line 20)
+                        Identifier : sum (line 20)
+                        Constant : 10 (line 20)
+                      Constant : 0 (line 20)
+                    CompoundStatement :  (line 22)
+                      BlockItemList :  (line 21)
+                        BlockItem :  (line 21)
+                          ExpressionStatement :  (line 21)
+                            AssignmentExpression : += (line 21)
+                              Identifier : i (line 21)
+                              Constant : 2 (line 21)
+                    CompoundStatement :  (line 24)
+                      BlockItemList :  (line 23)
+                        BlockItem :  (line 23)
+                          ExpressionStatement :  (line 23)
+                            PostfixExpression : ++ (line 23)
+                              Identifier : i (line 23)
+                BlockItem :  (line 26)
+                  ExpressionStatement :  (line 26)
+                    FunctionCall :  (line 26)
+                      Identifier : printf (line 26)
+                      ArgumentList :  (line 26)
+                        StringLiteral : "i=%d, sum=%d\n" (line 26)
+                        Identifier : i (line 26)
+                        Identifier : sum (line 26)
+            RelationalExpression : < (line 28)
+              Identifier : i (line 28)
+              Identifier : limit (line 28)
+        BlockItem :  (line 30)
+          ReturnStatement :  (line 30)
+            Constant : 0 (line 30)
+
+AST DOT file generated: ast.dot
+TAC file generated: output.tac
+
+=== MIPS ASSEMBLY GENERATION ===
+
+=== MIPS ASSEMBLY CODE ===
+    # ==============================================
+    #   MIPS Assembly Code
+    #   Generated from Three-Address Code
+    # ==============================================
+
+.data
+.align 2
+str_0: .asciiz "i=%d, sum=%d\n"
+.align 2
+newline: .asciiz "\n"
+
+.text
+.globl main
+
+
+    # Function: main
+main:
+    # Reserve stack space for register spills
+    addi $sp, $sp, -256
+    li $t0, 0
+    sw $t0, 0($sp)
+    li $t0, 0
+    sw $t0, 4($sp)
+    li $t0, 0
+    sw $t0, 8($sp)
+    li $t0, 5
+    sw $t0, 12($sp)
+L0:
+    # Reloading j from stack
+    lw $t0, 4($sp)
+    li $t0, 0
+    sw $t0, 4($sp)
+L3:
+    # Reloading i from stack
+    lw $t1, 0($sp)
+    # Reloading j from stack
+    lw $t2, 4($sp)
+    mul $t0, $t1, $t2
+    # Reloading sum from stack
+    lw $t4, 8($sp)
+    add $t3, $t4, $t0
+    move $t4, $t3
+    sw $t4, 8($sp)
+    add $t0, $t1, $t2
+    li $t4, 2
+    div $t0, $t4
+    mfhi $t3
+    li $t4, 0
+    seq $t0, $t3, $t4
+    beq $t0, $zero, L6
+    # Reloading sum from stack
+    lw $t3, 8($sp)
+    li $t4, 1
+    add $t0, $t3, $t4
+    move $t3, $t0
+    sw $t3, 8($sp)
+    j L7
+L6:
+    # Reloading sum from stack
+    lw $t1, 8($sp)
+    li $t2, 1
+    sub $t0, $t1, $t2
+    move $t1, $t0
+    sw $t1, 8($sp)
+L7:
+    # Reloading j from stack
+    lw $t1, 4($sp)
+    move $t0, $t1
+    li $t2, 1
+    add $t1, $t1, $t2
+    sw $t1, 4($sp)
+L4:
+    # Reloading limit from stack
+    lw $t2, 12($sp)
+    # Reloading i from stack
+    lw $t3, 0($sp)
+    sub $t1, $t2, $t3
+    # Reloading j from stack
+    lw $t5, 4($sp)
+    slt $t4, $t5, $t1
+    bne $t4, $zero, L3
+L5:
+    # Reloading sum from stack
+    lw $t2, 8($sp)
+    li $t3, 10
+    div $t2, $t3
+    mfhi $t1
+    li $t4, 0
+    seq $t3, $t1, $t4
+    beq $t3, $zero, L8
+    # Reloading i from stack
+    lw $t3, 0($sp)
+    li $t4, 2
+    add $t1, $t3, $t4
+    move $t3, $t1
+    sw $t3, 0($sp)
+    j L9
+L8:
+    # Reloading i from stack
+    lw $t2, 0($sp)
+    move $t1, $t2
+    li $t3, 1
+    add $t2, $t2, $t3
+    sw $t2, 0($sp)
+L9:
+    la $s0, str_0
+    # Save string param str_0 to $s0
+    # Reloading i from stack
+    lw $t2, 0($sp)
+    move $s1, $t2
+    # Save param i to $s1
+    # Reloading sum from stack
+    lw $t3, 8($sp)
+    move $s2, $t3
+    # Save param sum to $s2
+    # Call printf
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    # Print integer
+    li $v0, 1
+    move $a0, $s1
+    syscall
+    li $v0, 11
+    li $a0, 44
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 115
+    syscall
+    li $v0, 11
+    li $a0, 117
+    syscall
+    li $v0, 11
+    li $a0, 109
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    # Print integer
+    li $v0, 1
+    move $a0, $s2
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+L1:
+    # Reloading i from stack
+    lw $t1, 0($sp)
+    # Reloading limit from stack
+    lw $t2, 12($sp)
+    slt $t0, $t1, $t2
+    bne $t0, $zero, L0
+L2:
+    li $v0, 0
+    # Restore stack and exit program
+    addi $sp, $sp, 256
+    li $v0, 10
+    syscall
+
+MIPS file generated: output.s
+
+==================================================
+COMPILATION SUCCESSFUL
+==================================================

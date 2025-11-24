@@ -1,0 +1,4333 @@
+C/C++ Syntax Analyzer with AST
+==============================
+
+Token: #include <stdio.h>   Type: PREPROCESSOR   
+Token: int                  Type: KEYWORD        
+Token: getValue             Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: return               Type: KEYWORD        
+Token: 42                   Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: int                  Type: KEYWORD        
+Token: square               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: int                  Type: KEYWORD        
+Token: x                    Type: IDENTIFIER     
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: return               Type: KEYWORD        
+Token: x                    Type: IDENTIFIER     
+Token: *                    Type: ARITHMETIC_OP  
+Token: x                    Type: IDENTIFIER     
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: int                  Type: KEYWORD        
+Token: add                  Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: int                  Type: KEYWORD        
+Token: a                    Type: IDENTIFIER     
+Token: ,                    Type: COMMA          
+Token: int                  Type: KEYWORD        
+Token: b                    Type: IDENTIFIER     
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: return               Type: KEYWORD        
+Token: a                    Type: IDENTIFIER     
+Token: +                    Type: ARITHMETIC_OP  
+Token: b                    Type: IDENTIFIER     
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: int                  Type: KEYWORD        
+Token: subtract             Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: int                  Type: KEYWORD        
+Token: a                    Type: IDENTIFIER     
+Token: ,                    Type: COMMA          
+Token: int                  Type: KEYWORD        
+Token: b                    Type: IDENTIFIER     
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: return               Type: KEYWORD        
+Token: a                    Type: IDENTIFIER     
+Token: -                    Type: ARITHMETIC_OP  
+Token: b                    Type: IDENTIFIER     
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: int                  Type: KEYWORD        
+Token: multiply             Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: int                  Type: KEYWORD        
+Token: a                    Type: IDENTIFIER     
+Token: ,                    Type: COMMA          
+Token: int                  Type: KEYWORD        
+Token: b                    Type: IDENTIFIER     
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: return               Type: KEYWORD        
+Token: a                    Type: IDENTIFIER     
+Token: *                    Type: ARITHMETIC_OP  
+Token: b                    Type: IDENTIFIER     
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: int                  Type: KEYWORD        
+Token: divide               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: int                  Type: KEYWORD        
+Token: a                    Type: IDENTIFIER     
+Token: ,                    Type: COMMA          
+Token: int                  Type: KEYWORD        
+Token: b                    Type: IDENTIFIER     
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: if                   Type: KEYWORD        
+Token: (                    Type: LPAREN         
+Token: b                    Type: IDENTIFIER     
+Token: !=                   Type: RELATIONAL_OP  
+Token: 0                    Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: return               Type: KEYWORD        
+Token: a                    Type: IDENTIFIER     
+Token: /                    Type: ARITHMETIC_OP  
+Token: b                    Type: IDENTIFIER     
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: return               Type: KEYWORD        
+Token: 0                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: int                  Type: KEYWORD        
+Token: factorial            Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: int                  Type: KEYWORD        
+Token: n                    Type: IDENTIFIER     
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: if                   Type: KEYWORD        
+Token: (                    Type: LPAREN         
+Token: n                    Type: IDENTIFIER     
+Token: <=                   Type: RELATIONAL_OP  
+Token: 1                    Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: return               Type: KEYWORD        
+Token: 1                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: return               Type: KEYWORD        
+Token: n                    Type: IDENTIFIER     
+Token: *                    Type: ARITHMETIC_OP  
+Token: factorial            Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: n                    Type: IDENTIFIER     
+Token: -                    Type: ARITHMETIC_OP  
+Token: 1                    Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: int                  Type: KEYWORD        
+Token: fibonacci            Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: int                  Type: KEYWORD        
+Token: n                    Type: IDENTIFIER     
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: if                   Type: KEYWORD        
+Token: (                    Type: LPAREN         
+Token: n                    Type: IDENTIFIER     
+Token: <=                   Type: RELATIONAL_OP  
+Token: 1                    Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: return               Type: KEYWORD        
+Token: n                    Type: IDENTIFIER     
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: return               Type: KEYWORD        
+Token: fibonacci            Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: n                    Type: IDENTIFIER     
+Token: -                    Type: ARITHMETIC_OP  
+Token: 1                    Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: +                    Type: ARITHMETIC_OP  
+Token: fibonacci            Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: n                    Type: IDENTIFIER     
+Token: -                    Type: ARITHMETIC_OP  
+Token: 2                    Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: int                  Type: KEYWORD        
+Token: compute              Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: int                  Type: KEYWORD        
+Token: a                    Type: IDENTIFIER     
+Token: ,                    Type: COMMA          
+Token: int                  Type: KEYWORD        
+Token: b                    Type: IDENTIFIER     
+Token: ,                    Type: COMMA          
+Token: int                  Type: KEYWORD        
+Token: c                    Type: IDENTIFIER     
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: int                  Type: KEYWORD        
+Token: sum                  Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: add                  Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: a                    Type: IDENTIFIER     
+Token: ,                    Type: COMMA          
+Token: b                    Type: IDENTIFIER     
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: int                  Type: KEYWORD        
+Token: prod                 Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: multiply             Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: sum                  Type: IDENTIFIER     
+Token: ,                    Type: COMMA          
+Token: c                    Type: IDENTIFIER     
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: int                  Type: KEYWORD        
+Token: diff                 Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: subtract             Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: prod                 Type: IDENTIFIER     
+Token: ,                    Type: COMMA          
+Token: a                    Type: IDENTIFIER     
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: return               Type: KEYWORD        
+Token: diff                 Type: IDENTIFIER     
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: int                  Type: KEYWORD        
+Token: complexCalc          Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: int                  Type: KEYWORD        
+Token: x                    Type: IDENTIFIER     
+Token: ,                    Type: COMMA          
+Token: int                  Type: KEYWORD        
+Token: y                    Type: IDENTIFIER     
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: return               Type: KEYWORD        
+Token: add                  Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: multiply             Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: x                    Type: IDENTIFIER     
+Token: ,                    Type: COMMA          
+Token: y                    Type: IDENTIFIER     
+Token: )                    Type: RPAREN         
+Token: ,                    Type: COMMA          
+Token: subtract             Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: square               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: x                    Type: IDENTIFIER     
+Token: )                    Type: RPAREN         
+Token: ,                    Type: COMMA          
+Token: divide               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: y                    Type: IDENTIFIER     
+Token: ,                    Type: COMMA          
+Token: 2                    Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: )                    Type: RPAREN         
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: int                  Type: KEYWORD        
+Token: max                  Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: int                  Type: KEYWORD        
+Token: a                    Type: IDENTIFIER     
+Token: ,                    Type: COMMA          
+Token: int                  Type: KEYWORD        
+Token: b                    Type: IDENTIFIER     
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: if                   Type: KEYWORD        
+Token: (                    Type: LPAREN         
+Token: a                    Type: IDENTIFIER     
+Token: >                    Type: RELATIONAL_OP  
+Token: b                    Type: IDENTIFIER     
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: return               Type: KEYWORD        
+Token: a                    Type: IDENTIFIER     
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: return               Type: KEYWORD        
+Token: b                    Type: IDENTIFIER     
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: int                  Type: KEYWORD        
+Token: min                  Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: int                  Type: KEYWORD        
+Token: a                    Type: IDENTIFIER     
+Token: ,                    Type: COMMA          
+Token: int                  Type: KEYWORD        
+Token: b                    Type: IDENTIFIER     
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: if                   Type: KEYWORD        
+Token: (                    Type: LPAREN         
+Token: a                    Type: IDENTIFIER     
+Token: <                    Type: RELATIONAL_OP  
+Token: b                    Type: IDENTIFIER     
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: return               Type: KEYWORD        
+Token: a                    Type: IDENTIFIER     
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: return               Type: KEYWORD        
+Token: b                    Type: IDENTIFIER     
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: int                  Type: KEYWORD        
+Token: sumUpTo              Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: int                  Type: KEYWORD        
+Token: n                    Type: IDENTIFIER     
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: int                  Type: KEYWORD        
+Token: sum                  Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: 0                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: for                  Type: KEYWORD        
+Token: (                    Type: LPAREN         
+Token: int                  Type: KEYWORD        
+Token: i                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: 1                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: i                    Type: IDENTIFIER     
+Token: <=                   Type: RELATIONAL_OP  
+Token: n                    Type: IDENTIFIER     
+Token: ;                    Type: SEMICOLON      
+Token: i                    Type: IDENTIFIER     
+Token: ++                   Type: POSTFIX_OP     
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: sum                  Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: add                  Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: sum                  Type: IDENTIFIER     
+Token: ,                    Type: COMMA          
+Token: i                    Type: IDENTIFIER     
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: return               Type: KEYWORD        
+Token: sum                  Type: IDENTIFIER     
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: int                  Type: KEYWORD        
+Token: main                 Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "=== BASIC FUNCTION CALLS ===\n" Type: STRING_LITERAL 
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "getValue(): %d\n"   Type: STRING_LITERAL 
+Token: ,                    Type: COMMA          
+Token: getValue             Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: )                    Type: RPAREN         
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "square(5): %d\n"    Type: STRING_LITERAL 
+Token: ,                    Type: COMMA          
+Token: square               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: 5                    Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "add(10, 20): %d\n"  Type: STRING_LITERAL 
+Token: ,                    Type: COMMA          
+Token: add                  Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: 10                   Type: INTEGER_CONSTANT
+Token: ,                    Type: COMMA          
+Token: 20                   Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "subtract(50, 15): %d\n" Type: STRING_LITERAL 
+Token: ,                    Type: COMMA          
+Token: subtract             Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: 50                   Type: INTEGER_CONSTANT
+Token: ,                    Type: COMMA          
+Token: 15                   Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "multiply(7, 8): %d\n" Type: STRING_LITERAL 
+Token: ,                    Type: COMMA          
+Token: multiply             Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: 7                    Type: INTEGER_CONSTANT
+Token: ,                    Type: COMMA          
+Token: 8                    Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "divide(100, 4): %d\n" Type: STRING_LITERAL 
+Token: ,                    Type: COMMA          
+Token: divide               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: 100                  Type: INTEGER_CONSTANT
+Token: ,                    Type: COMMA          
+Token: 4                    Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "\n=== NESTED FUNCTION CALLS ===\n" Type: STRING_LITERAL 
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "add(square(3), multiply(2, 5)): %d\n" Type: STRING_LITERAL 
+Token: ,                    Type: COMMA          
+Token: add                  Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: square               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: 3                    Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: ,                    Type: COMMA          
+Token: multiply             Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: 2                    Type: INTEGER_CONSTANT
+Token: ,                    Type: COMMA          
+Token: 5                    Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: )                    Type: RPAREN         
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "complexCalc(5, 10): %d\n" Type: STRING_LITERAL 
+Token: ,                    Type: COMMA          
+Token: complexCalc          Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: 5                    Type: INTEGER_CONSTANT
+Token: ,                    Type: COMMA          
+Token: 10                   Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "multiply(add(2, 3), subtract(10, 5)): %d\n" Type: STRING_LITERAL 
+Token: ,                    Type: COMMA          
+Token: multiply             Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: add                  Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: 2                    Type: INTEGER_CONSTANT
+Token: ,                    Type: COMMA          
+Token: 3                    Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: ,                    Type: COMMA          
+Token: subtract             Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: 10                   Type: INTEGER_CONSTANT
+Token: ,                    Type: COMMA          
+Token: 5                    Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: )                    Type: RPAREN         
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "\n=== RECURSIVE FUNCTIONS ===\n" Type: STRING_LITERAL 
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "factorial(5): %d\n" Type: STRING_LITERAL 
+Token: ,                    Type: COMMA          
+Token: factorial            Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: 5                    Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "factorial(6): %d\n" Type: STRING_LITERAL 
+Token: ,                    Type: COMMA          
+Token: factorial            Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: 6                    Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "fibonacci(7): %d\n" Type: STRING_LITERAL 
+Token: ,                    Type: COMMA          
+Token: fibonacci            Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: 7                    Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "fibonacci(10): %d\n" Type: STRING_LITERAL 
+Token: ,                    Type: COMMA          
+Token: fibonacci            Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: 10                   Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "\n=== COMPLEX SCENARIOS ===\n" Type: STRING_LITERAL 
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "compute(5, 10, 3): %d\n" Type: STRING_LITERAL 
+Token: ,                    Type: COMMA          
+Token: compute              Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: 5                    Type: INTEGER_CONSTANT
+Token: ,                    Type: COMMA          
+Token: 10                   Type: INTEGER_CONSTANT
+Token: ,                    Type: COMMA          
+Token: 3                    Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "max(15, 23): %d\n"  Type: STRING_LITERAL 
+Token: ,                    Type: COMMA          
+Token: max                  Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: 15                   Type: INTEGER_CONSTANT
+Token: ,                    Type: COMMA          
+Token: 23                   Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "min(15, 23): %d\n"  Type: STRING_LITERAL 
+Token: ,                    Type: COMMA          
+Token: min                  Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: 15                   Type: INTEGER_CONSTANT
+Token: ,                    Type: COMMA          
+Token: 23                   Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "sumUpTo(10): %d\n"  Type: STRING_LITERAL 
+Token: ,                    Type: COMMA          
+Token: sumUpTo              Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: 10                   Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: int                  Type: KEYWORD        
+Token: result               Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: add                  Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: multiply             Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: square               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: 2                    Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: ,                    Type: COMMA          
+Token: factorial            Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: 3                    Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: )                    Type: RPAREN         
+Token: ,                    Type: COMMA          
+Token: subtract             Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: divide               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: 100                  Type: INTEGER_CONSTANT
+Token: ,                    Type: COMMA          
+Token: 5                    Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: ,                    Type: COMMA          
+Token: fibonacci            Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: 5                    Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: )                    Type: RPAREN         
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "Complex expression result: %d\n" Type: STRING_LITERAL 
+Token: ,                    Type: COMMA          
+Token: result               Type: IDENTIFIER     
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "max(min(10, 20), max(5, 15)): %d\n" Type: STRING_LITERAL 
+Token: ,                    Type: COMMA          
+Token: max                  Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: min                  Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: 10                   Type: INTEGER_CONSTANT
+Token: ,                    Type: COMMA          
+Token: 20                   Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: ,                    Type: COMMA          
+Token: max                  Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: 5                    Type: INTEGER_CONSTANT
+Token: ,                    Type: COMMA          
+Token: 15                   Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: )                    Type: RPAREN         
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: return               Type: KEYWORD        
+Token: 0                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+
+=== PARSING SUCCESSFUL ===
+
+=== SEMANTIC ANALYSIS ===
+=== SEMANTIC ANALYSIS STARTED ===
+=== SEMANTIC ANALYSIS COMPLETED ===
+Found 0 semantic error(s)
+Found 0 warning(s)
+
+=== SYMBOL TABLE (ACTIVE SCOPES) ===
+Scope 0:
+  function 'main' : int (scope: 0, line: 147) [has_return]
+ (scope: 0, line: 147) [has_return]
+  constant 'NULL' : void* (scope: 0, line: 0)
+ (scope: 0, line: 0)
+  function 'compute' : int(int, int, int) (scope: 0, line: 55) [has_return]
+    parameter 'a' : int (scope: 0, line: 0)
+ (scope: 0, line: 0)
+    parameter 'b' : int (scope: 0, line: 0)
+ (scope: 0, line: 0)
+    parameter 'c' : int (scope: 0, line: 0)
+ (scope: 0, line: 0)
+ (int a, int b, int c) (scope: 0, line: 55) [has_return]
+  function 'getValue' : int (scope: 0, line: 6) [has_return]
+ (scope: 0, line: 6) [has_return]
+  function 'sumUpTo' : int(int) (scope: 0, line: 84) [has_return]
+    parameter 'n' : int (scope: 0, line: 0)
+ (scope: 0, line: 0)
+ (int n) (scope: 0, line: 84) [has_return]
+  function 'factorial' : int(int) (scope: 0, line: 39) [recursive] [has_return]
+    parameter 'n' : int (scope: 0, line: 0)
+ (scope: 0, line: 0)
+ (int n) (scope: 0, line: 39) [has_return] [recursive]
+  function 'square' : int(int) (scope: 0, line: 11) [has_return]
+    parameter 'x' : int (scope: 0, line: 0)
+ (scope: 0, line: 0)
+ (int x) (scope: 0, line: 11) [has_return]
+  function 'max' : int(int, int) (scope: 0, line: 68) [has_return]
+    parameter 'a' : int (scope: 0, line: 0)
+ (scope: 0, line: 0)
+    parameter 'b' : int (scope: 0, line: 0)
+ (scope: 0, line: 0)
+ (int a, int b) (scope: 0, line: 68) [has_return]
+  function 'add' : int(int, int) (scope: 0, line: 16) [has_return]
+    parameter 'a' : int (scope: 0, line: 0)
+ (scope: 0, line: 0)
+    parameter 'b' : int (scope: 0, line: 0)
+ (scope: 0, line: 0)
+ (int a, int b) (scope: 0, line: 16) [has_return]
+  function 'subtract' : int(int, int) (scope: 0, line: 20) [has_return]
+    parameter 'a' : int (scope: 0, line: 0)
+ (scope: 0, line: 0)
+    parameter 'b' : int (scope: 0, line: 0)
+ (scope: 0, line: 0)
+ (int a, int b) (scope: 0, line: 20) [has_return]
+  function 'multiply' : int(int, int) (scope: 0, line: 24) [has_return]
+    parameter 'a' : int (scope: 0, line: 0)
+ (scope: 0, line: 0)
+    parameter 'b' : int (scope: 0, line: 0)
+ (scope: 0, line: 0)
+ (int a, int b) (scope: 0, line: 24) [has_return]
+  function 'divide' : int(int, int) (scope: 0, line: 31) [has_return]
+    parameter 'a' : int (scope: 0, line: 0)
+ (scope: 0, line: 0)
+    parameter 'b' : int (scope: 0, line: 0)
+ (scope: 0, line: 0)
+ (int a, int b) (scope: 0, line: 31) [has_return]
+  function 'min' : int(int, int) (scope: 0, line: 75) [has_return]
+    parameter 'a' : int (scope: 0, line: 0)
+ (scope: 0, line: 0)
+    parameter 'b' : int (scope: 0, line: 0)
+ (scope: 0, line: 0)
+ (int a, int b) (scope: 0, line: 75) [has_return]
+  function 'fibonacci' : int(int) (scope: 0, line: 47) [recursive] [has_return]
+    parameter 'n' : int (scope: 0, line: 0)
+ (scope: 0, line: 0)
+ (int n) (scope: 0, line: 47) [has_return] [recursive]
+  function 'complexCalc' : int(int, int) (scope: 0, line: 60) [has_return]
+    parameter 'x' : int (scope: 0, line: 0)
+ (scope: 0, line: 0)
+    parameter 'y' : int (scope: 0, line: 0)
+ (scope: 0, line: 0)
+ (int x, int y) (scope: 0, line: 60) [has_return]
+
+ Semantic analysis passed with no errors.
+
+=== CODE GENERATION ===
+
+=== THREE ADDRESS CODE ===
+getValue:
+    return 42
+square:
+     = x param_decl int
+    t0 = x * x
+    return t0
+add:
+     = a param_decl int
+     = b param_decl int
+    t1 = a + b
+    return t1
+subtract:
+     = a param_decl int
+     = b param_decl int
+    t2 = a - b
+    return t2
+multiply:
+     = a param_decl int
+     = b param_decl int
+    t3 = a * b
+    return t3
+divide:
+     = a param_decl int
+     = b param_decl int
+    t4 = b != 0
+    ifFalse t4 goto L0
+    t5 = a / b
+    return t5
+L0:
+    return 0
+factorial:
+     = n param_decl int
+    t6 = n <= 1
+    ifFalse t6 goto L2
+    return 1
+L2:
+    t7 = n - 1
+    param t7
+    t8 = call factorial, 1
+    t9 = n * t8
+    return t9
+fibonacci:
+     = n param_decl int
+    t10 = n <= 1
+    ifFalse t10 goto L4
+    return n
+L4:
+    t11 = n - 1
+    param t11
+    t12 = call fibonacci, 1
+    t13 = n - 2
+    param t13
+    t14 = call fibonacci, 1
+    t15 = t12 + t14
+    return t15
+compute:
+     = a param_decl int
+     = b param_decl int
+     = c param_decl int
+    param a
+    param b
+    t16 = call add, 2
+    sum = t16
+    param sum
+    param c
+    t17 = call multiply, 2
+    prod = t17
+    param prod
+    param a
+    t18 = call subtract, 2
+    diff = t18
+    return diff
+complexCalc:
+     = x param_decl int
+     = y param_decl int
+    param x
+    param y
+    t19 = call multiply, 2
+    param t19
+    param x
+    t20 = call square, 1
+    param t20
+    param y
+    param 2
+    t21 = call divide, 2
+    param t21
+    t22 = call subtract, 2
+    param t22
+    t23 = call add, 2
+    return t23
+max:
+     = a param_decl int
+     = b param_decl int
+    t24 = a > b
+    ifFalse t24 goto L6
+    return a
+L6:
+    return b
+min:
+     = a param_decl int
+     = b param_decl int
+    t25 = a < b
+    ifFalse t25 goto L8
+    return a
+L8:
+    return b
+sumUpTo:
+     = n param_decl int
+    sum = 0
+    i = 1
+L10:
+    t26 = i <= n
+    ifFalse t26 goto L11
+    param sum
+    param i
+    t27 = call add, 2
+    sum = t27
+L12:
+    t28 = i
+    i = i + 1
+    goto L10
+L11:
+    return sum
+main:
+    param "=== BASIC FUNCTION CALLS ===\n"
+    t29 = call printf, 1
+    param "getValue(): %d\n"
+    t30 = call getValue, 0
+    param t30
+    t31 = call printf, 2
+    param "square(5): %d\n"
+    param 5
+    t32 = call square, 1
+    param t32
+    t33 = call printf, 2
+    param "add(10, 20): %d\n"
+    param 10
+    param 20
+    t34 = call add, 2
+    param t34
+    t35 = call printf, 2
+    param "subtract(50, 15): %d\n"
+    param 50
+    param 15
+    t36 = call subtract, 2
+    param t36
+    t37 = call printf, 2
+    param "multiply(7, 8): %d\n"
+    param 7
+    param 8
+    t38 = call multiply, 2
+    param t38
+    t39 = call printf, 2
+    param "divide(100, 4): %d\n"
+    param 100
+    param 4
+    t40 = call divide, 2
+    param t40
+    t41 = call printf, 2
+    param "\n=== NESTED FUNCTION CALLS ===\n"
+    t42 = call printf, 1
+    param "add(square(3), multiply(2, 5)): %d\n"
+    param 3
+    t43 = call square, 1
+    param t43
+    param 2
+    param 5
+    t44 = call multiply, 2
+    param t44
+    t45 = call add, 2
+    param t45
+    t46 = call printf, 2
+    param "complexCalc(5, 10): %d\n"
+    param 5
+    param 10
+    t47 = call complexCalc, 2
+    param t47
+    t48 = call printf, 2
+    param "multiply(add(2, 3), subtract(10, 5)): %d\n"
+    param 2
+    param 3
+    t49 = call add, 2
+    param t49
+    param 10
+    param 5
+    t50 = call subtract, 2
+    param t50
+    t51 = call multiply, 2
+    param t51
+    t52 = call printf, 2
+    param "\n=== RECURSIVE FUNCTIONS ===\n"
+    t53 = call printf, 1
+    param "factorial(5): %d\n"
+    param 5
+    t54 = call factorial, 1
+    param t54
+    t55 = call printf, 2
+    param "factorial(6): %d\n"
+    param 6
+    t56 = call factorial, 1
+    param t56
+    t57 = call printf, 2
+    param "fibonacci(7): %d\n"
+    param 7
+    t58 = call fibonacci, 1
+    param t58
+    t59 = call printf, 2
+    param "fibonacci(10): %d\n"
+    param 10
+    t60 = call fibonacci, 1
+    param t60
+    t61 = call printf, 2
+    param "\n=== COMPLEX SCENARIOS ===\n"
+    t62 = call printf, 1
+    param "compute(5, 10, 3): %d\n"
+    param 5
+    param 10
+    param 3
+    t63 = call compute, 3
+    param t63
+    t64 = call printf, 2
+    param "max(15, 23): %d\n"
+    param 15
+    param 23
+    t65 = call max, 2
+    param t65
+    t66 = call printf, 2
+    param "min(15, 23): %d\n"
+    param 15
+    param 23
+    t67 = call min, 2
+    param t67
+    t68 = call printf, 2
+    param "sumUpTo(10): %d\n"
+    param 10
+    t69 = call sumUpTo, 1
+    param t69
+    t70 = call printf, 2
+    param 2
+    t71 = call square, 1
+    param t71
+    param 3
+    t72 = call factorial, 1
+    param t72
+    t73 = call multiply, 2
+    param t73
+    param 100
+    param 5
+    t74 = call divide, 2
+    param t74
+    param 5
+    t75 = call fibonacci, 1
+    param t75
+    t76 = call subtract, 2
+    param t76
+    t77 = call add, 2
+    result = t77
+    param "Complex expression result: %d\n"
+    param result
+    t78 = call printf, 2
+    param "max(min(10, 20), max(5, 15)): %d\n"
+    param 10
+    param 20
+    t79 = call min, 2
+    param t79
+    param 5
+    param 15
+    t80 = call max, 2
+    param t80
+    t81 = call max, 2
+    param t81
+    t82 = call printf, 2
+    return 0
+
+Total instructions: 273
+
+=== ABSTRACT SYNTAX TREE ===
+TranslationUnit :  (line 1)
+  Preprocessor : #include <stdio.h> (line 1)
+  FunctionDefinition :  (line 6)
+    DeclarationSpecifiers :  (line 4)
+      TypeSpecifier : int (line 4)
+    FunctionDeclarator :  (line 4)
+      DirectDeclarator : getValue (line 4)
+    CompoundStatement :  (line 6)
+      BlockItemList :  (line 5)
+        BlockItem :  (line 5)
+          ReturnStatement :  (line 5)
+            Constant : 42 (line 5)
+  FunctionDefinition :  (line 11)
+    DeclarationSpecifiers :  (line 9)
+      TypeSpecifier : int (line 9)
+    FunctionDeclarator :  (line 9)
+      DirectDeclarator : square (line 9)
+      ParameterList :  (line 9)
+        ParameterDeclaration :  (line 9)
+          DeclarationSpecifiers :  (line 9)
+            TypeSpecifier : int (line 9)
+          DirectDeclarator : x (line 9)
+    CompoundStatement :  (line 11)
+      BlockItemList :  (line 10)
+        BlockItem :  (line 10)
+          ReturnStatement :  (line 10)
+            MultiplicativeExpression : * (line 10)
+              Identifier : x (line 10)
+              Identifier : x (line 10)
+  FunctionDefinition :  (line 16)
+    DeclarationSpecifiers :  (line 14)
+      TypeSpecifier : int (line 14)
+    FunctionDeclarator :  (line 14)
+      DirectDeclarator : add (line 14)
+      ParameterList :  (line 14)
+        ParameterDeclaration :  (line 14)
+          DeclarationSpecifiers :  (line 14)
+            TypeSpecifier : int (line 14)
+          DirectDeclarator : a (line 14)
+        ParameterDeclaration :  (line 14)
+          DeclarationSpecifiers :  (line 14)
+            TypeSpecifier : int (line 14)
+          DirectDeclarator : b (line 14)
+    CompoundStatement :  (line 16)
+      BlockItemList :  (line 15)
+        BlockItem :  (line 15)
+          ReturnStatement :  (line 15)
+            AdditiveExpression : + (line 15)
+              Identifier : a (line 15)
+              Identifier : b (line 15)
+  FunctionDefinition :  (line 20)
+    DeclarationSpecifiers :  (line 18)
+      TypeSpecifier : int (line 18)
+    FunctionDeclarator :  (line 18)
+      DirectDeclarator : subtract (line 18)
+      ParameterList :  (line 18)
+        ParameterDeclaration :  (line 18)
+          DeclarationSpecifiers :  (line 18)
+            TypeSpecifier : int (line 18)
+          DirectDeclarator : a (line 18)
+        ParameterDeclaration :  (line 18)
+          DeclarationSpecifiers :  (line 18)
+            TypeSpecifier : int (line 18)
+          DirectDeclarator : b (line 18)
+    CompoundStatement :  (line 20)
+      BlockItemList :  (line 19)
+        BlockItem :  (line 19)
+          ReturnStatement :  (line 19)
+            AdditiveExpression : - (line 19)
+              Identifier : a (line 19)
+              Identifier : b (line 19)
+  FunctionDefinition :  (line 24)
+    DeclarationSpecifiers :  (line 22)
+      TypeSpecifier : int (line 22)
+    FunctionDeclarator :  (line 22)
+      DirectDeclarator : multiply (line 22)
+      ParameterList :  (line 22)
+        ParameterDeclaration :  (line 22)
+          DeclarationSpecifiers :  (line 22)
+            TypeSpecifier : int (line 22)
+          DirectDeclarator : a (line 22)
+        ParameterDeclaration :  (line 22)
+          DeclarationSpecifiers :  (line 22)
+            TypeSpecifier : int (line 22)
+          DirectDeclarator : b (line 22)
+    CompoundStatement :  (line 24)
+      BlockItemList :  (line 23)
+        BlockItem :  (line 23)
+          ReturnStatement :  (line 23)
+            MultiplicativeExpression : * (line 23)
+              Identifier : a (line 23)
+              Identifier : b (line 23)
+  FunctionDefinition :  (line 31)
+    DeclarationSpecifiers :  (line 26)
+      TypeSpecifier : int (line 26)
+    FunctionDeclarator :  (line 26)
+      DirectDeclarator : divide (line 26)
+      ParameterList :  (line 26)
+        ParameterDeclaration :  (line 26)
+          DeclarationSpecifiers :  (line 26)
+            TypeSpecifier : int (line 26)
+          DirectDeclarator : a (line 26)
+        ParameterDeclaration :  (line 26)
+          DeclarationSpecifiers :  (line 26)
+            TypeSpecifier : int (line 26)
+          DirectDeclarator : b (line 26)
+    CompoundStatement :  (line 31)
+      BlockItemList :  (line 30)
+        BlockItem :  (line 30)
+          IfStatement :  (line 30)
+            EqualityExpression : != (line 27)
+              Identifier : b (line 27)
+              Constant : 0 (line 27)
+            CompoundStatement :  (line 29)
+              BlockItemList :  (line 28)
+                BlockItem :  (line 28)
+                  ReturnStatement :  (line 28)
+                    MultiplicativeExpression : / (line 28)
+                      Identifier : a (line 28)
+                      Identifier : b (line 28)
+        BlockItem :  (line 30)
+          ReturnStatement :  (line 30)
+            Constant : 0 (line 30)
+  FunctionDefinition :  (line 39)
+    DeclarationSpecifiers :  (line 34)
+      TypeSpecifier : int (line 34)
+    FunctionDeclarator :  (line 34)
+      DirectDeclarator : factorial (line 34)
+      ParameterList :  (line 34)
+        ParameterDeclaration :  (line 34)
+          DeclarationSpecifiers :  (line 34)
+            TypeSpecifier : int (line 34)
+          DirectDeclarator : n (line 34)
+    CompoundStatement :  (line 39)
+      BlockItemList :  (line 38)
+        BlockItem :  (line 38)
+          IfStatement :  (line 38)
+            RelationalExpression : <= (line 35)
+              Identifier : n (line 35)
+              Constant : 1 (line 35)
+            CompoundStatement :  (line 37)
+              BlockItemList :  (line 36)
+                BlockItem :  (line 36)
+                  ReturnStatement :  (line 36)
+                    Constant : 1 (line 36)
+        BlockItem :  (line 38)
+          ReturnStatement :  (line 38)
+            MultiplicativeExpression : * (line 38)
+              Identifier : n (line 38)
+              FunctionCall :  (line 38)
+                Identifier : factorial (line 38)
+                ArgumentList :  (line 38)
+                  AdditiveExpression : - (line 38)
+                    Identifier : n (line 38)
+                    Constant : 1 (line 38)
+  FunctionDefinition :  (line 47)
+    DeclarationSpecifiers :  (line 42)
+      TypeSpecifier : int (line 42)
+    FunctionDeclarator :  (line 42)
+      DirectDeclarator : fibonacci (line 42)
+      ParameterList :  (line 42)
+        ParameterDeclaration :  (line 42)
+          DeclarationSpecifiers :  (line 42)
+            TypeSpecifier : int (line 42)
+          DirectDeclarator : n (line 42)
+    CompoundStatement :  (line 47)
+      BlockItemList :  (line 46)
+        BlockItem :  (line 46)
+          IfStatement :  (line 46)
+            RelationalExpression : <= (line 43)
+              Identifier : n (line 43)
+              Constant : 1 (line 43)
+            CompoundStatement :  (line 45)
+              BlockItemList :  (line 44)
+                BlockItem :  (line 44)
+                  ReturnStatement :  (line 44)
+                    Identifier : n (line 44)
+        BlockItem :  (line 46)
+          ReturnStatement :  (line 46)
+            AdditiveExpression : + (line 46)
+              FunctionCall :  (line 46)
+                Identifier : fibonacci (line 46)
+                ArgumentList :  (line 46)
+                  AdditiveExpression : - (line 46)
+                    Identifier : n (line 46)
+                    Constant : 1 (line 46)
+              FunctionCall :  (line 46)
+                Identifier : fibonacci (line 46)
+                ArgumentList :  (line 46)
+                  AdditiveExpression : - (line 46)
+                    Identifier : n (line 46)
+                    Constant : 2 (line 46)
+  FunctionDefinition :  (line 55)
+    DeclarationSpecifiers :  (line 50)
+      TypeSpecifier : int (line 50)
+    FunctionDeclarator :  (line 50)
+      DirectDeclarator : compute (line 50)
+      ParameterList :  (line 50)
+        ParameterDeclaration :  (line 50)
+          DeclarationSpecifiers :  (line 50)
+            TypeSpecifier : int (line 50)
+          DirectDeclarator : a (line 50)
+        ParameterDeclaration :  (line 50)
+          DeclarationSpecifiers :  (line 50)
+            TypeSpecifier : int (line 50)
+          DirectDeclarator : b (line 50)
+        ParameterDeclaration :  (line 50)
+          DeclarationSpecifiers :  (line 50)
+            TypeSpecifier : int (line 50)
+          DirectDeclarator : c (line 50)
+    CompoundStatement :  (line 55)
+      BlockItemList :  (line 51)
+        BlockItem :  (line 51)
+          Declaration :  (line 51)
+            DeclarationSpecifiers :  (line 51)
+              TypeSpecifier : int (line 51)
+            InitDeclaratorList :  (line 51)
+              InitDeclarator :  (line 51)
+                DirectDeclarator : sum (line 51)
+                Initializer :  (line 51)
+                  FunctionCall :  (line 51)
+                    Identifier : add (line 51)
+                    ArgumentList :  (line 51)
+                      Identifier : a (line 51)
+                      Identifier : b (line 51)
+        BlockItem :  (line 52)
+          Declaration :  (line 52)
+            DeclarationSpecifiers :  (line 52)
+              TypeSpecifier : int (line 52)
+            InitDeclaratorList :  (line 52)
+              InitDeclarator :  (line 52)
+                DirectDeclarator : prod (line 52)
+                Initializer :  (line 52)
+                  FunctionCall :  (line 52)
+                    Identifier : multiply (line 52)
+                    ArgumentList :  (line 52)
+                      Identifier : sum (line 52)
+                      Identifier : c (line 52)
+        BlockItem :  (line 53)
+          Declaration :  (line 53)
+            DeclarationSpecifiers :  (line 53)
+              TypeSpecifier : int (line 53)
+            InitDeclaratorList :  (line 53)
+              InitDeclarator :  (line 53)
+                DirectDeclarator : diff (line 53)
+                Initializer :  (line 53)
+                  FunctionCall :  (line 53)
+                    Identifier : subtract (line 53)
+                    ArgumentList :  (line 53)
+                      Identifier : prod (line 53)
+                      Identifier : a (line 53)
+        BlockItem :  (line 54)
+          ReturnStatement :  (line 54)
+            Identifier : diff (line 54)
+  FunctionDefinition :  (line 60)
+    DeclarationSpecifiers :  (line 58)
+      TypeSpecifier : int (line 58)
+    FunctionDeclarator :  (line 58)
+      DirectDeclarator : complexCalc (line 58)
+      ParameterList :  (line 58)
+        ParameterDeclaration :  (line 58)
+          DeclarationSpecifiers :  (line 58)
+            TypeSpecifier : int (line 58)
+          DirectDeclarator : x (line 58)
+        ParameterDeclaration :  (line 58)
+          DeclarationSpecifiers :  (line 58)
+            TypeSpecifier : int (line 58)
+          DirectDeclarator : y (line 58)
+    CompoundStatement :  (line 60)
+      BlockItemList :  (line 59)
+        BlockItem :  (line 59)
+          ReturnStatement :  (line 59)
+            FunctionCall :  (line 59)
+              Identifier : add (line 59)
+              ArgumentList :  (line 59)
+                FunctionCall :  (line 59)
+                  Identifier : multiply (line 59)
+                  ArgumentList :  (line 59)
+                    Identifier : x (line 59)
+                    Identifier : y (line 59)
+                FunctionCall :  (line 59)
+                  Identifier : subtract (line 59)
+                  ArgumentList :  (line 59)
+                    FunctionCall :  (line 59)
+                      Identifier : square (line 59)
+                      ArgumentList :  (line 59)
+                        Identifier : x (line 59)
+                    FunctionCall :  (line 59)
+                      Identifier : divide (line 59)
+                      ArgumentList :  (line 59)
+                        Identifier : y (line 59)
+                        Constant : 2 (line 59)
+  FunctionDefinition :  (line 68)
+    DeclarationSpecifiers :  (line 63)
+      TypeSpecifier : int (line 63)
+    FunctionDeclarator :  (line 63)
+      DirectDeclarator : max (line 63)
+      ParameterList :  (line 63)
+        ParameterDeclaration :  (line 63)
+          DeclarationSpecifiers :  (line 63)
+            TypeSpecifier : int (line 63)
+          DirectDeclarator : a (line 63)
+        ParameterDeclaration :  (line 63)
+          DeclarationSpecifiers :  (line 63)
+            TypeSpecifier : int (line 63)
+          DirectDeclarator : b (line 63)
+    CompoundStatement :  (line 68)
+      BlockItemList :  (line 67)
+        BlockItem :  (line 67)
+          IfStatement :  (line 67)
+            RelationalExpression : > (line 64)
+              Identifier : a (line 64)
+              Identifier : b (line 64)
+            CompoundStatement :  (line 66)
+              BlockItemList :  (line 65)
+                BlockItem :  (line 65)
+                  ReturnStatement :  (line 65)
+                    Identifier : a (line 65)
+        BlockItem :  (line 67)
+          ReturnStatement :  (line 67)
+            Identifier : b (line 67)
+  FunctionDefinition :  (line 75)
+    DeclarationSpecifiers :  (line 70)
+      TypeSpecifier : int (line 70)
+    FunctionDeclarator :  (line 70)
+      DirectDeclarator : min (line 70)
+      ParameterList :  (line 70)
+        ParameterDeclaration :  (line 70)
+          DeclarationSpecifiers :  (line 70)
+            TypeSpecifier : int (line 70)
+          DirectDeclarator : a (line 70)
+        ParameterDeclaration :  (line 70)
+          DeclarationSpecifiers :  (line 70)
+            TypeSpecifier : int (line 70)
+          DirectDeclarator : b (line 70)
+    CompoundStatement :  (line 75)
+      BlockItemList :  (line 74)
+        BlockItem :  (line 74)
+          IfStatement :  (line 74)
+            RelationalExpression : < (line 71)
+              Identifier : a (line 71)
+              Identifier : b (line 71)
+            CompoundStatement :  (line 73)
+              BlockItemList :  (line 72)
+                BlockItem :  (line 72)
+                  ReturnStatement :  (line 72)
+                    Identifier : a (line 72)
+        BlockItem :  (line 74)
+          ReturnStatement :  (line 74)
+            Identifier : b (line 74)
+  FunctionDefinition :  (line 84)
+    DeclarationSpecifiers :  (line 78)
+      TypeSpecifier : int (line 78)
+    FunctionDeclarator :  (line 78)
+      DirectDeclarator : sumUpTo (line 78)
+      ParameterList :  (line 78)
+        ParameterDeclaration :  (line 78)
+          DeclarationSpecifiers :  (line 78)
+            TypeSpecifier : int (line 78)
+          DirectDeclarator : n (line 78)
+    CompoundStatement :  (line 84)
+      BlockItemList :  (line 79)
+        BlockItem :  (line 79)
+          Declaration :  (line 79)
+            DeclarationSpecifiers :  (line 79)
+              TypeSpecifier : int (line 79)
+            InitDeclaratorList :  (line 79)
+              InitDeclarator :  (line 79)
+                DirectDeclarator : sum (line 79)
+                Initializer :  (line 79)
+                  Constant : 0 (line 79)
+        BlockItem :  (line 82)
+          ForStatement :  (line 82)
+            ForInitStatement :  (line 80)
+              Declaration :  (line 80)
+                DeclarationSpecifiers :  (line 80)
+                  TypeSpecifier : int (line 80)
+                InitDeclaratorList :  (line 80)
+                  InitDeclarator :  (line 80)
+                    DirectDeclarator : i (line 80)
+                    Initializer :  (line 80)
+                      Constant : 1 (line 80)
+            ExpressionStatement :  (line 80)
+              RelationalExpression : <= (line 80)
+                Identifier : i (line 80)
+                Identifier : n (line 80)
+            PostfixExpression : ++ (line 80)
+              Identifier : i (line 80)
+            CompoundStatement :  (line 82)
+              BlockItemList :  (line 81)
+                BlockItem :  (line 81)
+                  ExpressionStatement :  (line 81)
+                    AssignmentExpression : = (line 81)
+                      Identifier : sum (line 81)
+                      FunctionCall :  (line 81)
+                        Identifier : add (line 81)
+                        ArgumentList :  (line 81)
+                          Identifier : sum (line 81)
+                          Identifier : i (line 81)
+        BlockItem :  (line 83)
+          ReturnStatement :  (line 83)
+            Identifier : sum (line 83)
+  FunctionDefinition :  (line 147)
+    DeclarationSpecifiers :  (line 86)
+      TypeSpecifier : int (line 86)
+    FunctionDeclarator :  (line 86)
+      DirectDeclarator : main (line 86)
+    CompoundStatement :  (line 147)
+      BlockItemList :  (line 87)
+        BlockItem :  (line 87)
+          ExpressionStatement :  (line 87)
+            FunctionCall :  (line 87)
+              Identifier : printf (line 87)
+              ArgumentList :  (line 87)
+                StringLiteral : "=== BASIC FUNCTION CALLS ===\n" (line 87)
+        BlockItem :  (line 90)
+          ExpressionStatement :  (line 90)
+            FunctionCall :  (line 90)
+              Identifier : printf (line 90)
+              ArgumentList :  (line 90)
+                StringLiteral : "getValue(): %d\n" (line 90)
+                FunctionCall :  (line 90)
+                  Identifier : getValue (line 90)
+        BlockItem :  (line 93)
+          ExpressionStatement :  (line 93)
+            FunctionCall :  (line 93)
+              Identifier : printf (line 93)
+              ArgumentList :  (line 93)
+                StringLiteral : "square(5): %d\n" (line 93)
+                FunctionCall :  (line 93)
+                  Identifier : square (line 93)
+                  ArgumentList :  (line 93)
+                    Constant : 5 (line 93)
+        BlockItem :  (line 96)
+          ExpressionStatement :  (line 96)
+            FunctionCall :  (line 96)
+              Identifier : printf (line 96)
+              ArgumentList :  (line 96)
+                StringLiteral : "add(10, 20): %d\n" (line 96)
+                FunctionCall :  (line 96)
+                  Identifier : add (line 96)
+                  ArgumentList :  (line 96)
+                    Constant : 10 (line 96)
+                    Constant : 20 (line 96)
+        BlockItem :  (line 97)
+          ExpressionStatement :  (line 97)
+            FunctionCall :  (line 97)
+              Identifier : printf (line 97)
+              ArgumentList :  (line 97)
+                StringLiteral : "subtract(50, 15): %d\n" (line 97)
+                FunctionCall :  (line 97)
+                  Identifier : subtract (line 97)
+                  ArgumentList :  (line 97)
+                    Constant : 50 (line 97)
+                    Constant : 15 (line 97)
+        BlockItem :  (line 98)
+          ExpressionStatement :  (line 98)
+            FunctionCall :  (line 98)
+              Identifier : printf (line 98)
+              ArgumentList :  (line 98)
+                StringLiteral : "multiply(7, 8): %d\n" (line 98)
+                FunctionCall :  (line 98)
+                  Identifier : multiply (line 98)
+                  ArgumentList :  (line 98)
+                    Constant : 7 (line 98)
+                    Constant : 8 (line 98)
+        BlockItem :  (line 99)
+          ExpressionStatement :  (line 99)
+            FunctionCall :  (line 99)
+              Identifier : printf (line 99)
+              ArgumentList :  (line 99)
+                StringLiteral : "divide(100, 4): %d\n" (line 99)
+                FunctionCall :  (line 99)
+                  Identifier : divide (line 99)
+                  ArgumentList :  (line 99)
+                    Constant : 100 (line 99)
+                    Constant : 4 (line 99)
+        BlockItem :  (line 101)
+          ExpressionStatement :  (line 101)
+            FunctionCall :  (line 101)
+              Identifier : printf (line 101)
+              ArgumentList :  (line 101)
+                StringLiteral : "\n=== NESTED FUNCTION CALLS ===\n" (line 101)
+        BlockItem :  (line 104)
+          ExpressionStatement :  (line 104)
+            FunctionCall :  (line 104)
+              Identifier : printf (line 104)
+              ArgumentList :  (line 104)
+                StringLiteral : "add(square(3), multiply(2, 5)): %d\n" (line 104)
+                FunctionCall :  (line 104)
+                  Identifier : add (line 104)
+                  ArgumentList :  (line 104)
+                    FunctionCall :  (line 104)
+                      Identifier : square (line 104)
+                      ArgumentList :  (line 104)
+                        Constant : 3 (line 104)
+                    FunctionCall :  (line 104)
+                      Identifier : multiply (line 104)
+                      ArgumentList :  (line 104)
+                        Constant : 2 (line 104)
+                        Constant : 5 (line 104)
+        BlockItem :  (line 107)
+          ExpressionStatement :  (line 107)
+            FunctionCall :  (line 107)
+              Identifier : printf (line 107)
+              ArgumentList :  (line 107)
+                StringLiteral : "complexCalc(5, 10): %d\n" (line 107)
+                FunctionCall :  (line 107)
+                  Identifier : complexCalc (line 107)
+                  ArgumentList :  (line 107)
+                    Constant : 5 (line 107)
+                    Constant : 10 (line 107)
+        BlockItem :  (line 111)
+          ExpressionStatement :  (line 111)
+            FunctionCall :  (line 111)
+              Identifier : printf (line 110)
+              ArgumentList :  (line 110)
+                StringLiteral : "multiply(add(2, 3), subtract(10, 5)): %d\n" (line 110)
+                FunctionCall :  (line 111)
+                  Identifier : multiply (line 111)
+                  ArgumentList :  (line 111)
+                    FunctionCall :  (line 111)
+                      Identifier : add (line 111)
+                      ArgumentList :  (line 111)
+                        Constant : 2 (line 111)
+                        Constant : 3 (line 111)
+                    FunctionCall :  (line 111)
+                      Identifier : subtract (line 111)
+                      ArgumentList :  (line 111)
+                        Constant : 10 (line 111)
+                        Constant : 5 (line 111)
+        BlockItem :  (line 113)
+          ExpressionStatement :  (line 113)
+            FunctionCall :  (line 113)
+              Identifier : printf (line 113)
+              ArgumentList :  (line 113)
+                StringLiteral : "\n=== RECURSIVE FUNCTIONS ===\n" (line 113)
+        BlockItem :  (line 116)
+          ExpressionStatement :  (line 116)
+            FunctionCall :  (line 116)
+              Identifier : printf (line 116)
+              ArgumentList :  (line 116)
+                StringLiteral : "factorial(5): %d\n" (line 116)
+                FunctionCall :  (line 116)
+                  Identifier : factorial (line 116)
+                  ArgumentList :  (line 116)
+                    Constant : 5 (line 116)
+        BlockItem :  (line 117)
+          ExpressionStatement :  (line 117)
+            FunctionCall :  (line 117)
+              Identifier : printf (line 117)
+              ArgumentList :  (line 117)
+                StringLiteral : "factorial(6): %d\n" (line 117)
+                FunctionCall :  (line 117)
+                  Identifier : factorial (line 117)
+                  ArgumentList :  (line 117)
+                    Constant : 6 (line 117)
+        BlockItem :  (line 120)
+          ExpressionStatement :  (line 120)
+            FunctionCall :  (line 120)
+              Identifier : printf (line 120)
+              ArgumentList :  (line 120)
+                StringLiteral : "fibonacci(7): %d\n" (line 120)
+                FunctionCall :  (line 120)
+                  Identifier : fibonacci (line 120)
+                  ArgumentList :  (line 120)
+                    Constant : 7 (line 120)
+        BlockItem :  (line 121)
+          ExpressionStatement :  (line 121)
+            FunctionCall :  (line 121)
+              Identifier : printf (line 121)
+              ArgumentList :  (line 121)
+                StringLiteral : "fibonacci(10): %d\n" (line 121)
+                FunctionCall :  (line 121)
+                  Identifier : fibonacci (line 121)
+                  ArgumentList :  (line 121)
+                    Constant : 10 (line 121)
+        BlockItem :  (line 123)
+          ExpressionStatement :  (line 123)
+            FunctionCall :  (line 123)
+              Identifier : printf (line 123)
+              ArgumentList :  (line 123)
+                StringLiteral : "\n=== COMPLEX SCENARIOS ===\n" (line 123)
+        BlockItem :  (line 126)
+          ExpressionStatement :  (line 126)
+            FunctionCall :  (line 126)
+              Identifier : printf (line 126)
+              ArgumentList :  (line 126)
+                StringLiteral : "compute(5, 10, 3): %d\n" (line 126)
+                FunctionCall :  (line 126)
+                  Identifier : compute (line 126)
+                  ArgumentList :  (line 126)
+                    Constant : 5 (line 126)
+                    Constant : 10 (line 126)
+                    Constant : 3 (line 126)
+        BlockItem :  (line 129)
+          ExpressionStatement :  (line 129)
+            FunctionCall :  (line 129)
+              Identifier : printf (line 129)
+              ArgumentList :  (line 129)
+                StringLiteral : "max(15, 23): %d\n" (line 129)
+                FunctionCall :  (line 129)
+                  Identifier : max (line 129)
+                  ArgumentList :  (line 129)
+                    Constant : 15 (line 129)
+                    Constant : 23 (line 129)
+        BlockItem :  (line 130)
+          ExpressionStatement :  (line 130)
+            FunctionCall :  (line 130)
+              Identifier : printf (line 130)
+              ArgumentList :  (line 130)
+                StringLiteral : "min(15, 23): %d\n" (line 130)
+                FunctionCall :  (line 130)
+                  Identifier : min (line 130)
+                  ArgumentList :  (line 130)
+                    Constant : 15 (line 130)
+                    Constant : 23 (line 130)
+        BlockItem :  (line 133)
+          ExpressionStatement :  (line 133)
+            FunctionCall :  (line 133)
+              Identifier : printf (line 133)
+              ArgumentList :  (line 133)
+                StringLiteral : "sumUpTo(10): %d\n" (line 133)
+                FunctionCall :  (line 133)
+                  Identifier : sumUpTo (line 133)
+                  ArgumentList :  (line 133)
+                    Constant : 10 (line 133)
+        BlockItem :  (line 139)
+          Declaration :  (line 139)
+            DeclarationSpecifiers :  (line 136)
+              TypeSpecifier : int (line 136)
+            InitDeclaratorList :  (line 139)
+              InitDeclarator :  (line 139)
+                DirectDeclarator : result (line 136)
+                Initializer :  (line 139)
+                  FunctionCall :  (line 139)
+                    Identifier : add (line 136)
+                    ArgumentList :  (line 137)
+                      FunctionCall :  (line 137)
+                        Identifier : multiply (line 137)
+                        ArgumentList :  (line 137)
+                          FunctionCall :  (line 137)
+                            Identifier : square (line 137)
+                            ArgumentList :  (line 137)
+                              Constant : 2 (line 137)
+                          FunctionCall :  (line 137)
+                            Identifier : factorial (line 137)
+                            ArgumentList :  (line 137)
+                              Constant : 3 (line 137)
+                      FunctionCall :  (line 138)
+                        Identifier : subtract (line 138)
+                        ArgumentList :  (line 138)
+                          FunctionCall :  (line 138)
+                            Identifier : divide (line 138)
+                            ArgumentList :  (line 138)
+                              Constant : 100 (line 138)
+                              Constant : 5 (line 138)
+                          FunctionCall :  (line 138)
+                            Identifier : fibonacci (line 138)
+                            ArgumentList :  (line 138)
+                              Constant : 5 (line 138)
+        BlockItem :  (line 140)
+          ExpressionStatement :  (line 140)
+            FunctionCall :  (line 140)
+              Identifier : printf (line 140)
+              ArgumentList :  (line 140)
+                StringLiteral : "Complex expression result: %d\n" (line 140)
+                Identifier : result (line 140)
+        BlockItem :  (line 144)
+          ExpressionStatement :  (line 144)
+            FunctionCall :  (line 144)
+              Identifier : printf (line 143)
+              ArgumentList :  (line 143)
+                StringLiteral : "max(min(10, 20), max(5, 15)): %d\n" (line 143)
+                FunctionCall :  (line 144)
+                  Identifier : max (line 144)
+                  ArgumentList :  (line 144)
+                    FunctionCall :  (line 144)
+                      Identifier : min (line 144)
+                      ArgumentList :  (line 144)
+                        Constant : 10 (line 144)
+                        Constant : 20 (line 144)
+                    FunctionCall :  (line 144)
+                      Identifier : max (line 144)
+                      ArgumentList :  (line 144)
+                        Constant : 5 (line 144)
+                        Constant : 15 (line 144)
+        BlockItem :  (line 146)
+          ReturnStatement :  (line 146)
+            Constant : 0 (line 146)
+
+AST DOT file generated: ast.dot
+TAC file generated: output.tac
+
+=== MIPS ASSEMBLY GENERATION ===
+
+=== MIPS ASSEMBLY CODE ===
+    # ==============================================
+    #   MIPS Assembly Code
+    #   Generated from Three-Address Code
+    # ==============================================
+
+.data
+.align 2
+str_22: .asciiz "max(min(10, 20), max(5, 15)): %d\n"
+.align 2
+str_18: .asciiz "max(15, 23): %d\n"
+.align 2
+str_19: .asciiz "min(15, 23): %d\n"
+.align 2
+str_16: .asciiz "\n=== COMPLEX SCENARIOS ===\n"
+.align 2
+str_15: .asciiz "fibonacci(10): %d\n"
+.align 2
+str_14: .asciiz "fibonacci(7): %d\n"
+.align 2
+str_0: .asciiz "=== BASIC FUNCTION CALLS ===\n"
+.align 2
+str_3: .asciiz "add(10, 20): %d\n"
+.align 2
+str_10: .asciiz "multiply(add(2, 3), subtract(10, 5)): %d\n"
+.align 2
+str_13: .asciiz "factorial(6): %d\n"
+.align 2
+str_1: .asciiz "getValue(): %d\n"
+.align 2
+str_2: .asciiz "square(5): %d\n"
+.align 2
+str_4: .asciiz "subtract(50, 15): %d\n"
+.align 2
+str_5: .asciiz "multiply(7, 8): %d\n"
+.align 2
+str_17: .asciiz "compute(5, 10, 3): %d\n"
+.align 2
+str_8: .asciiz "add(square(3), multiply(2, 5)): %d\n"
+.align 2
+str_6: .asciiz "divide(100, 4): %d\n"
+.align 2
+str_7: .asciiz "\n=== NESTED FUNCTION CALLS ===\n"
+.align 2
+str_11: .asciiz "\n=== RECURSIVE FUNCTIONS ===\n"
+.align 2
+str_21: .asciiz "Complex expression result: %d\n"
+.align 2
+str_20: .asciiz "sumUpTo(10): %d\n"
+.align 2
+str_9: .asciiz "complexCalc(5, 10): %d\n"
+.align 2
+str_12: .asciiz "factorial(5): %d\n"
+.align 2
+newline: .asciiz "\n"
+
+.text
+.globl main
+
+
+    # Function: getValue
+func_getValue:
+    # Function prologue
+    addi $sp, $sp, -256
+    sw $ra, 252($sp)
+    sw $fp, 248($sp)
+    addi $fp, $sp, 256
+    sw $a0, 244($sp)
+    sw $a1, 240($sp)
+    sw $a2, 236($sp)
+    sw $a3, 232($sp)
+    sw $s0, 228($sp)
+    sw $s1, 224($sp)
+    sw $s2, 220($sp)
+    sw $s3, 216($sp)
+    sw $s4, 212($sp)
+    sw $s5, 208($sp)
+    sw $s6, 204($sp)
+    sw $s7, 200($sp)
+    li $v0, 42
+    # Function epilogue
+    lw $s0, 228($sp)
+    lw $s1, 224($sp)
+    lw $s2, 220($sp)
+    lw $s3, 216($sp)
+    lw $s4, 212($sp)
+    lw $s5, 208($sp)
+    lw $s6, 204($sp)
+    lw $s7, 200($sp)
+    lw $fp, 248($sp)
+    lw $ra, 252($sp)
+    addi $sp, $sp, 256
+    jr $ra
+
+    # Function: square
+func_square:
+    # Function prologue
+    addi $sp, $sp, -256
+    sw $ra, 252($sp)
+    sw $fp, 248($sp)
+    addi $fp, $sp, 256
+    sw $a0, 244($sp)
+    sw $a1, 240($sp)
+    sw $a2, 236($sp)
+    sw $a3, 232($sp)
+    sw $s0, 228($sp)
+    sw $s1, 224($sp)
+    sw $s2, 220($sp)
+    sw $s3, 216($sp)
+    sw $s4, 212($sp)
+    sw $s5, 208($sp)
+    sw $s6, 204($sp)
+    sw $s7, 200($sp)
+    # Loading parameter x from stack
+    lw $t1, 244($sp)
+    mul $t0, $t1, $t1
+    move $v0, $t0
+    # Function epilogue
+    lw $s0, 228($sp)
+    lw $s1, 224($sp)
+    lw $s2, 220($sp)
+    lw $s3, 216($sp)
+    lw $s4, 212($sp)
+    lw $s5, 208($sp)
+    lw $s6, 204($sp)
+    lw $s7, 200($sp)
+    lw $fp, 248($sp)
+    lw $ra, 252($sp)
+    addi $sp, $sp, 256
+    jr $ra
+
+    # Function: add
+func_add:
+    # Function prologue
+    addi $sp, $sp, -256
+    sw $ra, 252($sp)
+    sw $fp, 248($sp)
+    addi $fp, $sp, 256
+    sw $a0, 244($sp)
+    sw $a1, 240($sp)
+    sw $a2, 236($sp)
+    sw $a3, 232($sp)
+    sw $s0, 228($sp)
+    sw $s1, 224($sp)
+    sw $s2, 220($sp)
+    sw $s3, 216($sp)
+    sw $s4, 212($sp)
+    sw $s5, 208($sp)
+    sw $s6, 204($sp)
+    sw $s7, 200($sp)
+    # Loading parameter a from stack
+    lw $t1, 244($sp)
+    # Loading parameter b from stack
+    lw $t2, 240($sp)
+    add $t0, $t1, $t2
+    move $v0, $t0
+    # Function epilogue
+    lw $s0, 228($sp)
+    lw $s1, 224($sp)
+    lw $s2, 220($sp)
+    lw $s3, 216($sp)
+    lw $s4, 212($sp)
+    lw $s5, 208($sp)
+    lw $s6, 204($sp)
+    lw $s7, 200($sp)
+    lw $fp, 248($sp)
+    lw $ra, 252($sp)
+    addi $sp, $sp, 256
+    jr $ra
+
+    # Function: subtract
+func_subtract:
+    # Function prologue
+    addi $sp, $sp, -256
+    sw $ra, 252($sp)
+    sw $fp, 248($sp)
+    addi $fp, $sp, 256
+    sw $a0, 244($sp)
+    sw $a1, 240($sp)
+    sw $a2, 236($sp)
+    sw $a3, 232($sp)
+    sw $s0, 228($sp)
+    sw $s1, 224($sp)
+    sw $s2, 220($sp)
+    sw $s3, 216($sp)
+    sw $s4, 212($sp)
+    sw $s5, 208($sp)
+    sw $s6, 204($sp)
+    sw $s7, 200($sp)
+    # Loading parameter a from stack
+    lw $t1, 244($sp)
+    # Loading parameter b from stack
+    lw $t2, 240($sp)
+    sub $t0, $t1, $t2
+    move $v0, $t0
+    # Function epilogue
+    lw $s0, 228($sp)
+    lw $s1, 224($sp)
+    lw $s2, 220($sp)
+    lw $s3, 216($sp)
+    lw $s4, 212($sp)
+    lw $s5, 208($sp)
+    lw $s6, 204($sp)
+    lw $s7, 200($sp)
+    lw $fp, 248($sp)
+    lw $ra, 252($sp)
+    addi $sp, $sp, 256
+    jr $ra
+
+    # Function: multiply
+func_multiply:
+    # Function prologue
+    addi $sp, $sp, -256
+    sw $ra, 252($sp)
+    sw $fp, 248($sp)
+    addi $fp, $sp, 256
+    sw $a0, 244($sp)
+    sw $a1, 240($sp)
+    sw $a2, 236($sp)
+    sw $a3, 232($sp)
+    sw $s0, 228($sp)
+    sw $s1, 224($sp)
+    sw $s2, 220($sp)
+    sw $s3, 216($sp)
+    sw $s4, 212($sp)
+    sw $s5, 208($sp)
+    sw $s6, 204($sp)
+    sw $s7, 200($sp)
+    # Loading parameter a from stack
+    lw $t1, 244($sp)
+    # Loading parameter b from stack
+    lw $t2, 240($sp)
+    mul $t0, $t1, $t2
+    move $v0, $t0
+    # Function epilogue
+    lw $s0, 228($sp)
+    lw $s1, 224($sp)
+    lw $s2, 220($sp)
+    lw $s3, 216($sp)
+    lw $s4, 212($sp)
+    lw $s5, 208($sp)
+    lw $s6, 204($sp)
+    lw $s7, 200($sp)
+    lw $fp, 248($sp)
+    lw $ra, 252($sp)
+    addi $sp, $sp, 256
+    jr $ra
+
+    # Function: divide
+func_divide:
+    # Function prologue
+    addi $sp, $sp, -256
+    sw $ra, 252($sp)
+    sw $fp, 248($sp)
+    addi $fp, $sp, 256
+    sw $a0, 244($sp)
+    sw $a1, 240($sp)
+    sw $a2, 236($sp)
+    sw $a3, 232($sp)
+    sw $s0, 228($sp)
+    sw $s1, 224($sp)
+    sw $s2, 220($sp)
+    sw $s3, 216($sp)
+    sw $s4, 212($sp)
+    sw $s5, 208($sp)
+    sw $s6, 204($sp)
+    sw $s7, 200($sp)
+    # Loading parameter b from stack
+    lw $t1, 240($sp)
+    li $t2, 0
+    sne $t0, $t1, $t2
+    beq $t0, $zero, L0
+    # Loading parameter a from stack
+    lw $t2, 244($sp)
+    div $t2, $t1
+    mflo $t0
+    move $v0, $t0
+    # Function epilogue
+    lw $s0, 228($sp)
+    lw $s1, 224($sp)
+    lw $s2, 220($sp)
+    lw $s3, 216($sp)
+    lw $s4, 212($sp)
+    lw $s5, 208($sp)
+    lw $s6, 204($sp)
+    lw $s7, 200($sp)
+    lw $fp, 248($sp)
+    lw $ra, 252($sp)
+    addi $sp, $sp, 256
+    jr $ra
+L0:
+    li $v0, 0
+    # Function epilogue
+    lw $s0, 228($sp)
+    lw $s1, 224($sp)
+    lw $s2, 220($sp)
+    lw $s3, 216($sp)
+    lw $s4, 212($sp)
+    lw $s5, 208($sp)
+    lw $s6, 204($sp)
+    lw $s7, 200($sp)
+    lw $fp, 248($sp)
+    lw $ra, 252($sp)
+    addi $sp, $sp, 256
+    jr $ra
+
+    # Function: factorial
+func_factorial:
+    # Function prologue
+    addi $sp, $sp, -256
+    sw $ra, 252($sp)
+    sw $fp, 248($sp)
+    addi $fp, $sp, 256
+    sw $a0, 244($sp)
+    sw $a1, 240($sp)
+    sw $a2, 236($sp)
+    sw $a3, 232($sp)
+    sw $s0, 228($sp)
+    sw $s1, 224($sp)
+    sw $s2, 220($sp)
+    sw $s3, 216($sp)
+    sw $s4, 212($sp)
+    sw $s5, 208($sp)
+    sw $s6, 204($sp)
+    sw $s7, 200($sp)
+    # Loading parameter n from stack
+    lw $t1, 244($sp)
+    li $t2, 1
+    sle $t0, $t1, $t2
+    beq $t0, $zero, L2
+    li $v0, 1
+    # Function epilogue
+    lw $s0, 228($sp)
+    lw $s1, 224($sp)
+    lw $s2, 220($sp)
+    lw $s3, 216($sp)
+    lw $s4, 212($sp)
+    lw $s5, 208($sp)
+    lw $s6, 204($sp)
+    lw $s7, 200($sp)
+    lw $fp, 248($sp)
+    lw $ra, 252($sp)
+    addi $sp, $sp, 256
+    jr $ra
+L2:
+    # Loading parameter n from stack
+    lw $t1, 244($sp)
+    li $t2, 1
+    sub $t0, $t1, $t2
+    move $s0, $t0
+    # Save param t7 to $s0
+    # Call factorial
+    move $a0, $s0
+    # Spilling n before function call
+    sw $t1, 0($sp)
+    jal func_factorial
+    move $s1, $v0
+    # Loading parameter n from stack
+    lw $t1, 244($sp)
+    mul $t0, $t1, $s1
+    move $v0, $t0
+    # Function epilogue
+    lw $s0, 228($sp)
+    lw $s1, 224($sp)
+    lw $s2, 220($sp)
+    lw $s3, 216($sp)
+    lw $s4, 212($sp)
+    lw $s5, 208($sp)
+    lw $s6, 204($sp)
+    lw $s7, 200($sp)
+    lw $fp, 248($sp)
+    lw $ra, 252($sp)
+    addi $sp, $sp, 256
+    jr $ra
+
+    # Function: fibonacci
+func_fibonacci:
+    # Function prologue
+    addi $sp, $sp, -256
+    sw $ra, 252($sp)
+    sw $fp, 248($sp)
+    addi $fp, $sp, 256
+    sw $a0, 244($sp)
+    sw $a1, 240($sp)
+    sw $a2, 236($sp)
+    sw $a3, 232($sp)
+    sw $s0, 228($sp)
+    sw $s1, 224($sp)
+    sw $s2, 220($sp)
+    sw $s3, 216($sp)
+    sw $s4, 212($sp)
+    sw $s5, 208($sp)
+    sw $s6, 204($sp)
+    sw $s7, 200($sp)
+    # Loading parameter n from stack
+    lw $t1, 244($sp)
+    li $t2, 1
+    sle $t0, $t1, $t2
+    beq $t0, $zero, L4
+    move $v0, $t1
+    # Function epilogue
+    lw $s0, 228($sp)
+    lw $s1, 224($sp)
+    lw $s2, 220($sp)
+    lw $s3, 216($sp)
+    lw $s4, 212($sp)
+    lw $s5, 208($sp)
+    lw $s6, 204($sp)
+    lw $s7, 200($sp)
+    lw $fp, 248($sp)
+    lw $ra, 252($sp)
+    addi $sp, $sp, 256
+    jr $ra
+L4:
+    # Loading parameter n from stack
+    lw $t1, 244($sp)
+    li $t2, 1
+    sub $t0, $t1, $t2
+    move $s2, $t0
+    # Save param t11 to $s2
+    # Call fibonacci
+    move $a0, $s2
+    # Spilling n before function call
+    sw $t1, 0($sp)
+    jal func_fibonacci
+    move $s3, $v0
+    # Loading parameter n from stack
+    lw $t1, 244($sp)
+    li $t2, 2
+    sub $t0, $t1, $t2
+    move $s4, $t0
+    # Save param t13 to $s4
+    # Call fibonacci
+    move $a0, $s4
+    jal func_fibonacci
+    move $s5, $v0
+    add $t0, $s3, $s5
+    move $v0, $t0
+    # Function epilogue
+    lw $s0, 228($sp)
+    lw $s1, 224($sp)
+    lw $s2, 220($sp)
+    lw $s3, 216($sp)
+    lw $s4, 212($sp)
+    lw $s5, 208($sp)
+    lw $s6, 204($sp)
+    lw $s7, 200($sp)
+    lw $fp, 248($sp)
+    lw $ra, 252($sp)
+    addi $sp, $sp, 256
+    jr $ra
+
+    # Function: compute
+func_compute:
+    # Function prologue
+    addi $sp, $sp, -256
+    sw $ra, 252($sp)
+    sw $fp, 248($sp)
+    addi $fp, $sp, 256
+    sw $a0, 244($sp)
+    sw $a1, 240($sp)
+    sw $a2, 236($sp)
+    sw $a3, 232($sp)
+    sw $s0, 228($sp)
+    sw $s1, 224($sp)
+    sw $s2, 220($sp)
+    sw $s3, 216($sp)
+    sw $s4, 212($sp)
+    sw $s5, 208($sp)
+    sw $s6, 204($sp)
+    sw $s7, 200($sp)
+    # Loading parameter a from stack
+    lw $t0, 244($sp)
+    move $s6, $t0
+    # Save param a to $s6
+    # Loading parameter b from stack
+    lw $t1, 240($sp)
+    move $s7, $t1
+    # Save param b to $s7
+    # Call add
+    move $a0, $s6
+    move $a1, $s7
+    # Spilling b before function call
+    sw $t1, 0($sp)
+    # Spilling a before function call
+    sw $t0, 4($sp)
+    jal func_add
+    move $s0, $v0
+    move $t0, $s0
+    sw $t0, 8($sp)
+    # Reloading sum from stack
+    lw $t0, 8($sp)
+    move $s1, $t0
+    # Save param sum to $s1
+    # Loading parameter c from stack
+    lw $t1, 236($sp)
+    move $s2, $t1
+    # Save param c to $s2
+    # Call multiply
+    move $a0, $s1
+    move $a1, $s2
+    # Spilling c before function call
+    sw $t1, 12($sp)
+    jal func_multiply
+    move $s3, $v0
+    move $t0, $s3
+    sw $t0, 16($sp)
+    # Reloading prod from stack
+    lw $t0, 16($sp)
+    move $s4, $t0
+    # Save param prod to $s4
+    # Loading parameter a from stack
+    lw $t1, 244($sp)
+    move $s5, $t1
+    # Save param a to $s5
+    # Call subtract
+    move $a0, $s4
+    move $a1, $s5
+    jal func_subtract
+    move $s6, $v0
+    move $t0, $s6
+    sw $t0, 20($sp)
+    # Reloading diff from stack
+    lw $t0, 20($sp)
+    move $v0, $t0
+    # Function epilogue
+    lw $s0, 228($sp)
+    lw $s1, 224($sp)
+    lw $s2, 220($sp)
+    lw $s3, 216($sp)
+    lw $s4, 212($sp)
+    lw $s5, 208($sp)
+    lw $s6, 204($sp)
+    lw $s7, 200($sp)
+    lw $fp, 248($sp)
+    lw $ra, 252($sp)
+    addi $sp, $sp, 256
+    jr $ra
+
+    # Function: complexCalc
+func_complexCalc:
+    # Function prologue
+    addi $sp, $sp, -256
+    sw $ra, 252($sp)
+    sw $fp, 248($sp)
+    addi $fp, $sp, 256
+    sw $a0, 244($sp)
+    sw $a1, 240($sp)
+    sw $a2, 236($sp)
+    sw $a3, 232($sp)
+    sw $s0, 228($sp)
+    sw $s1, 224($sp)
+    sw $s2, 220($sp)
+    sw $s3, 216($sp)
+    sw $s4, 212($sp)
+    sw $s5, 208($sp)
+    sw $s6, 204($sp)
+    sw $s7, 200($sp)
+    # Loading parameter x from stack
+    lw $t0, 244($sp)
+    move $s7, $t0
+    # Save param x to $s7
+    # Loading parameter y from stack
+    lw $t1, 240($sp)
+    move $s0, $t1
+    # Save param y to $s0
+    # Call multiply
+    move $a0, $s7
+    move $a1, $s0
+    # Spilling y before function call
+    sw $t1, 0($sp)
+    # Spilling x before function call
+    sw $t0, 4($sp)
+    jal func_multiply
+    move $s1, $v0
+    move $s2, $s1
+    # Save param t19 to $s2
+    # Loading parameter x from stack
+    lw $t0, 244($sp)
+    move $s3, $t0
+    # Save param x to $s3
+    # Call square
+    move $a0, $s3
+    jal func_square
+    move $s4, $v0
+    move $s5, $s4
+    # Save param t20 to $s5
+    # Loading parameter y from stack
+    lw $t0, 240($sp)
+    move $s6, $t0
+    # Save param y to $s6
+    # Call divide
+    move $a0, $s6
+    li $a1, 2
+    jal func_divide
+    move $s7, $v0
+    move $s0, $s7
+    # Save param t21 to $s0
+    # Call subtract
+    move $a0, $s5
+    move $a1, $s0
+    jal func_subtract
+    move $s1, $v0
+    move $s2, $s1
+    # Save param t22 to $s2
+    # Call add
+    move $a0, $s2
+    move $a1, $s2
+    jal func_add
+    move $s3, $v0
+    move $v0, $s3
+    # Function epilogue
+    lw $s0, 228($sp)
+    lw $s1, 224($sp)
+    lw $s2, 220($sp)
+    lw $s3, 216($sp)
+    lw $s4, 212($sp)
+    lw $s5, 208($sp)
+    lw $s6, 204($sp)
+    lw $s7, 200($sp)
+    lw $fp, 248($sp)
+    lw $ra, 252($sp)
+    addi $sp, $sp, 256
+    jr $ra
+
+    # Function: max
+func_max:
+    # Function prologue
+    addi $sp, $sp, -256
+    sw $ra, 252($sp)
+    sw $fp, 248($sp)
+    addi $fp, $sp, 256
+    sw $a0, 244($sp)
+    sw $a1, 240($sp)
+    sw $a2, 236($sp)
+    sw $a3, 232($sp)
+    sw $s0, 228($sp)
+    sw $s1, 224($sp)
+    sw $s2, 220($sp)
+    sw $s3, 216($sp)
+    sw $s4, 212($sp)
+    sw $s5, 208($sp)
+    sw $s6, 204($sp)
+    sw $s7, 200($sp)
+    # Loading parameter a from stack
+    lw $t1, 244($sp)
+    # Loading parameter b from stack
+    lw $t2, 240($sp)
+    sgt $t0, $t1, $t2
+    beq $t0, $zero, L6
+    move $v0, $t1
+    # Function epilogue
+    lw $s0, 228($sp)
+    lw $s1, 224($sp)
+    lw $s2, 220($sp)
+    lw $s3, 216($sp)
+    lw $s4, 212($sp)
+    lw $s5, 208($sp)
+    lw $s6, 204($sp)
+    lw $s7, 200($sp)
+    lw $fp, 248($sp)
+    lw $ra, 252($sp)
+    addi $sp, $sp, 256
+    jr $ra
+L6:
+    # Loading parameter b from stack
+    lw $t0, 240($sp)
+    move $v0, $t0
+    # Function epilogue
+    lw $s0, 228($sp)
+    lw $s1, 224($sp)
+    lw $s2, 220($sp)
+    lw $s3, 216($sp)
+    lw $s4, 212($sp)
+    lw $s5, 208($sp)
+    lw $s6, 204($sp)
+    lw $s7, 200($sp)
+    lw $fp, 248($sp)
+    lw $ra, 252($sp)
+    addi $sp, $sp, 256
+    jr $ra
+
+    # Function: min
+func_min:
+    # Function prologue
+    addi $sp, $sp, -256
+    sw $ra, 252($sp)
+    sw $fp, 248($sp)
+    addi $fp, $sp, 256
+    sw $a0, 244($sp)
+    sw $a1, 240($sp)
+    sw $a2, 236($sp)
+    sw $a3, 232($sp)
+    sw $s0, 228($sp)
+    sw $s1, 224($sp)
+    sw $s2, 220($sp)
+    sw $s3, 216($sp)
+    sw $s4, 212($sp)
+    sw $s5, 208($sp)
+    sw $s6, 204($sp)
+    sw $s7, 200($sp)
+    # Loading parameter a from stack
+    lw $t1, 244($sp)
+    # Loading parameter b from stack
+    lw $t2, 240($sp)
+    slt $t0, $t1, $t2
+    beq $t0, $zero, L8
+    move $v0, $t1
+    # Function epilogue
+    lw $s0, 228($sp)
+    lw $s1, 224($sp)
+    lw $s2, 220($sp)
+    lw $s3, 216($sp)
+    lw $s4, 212($sp)
+    lw $s5, 208($sp)
+    lw $s6, 204($sp)
+    lw $s7, 200($sp)
+    lw $fp, 248($sp)
+    lw $ra, 252($sp)
+    addi $sp, $sp, 256
+    jr $ra
+L8:
+    # Loading parameter b from stack
+    lw $t0, 240($sp)
+    move $v0, $t0
+    # Function epilogue
+    lw $s0, 228($sp)
+    lw $s1, 224($sp)
+    lw $s2, 220($sp)
+    lw $s3, 216($sp)
+    lw $s4, 212($sp)
+    lw $s5, 208($sp)
+    lw $s6, 204($sp)
+    lw $s7, 200($sp)
+    lw $fp, 248($sp)
+    lw $ra, 252($sp)
+    addi $sp, $sp, 256
+    jr $ra
+
+    # Function: sumUpTo
+func_sumUpTo:
+    # Function prologue
+    addi $sp, $sp, -256
+    sw $ra, 252($sp)
+    sw $fp, 248($sp)
+    addi $fp, $sp, 256
+    sw $a0, 244($sp)
+    sw $a1, 240($sp)
+    sw $a2, 236($sp)
+    sw $a3, 232($sp)
+    sw $s0, 228($sp)
+    sw $s1, 224($sp)
+    sw $s2, 220($sp)
+    sw $s3, 216($sp)
+    sw $s4, 212($sp)
+    sw $s5, 208($sp)
+    sw $s6, 204($sp)
+    sw $s7, 200($sp)
+    li $t0, 0
+    sw $t0, 0($sp)
+    li $t0, 1
+    sw $t0, 4($sp)
+L10:
+    # Reloading i from stack
+    lw $t1, 4($sp)
+    # Loading parameter n from stack
+    lw $t2, 244($sp)
+    sle $t0, $t1, $t2
+    beq $t0, $zero, L11
+    # Reloading sum from stack
+    lw $t0, 0($sp)
+    move $s4, $t0
+    # Save param sum to $s4
+    move $s5, $t1
+    # Save param i to $s5
+    # Call add
+    move $a0, $s4
+    move $a1, $s5
+    # Spilling n before function call
+    sw $t2, 8($sp)
+    jal func_add
+    move $s6, $v0
+    # Reloading sum from stack
+    lw $t0, 0($sp)
+    move $t0, $s6
+    sw $t0, 0($sp)
+L12:
+    # Reloading i from stack
+    lw $t1, 4($sp)
+    move $t0, $t1
+    li $t2, 1
+    add $t1, $t1, $t2
+    sw $t1, 4($sp)
+    j L10
+L11:
+    # Reloading sum from stack
+    lw $t1, 0($sp)
+    move $v0, $t1
+    # Function epilogue
+    lw $s0, 228($sp)
+    lw $s1, 224($sp)
+    lw $s2, 220($sp)
+    lw $s3, 216($sp)
+    lw $s4, 212($sp)
+    lw $s5, 208($sp)
+    lw $s6, 204($sp)
+    lw $s7, 200($sp)
+    lw $fp, 248($sp)
+    lw $ra, 252($sp)
+    addi $sp, $sp, 256
+    jr $ra
+
+    # Function: main
+main:
+    # Reserve stack space for register spills
+    addi $sp, $sp, -256
+    la $s7, str_0
+    # Save string param str_0 to $s7
+    # Call printf
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 66
+    syscall
+    li $v0, 11
+    li $a0, 65
+    syscall
+    li $v0, 11
+    li $a0, 83
+    syscall
+    li $v0, 11
+    li $a0, 73
+    syscall
+    li $v0, 11
+    li $a0, 67
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 70
+    syscall
+    li $v0, 11
+    li $a0, 85
+    syscall
+    li $v0, 11
+    li $a0, 78
+    syscall
+    li $v0, 11
+    li $a0, 67
+    syscall
+    li $v0, 11
+    li $a0, 84
+    syscall
+    li $v0, 11
+    li $a0, 73
+    syscall
+    li $v0, 11
+    li $a0, 79
+    syscall
+    li $v0, 11
+    li $a0, 78
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 67
+    syscall
+    li $v0, 11
+    li $a0, 65
+    syscall
+    li $v0, 11
+    li $a0, 76
+    syscall
+    li $v0, 11
+    li $a0, 76
+    syscall
+    li $v0, 11
+    li $a0, 83
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    la $s0, str_1
+    # Save string param str_1 to $s0
+    # Call getValue
+    jal func_getValue
+    move $s1, $v0
+    move $s2, $s1
+    # Save param t30 to $s2
+    # Call printf
+    li $v0, 11
+    li $a0, 103
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 86
+    syscall
+    li $v0, 11
+    li $a0, 97
+    syscall
+    li $v0, 11
+    li $a0, 108
+    syscall
+    li $v0, 11
+    li $a0, 117
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 40
+    syscall
+    li $v0, 11
+    li $a0, 41
+    syscall
+    li $v0, 11
+    li $a0, 58
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    # Print integer
+    li $v0, 1
+    move $a0, $s2
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    la $s3, str_2
+    # Save string param str_2 to $s3
+    # Call square
+    li $a0, 5
+    jal func_square
+    move $s4, $v0
+    move $s5, $s4
+    # Save param t32 to $s5
+    # Call printf
+    li $v0, 11
+    li $a0, 115
+    syscall
+    li $v0, 11
+    li $a0, 113
+    syscall
+    li $v0, 11
+    li $a0, 117
+    syscall
+    li $v0, 11
+    li $a0, 97
+    syscall
+    li $v0, 11
+    li $a0, 114
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 40
+    syscall
+    li $v0, 11
+    li $a0, 53
+    syscall
+    li $v0, 11
+    li $a0, 41
+    syscall
+    li $v0, 11
+    li $a0, 58
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    # Print integer
+    li $v0, 1
+    move $a0, $s5
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    la $s6, str_3
+    # Save string param str_3 to $s6
+    # Call add
+    li $a0, 10
+    li $a1, 20
+    jal func_add
+    move $s7, $v0
+    move $s0, $s7
+    # Save param t34 to $s0
+    # Call printf
+    li $v0, 11
+    li $a0, 97
+    syscall
+    li $v0, 11
+    li $a0, 100
+    syscall
+    li $v0, 11
+    li $a0, 100
+    syscall
+    li $v0, 11
+    li $a0, 40
+    syscall
+    li $v0, 11
+    li $a0, 49
+    syscall
+    li $v0, 11
+    li $a0, 48
+    syscall
+    li $v0, 11
+    li $a0, 44
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 50
+    syscall
+    li $v0, 11
+    li $a0, 48
+    syscall
+    li $v0, 11
+    li $a0, 41
+    syscall
+    li $v0, 11
+    li $a0, 58
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    # Print integer
+    li $v0, 1
+    move $a0, $s0
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    la $s1, str_4
+    # Save string param str_4 to $s1
+    # Call subtract
+    li $a0, 50
+    li $a1, 15
+    jal func_subtract
+    move $s2, $v0
+    move $s3, $s2
+    # Save param t36 to $s3
+    # Call printf
+    li $v0, 11
+    li $a0, 115
+    syscall
+    li $v0, 11
+    li $a0, 117
+    syscall
+    li $v0, 11
+    li $a0, 98
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 114
+    syscall
+    li $v0, 11
+    li $a0, 97
+    syscall
+    li $v0, 11
+    li $a0, 99
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 40
+    syscall
+    li $v0, 11
+    li $a0, 53
+    syscall
+    li $v0, 11
+    li $a0, 48
+    syscall
+    li $v0, 11
+    li $a0, 44
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 49
+    syscall
+    li $v0, 11
+    li $a0, 53
+    syscall
+    li $v0, 11
+    li $a0, 41
+    syscall
+    li $v0, 11
+    li $a0, 58
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    # Print integer
+    li $v0, 1
+    move $a0, $s3
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    la $s4, str_5
+    # Save string param str_5 to $s4
+    # Call multiply
+    li $a0, 7
+    li $a1, 8
+    jal func_multiply
+    move $s5, $v0
+    move $s6, $s5
+    # Save param t38 to $s6
+    # Call printf
+    li $v0, 11
+    li $a0, 109
+    syscall
+    li $v0, 11
+    li $a0, 117
+    syscall
+    li $v0, 11
+    li $a0, 108
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 112
+    syscall
+    li $v0, 11
+    li $a0, 108
+    syscall
+    li $v0, 11
+    li $a0, 121
+    syscall
+    li $v0, 11
+    li $a0, 40
+    syscall
+    li $v0, 11
+    li $a0, 55
+    syscall
+    li $v0, 11
+    li $a0, 44
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 56
+    syscall
+    li $v0, 11
+    li $a0, 41
+    syscall
+    li $v0, 11
+    li $a0, 58
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    # Print integer
+    li $v0, 1
+    move $a0, $s6
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    la $s7, str_6
+    # Save string param str_6 to $s7
+    # Call divide
+    li $a0, 100
+    li $a1, 4
+    jal func_divide
+    move $s0, $v0
+    move $s1, $s0
+    # Save param t40 to $s1
+    # Call printf
+    li $v0, 11
+    li $a0, 100
+    syscall
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 118
+    syscall
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 100
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 40
+    syscall
+    li $v0, 11
+    li $a0, 49
+    syscall
+    li $v0, 11
+    li $a0, 48
+    syscall
+    li $v0, 11
+    li $a0, 48
+    syscall
+    li $v0, 11
+    li $a0, 44
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 52
+    syscall
+    li $v0, 11
+    li $a0, 41
+    syscall
+    li $v0, 11
+    li $a0, 58
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    # Print integer
+    li $v0, 1
+    move $a0, $s1
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    la $s2, str_7
+    # Save string param str_7 to $s2
+    # Call printf
+    li $v0, 11
+    li $a0, 10
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 78
+    syscall
+    li $v0, 11
+    li $a0, 69
+    syscall
+    li $v0, 11
+    li $a0, 83
+    syscall
+    li $v0, 11
+    li $a0, 84
+    syscall
+    li $v0, 11
+    li $a0, 69
+    syscall
+    li $v0, 11
+    li $a0, 68
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 70
+    syscall
+    li $v0, 11
+    li $a0, 85
+    syscall
+    li $v0, 11
+    li $a0, 78
+    syscall
+    li $v0, 11
+    li $a0, 67
+    syscall
+    li $v0, 11
+    li $a0, 84
+    syscall
+    li $v0, 11
+    li $a0, 73
+    syscall
+    li $v0, 11
+    li $a0, 79
+    syscall
+    li $v0, 11
+    li $a0, 78
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 67
+    syscall
+    li $v0, 11
+    li $a0, 65
+    syscall
+    li $v0, 11
+    li $a0, 76
+    syscall
+    li $v0, 11
+    li $a0, 76
+    syscall
+    li $v0, 11
+    li $a0, 83
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    la $s3, str_8
+    # Save string param str_8 to $s3
+    # Call square
+    li $a0, 3
+    jal func_square
+    move $s4, $v0
+    move $s5, $s4
+    # Save param t43 to $s5
+    # Call multiply
+    li $a0, 2
+    li $a1, 5
+    jal func_multiply
+    move $s6, $v0
+    move $s7, $s6
+    # Save param t44 to $s7
+    # Call add
+    move $a0, $s5
+    move $a1, $s7
+    jal func_add
+    move $s0, $v0
+    move $s1, $s0
+    # Save param t45 to $s1
+    # Call printf
+    li $v0, 11
+    li $a0, 97
+    syscall
+    li $v0, 11
+    li $a0, 100
+    syscall
+    li $v0, 11
+    li $a0, 100
+    syscall
+    li $v0, 11
+    li $a0, 40
+    syscall
+    li $v0, 11
+    li $a0, 115
+    syscall
+    li $v0, 11
+    li $a0, 113
+    syscall
+    li $v0, 11
+    li $a0, 117
+    syscall
+    li $v0, 11
+    li $a0, 97
+    syscall
+    li $v0, 11
+    li $a0, 114
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 40
+    syscall
+    li $v0, 11
+    li $a0, 51
+    syscall
+    li $v0, 11
+    li $a0, 41
+    syscall
+    li $v0, 11
+    li $a0, 44
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 109
+    syscall
+    li $v0, 11
+    li $a0, 117
+    syscall
+    li $v0, 11
+    li $a0, 108
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 112
+    syscall
+    li $v0, 11
+    li $a0, 108
+    syscall
+    li $v0, 11
+    li $a0, 121
+    syscall
+    li $v0, 11
+    li $a0, 40
+    syscall
+    li $v0, 11
+    li $a0, 50
+    syscall
+    li $v0, 11
+    li $a0, 44
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 53
+    syscall
+    li $v0, 11
+    li $a0, 41
+    syscall
+    li $v0, 11
+    li $a0, 41
+    syscall
+    li $v0, 11
+    li $a0, 58
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    # Print integer
+    li $v0, 1
+    move $a0, $s1
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    la $s2, str_9
+    # Save string param str_9 to $s2
+    # Call complexCalc
+    li $a0, 5
+    li $a1, 10
+    jal func_complexCalc
+    move $s3, $v0
+    move $s4, $s3
+    # Save param t47 to $s4
+    # Call printf
+    li $v0, 11
+    li $a0, 99
+    syscall
+    li $v0, 11
+    li $a0, 111
+    syscall
+    li $v0, 11
+    li $a0, 109
+    syscall
+    li $v0, 11
+    li $a0, 112
+    syscall
+    li $v0, 11
+    li $a0, 108
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 120
+    syscall
+    li $v0, 11
+    li $a0, 67
+    syscall
+    li $v0, 11
+    li $a0, 97
+    syscall
+    li $v0, 11
+    li $a0, 108
+    syscall
+    li $v0, 11
+    li $a0, 99
+    syscall
+    li $v0, 11
+    li $a0, 40
+    syscall
+    li $v0, 11
+    li $a0, 53
+    syscall
+    li $v0, 11
+    li $a0, 44
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 49
+    syscall
+    li $v0, 11
+    li $a0, 48
+    syscall
+    li $v0, 11
+    li $a0, 41
+    syscall
+    li $v0, 11
+    li $a0, 58
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    # Print integer
+    li $v0, 1
+    move $a0, $s4
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    la $s5, str_10
+    # Save string param str_10 to $s5
+    # Call add
+    li $a0, 2
+    li $a1, 3
+    jal func_add
+    move $s6, $v0
+    move $s7, $s6
+    # Save param t49 to $s7
+    # Call subtract
+    li $a0, 10
+    li $a1, 5
+    jal func_subtract
+    move $s0, $v0
+    move $s1, $s0
+    # Save param t50 to $s1
+    # Call multiply
+    move $a0, $s7
+    move $a1, $s1
+    jal func_multiply
+    move $s2, $v0
+    move $s3, $s2
+    # Save param t51 to $s3
+    # Call printf
+    li $v0, 11
+    li $a0, 109
+    syscall
+    li $v0, 11
+    li $a0, 117
+    syscall
+    li $v0, 11
+    li $a0, 108
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 112
+    syscall
+    li $v0, 11
+    li $a0, 108
+    syscall
+    li $v0, 11
+    li $a0, 121
+    syscall
+    li $v0, 11
+    li $a0, 40
+    syscall
+    li $v0, 11
+    li $a0, 97
+    syscall
+    li $v0, 11
+    li $a0, 100
+    syscall
+    li $v0, 11
+    li $a0, 100
+    syscall
+    li $v0, 11
+    li $a0, 40
+    syscall
+    li $v0, 11
+    li $a0, 50
+    syscall
+    li $v0, 11
+    li $a0, 44
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 51
+    syscall
+    li $v0, 11
+    li $a0, 41
+    syscall
+    li $v0, 11
+    li $a0, 44
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 115
+    syscall
+    li $v0, 11
+    li $a0, 117
+    syscall
+    li $v0, 11
+    li $a0, 98
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 114
+    syscall
+    li $v0, 11
+    li $a0, 97
+    syscall
+    li $v0, 11
+    li $a0, 99
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 40
+    syscall
+    li $v0, 11
+    li $a0, 49
+    syscall
+    li $v0, 11
+    li $a0, 48
+    syscall
+    li $v0, 11
+    li $a0, 44
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 53
+    syscall
+    li $v0, 11
+    li $a0, 41
+    syscall
+    li $v0, 11
+    li $a0, 41
+    syscall
+    li $v0, 11
+    li $a0, 58
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    # Print integer
+    li $v0, 1
+    move $a0, $s3
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    la $s4, str_11
+    # Save string param str_11 to $s4
+    # Call printf
+    li $v0, 11
+    li $a0, 10
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 82
+    syscall
+    li $v0, 11
+    li $a0, 69
+    syscall
+    li $v0, 11
+    li $a0, 67
+    syscall
+    li $v0, 11
+    li $a0, 85
+    syscall
+    li $v0, 11
+    li $a0, 82
+    syscall
+    li $v0, 11
+    li $a0, 83
+    syscall
+    li $v0, 11
+    li $a0, 73
+    syscall
+    li $v0, 11
+    li $a0, 86
+    syscall
+    li $v0, 11
+    li $a0, 69
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 70
+    syscall
+    li $v0, 11
+    li $a0, 85
+    syscall
+    li $v0, 11
+    li $a0, 78
+    syscall
+    li $v0, 11
+    li $a0, 67
+    syscall
+    li $v0, 11
+    li $a0, 84
+    syscall
+    li $v0, 11
+    li $a0, 73
+    syscall
+    li $v0, 11
+    li $a0, 79
+    syscall
+    li $v0, 11
+    li $a0, 78
+    syscall
+    li $v0, 11
+    li $a0, 83
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    la $s5, str_12
+    # Save string param str_12 to $s5
+    # Call factorial
+    li $a0, 5
+    jal func_factorial
+    move $s6, $v0
+    move $s7, $s6
+    # Save param t54 to $s7
+    # Call printf
+    li $v0, 11
+    li $a0, 102
+    syscall
+    li $v0, 11
+    li $a0, 97
+    syscall
+    li $v0, 11
+    li $a0, 99
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 111
+    syscall
+    li $v0, 11
+    li $a0, 114
+    syscall
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 97
+    syscall
+    li $v0, 11
+    li $a0, 108
+    syscall
+    li $v0, 11
+    li $a0, 40
+    syscall
+    li $v0, 11
+    li $a0, 53
+    syscall
+    li $v0, 11
+    li $a0, 41
+    syscall
+    li $v0, 11
+    li $a0, 58
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    # Print integer
+    li $v0, 1
+    move $a0, $s7
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    la $s0, str_13
+    # Save string param str_13 to $s0
+    # Call factorial
+    li $a0, 6
+    jal func_factorial
+    move $s1, $v0
+    move $s2, $s1
+    # Save param t56 to $s2
+    # Call printf
+    li $v0, 11
+    li $a0, 102
+    syscall
+    li $v0, 11
+    li $a0, 97
+    syscall
+    li $v0, 11
+    li $a0, 99
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 111
+    syscall
+    li $v0, 11
+    li $a0, 114
+    syscall
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 97
+    syscall
+    li $v0, 11
+    li $a0, 108
+    syscall
+    li $v0, 11
+    li $a0, 40
+    syscall
+    li $v0, 11
+    li $a0, 54
+    syscall
+    li $v0, 11
+    li $a0, 41
+    syscall
+    li $v0, 11
+    li $a0, 58
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    # Print integer
+    li $v0, 1
+    move $a0, $s2
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    la $s3, str_14
+    # Save string param str_14 to $s3
+    # Call fibonacci
+    li $a0, 7
+    jal func_fibonacci
+    move $s4, $v0
+    move $s5, $s4
+    # Save param t58 to $s5
+    # Call printf
+    li $v0, 11
+    li $a0, 102
+    syscall
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 98
+    syscall
+    li $v0, 11
+    li $a0, 111
+    syscall
+    li $v0, 11
+    li $a0, 110
+    syscall
+    li $v0, 11
+    li $a0, 97
+    syscall
+    li $v0, 11
+    li $a0, 99
+    syscall
+    li $v0, 11
+    li $a0, 99
+    syscall
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 40
+    syscall
+    li $v0, 11
+    li $a0, 55
+    syscall
+    li $v0, 11
+    li $a0, 41
+    syscall
+    li $v0, 11
+    li $a0, 58
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    # Print integer
+    li $v0, 1
+    move $a0, $s5
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    la $s6, str_15
+    # Save string param str_15 to $s6
+    # Call fibonacci
+    li $a0, 10
+    jal func_fibonacci
+    move $s7, $v0
+    move $s0, $s7
+    # Save param t60 to $s0
+    # Call printf
+    li $v0, 11
+    li $a0, 102
+    syscall
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 98
+    syscall
+    li $v0, 11
+    li $a0, 111
+    syscall
+    li $v0, 11
+    li $a0, 110
+    syscall
+    li $v0, 11
+    li $a0, 97
+    syscall
+    li $v0, 11
+    li $a0, 99
+    syscall
+    li $v0, 11
+    li $a0, 99
+    syscall
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 40
+    syscall
+    li $v0, 11
+    li $a0, 49
+    syscall
+    li $v0, 11
+    li $a0, 48
+    syscall
+    li $v0, 11
+    li $a0, 41
+    syscall
+    li $v0, 11
+    li $a0, 58
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    # Print integer
+    li $v0, 1
+    move $a0, $s0
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    la $s1, str_16
+    # Save string param str_16 to $s1
+    # Call printf
+    li $v0, 11
+    li $a0, 10
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 67
+    syscall
+    li $v0, 11
+    li $a0, 79
+    syscall
+    li $v0, 11
+    li $a0, 77
+    syscall
+    li $v0, 11
+    li $a0, 80
+    syscall
+    li $v0, 11
+    li $a0, 76
+    syscall
+    li $v0, 11
+    li $a0, 69
+    syscall
+    li $v0, 11
+    li $a0, 88
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 83
+    syscall
+    li $v0, 11
+    li $a0, 67
+    syscall
+    li $v0, 11
+    li $a0, 69
+    syscall
+    li $v0, 11
+    li $a0, 78
+    syscall
+    li $v0, 11
+    li $a0, 65
+    syscall
+    li $v0, 11
+    li $a0, 82
+    syscall
+    li $v0, 11
+    li $a0, 73
+    syscall
+    li $v0, 11
+    li $a0, 79
+    syscall
+    li $v0, 11
+    li $a0, 83
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    la $s2, str_17
+    # Save string param str_17 to $s2
+    # Call compute
+    li $a0, 5
+    li $a1, 10
+    li $a2, 3
+    jal func_compute
+    move $s3, $v0
+    move $s4, $s3
+    # Save param t63 to $s4
+    # Call printf
+    li $v0, 11
+    li $a0, 99
+    syscall
+    li $v0, 11
+    li $a0, 111
+    syscall
+    li $v0, 11
+    li $a0, 109
+    syscall
+    li $v0, 11
+    li $a0, 112
+    syscall
+    li $v0, 11
+    li $a0, 117
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 40
+    syscall
+    li $v0, 11
+    li $a0, 53
+    syscall
+    li $v0, 11
+    li $a0, 44
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 49
+    syscall
+    li $v0, 11
+    li $a0, 48
+    syscall
+    li $v0, 11
+    li $a0, 44
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 51
+    syscall
+    li $v0, 11
+    li $a0, 41
+    syscall
+    li $v0, 11
+    li $a0, 58
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    # Print integer
+    li $v0, 1
+    move $a0, $s4
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    la $s5, str_18
+    # Save string param str_18 to $s5
+    # Call max
+    li $a0, 15
+    li $a1, 23
+    jal func_max
+    move $s6, $v0
+    move $s7, $s6
+    # Save param t65 to $s7
+    # Call printf
+    li $v0, 11
+    li $a0, 109
+    syscall
+    li $v0, 11
+    li $a0, 97
+    syscall
+    li $v0, 11
+    li $a0, 120
+    syscall
+    li $v0, 11
+    li $a0, 40
+    syscall
+    li $v0, 11
+    li $a0, 49
+    syscall
+    li $v0, 11
+    li $a0, 53
+    syscall
+    li $v0, 11
+    li $a0, 44
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 50
+    syscall
+    li $v0, 11
+    li $a0, 51
+    syscall
+    li $v0, 11
+    li $a0, 41
+    syscall
+    li $v0, 11
+    li $a0, 58
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    # Print integer
+    li $v0, 1
+    move $a0, $s7
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    la $s0, str_19
+    # Save string param str_19 to $s0
+    # Call min
+    li $a0, 15
+    li $a1, 23
+    jal func_min
+    move $s1, $v0
+    move $s2, $s1
+    # Save param t67 to $s2
+    # Call printf
+    li $v0, 11
+    li $a0, 109
+    syscall
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 110
+    syscall
+    li $v0, 11
+    li $a0, 40
+    syscall
+    li $v0, 11
+    li $a0, 49
+    syscall
+    li $v0, 11
+    li $a0, 53
+    syscall
+    li $v0, 11
+    li $a0, 44
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 50
+    syscall
+    li $v0, 11
+    li $a0, 51
+    syscall
+    li $v0, 11
+    li $a0, 41
+    syscall
+    li $v0, 11
+    li $a0, 58
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    # Print integer
+    li $v0, 1
+    move $a0, $s2
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    la $s3, str_20
+    # Save string param str_20 to $s3
+    # Call sumUpTo
+    li $a0, 10
+    jal func_sumUpTo
+    move $s4, $v0
+    move $s5, $s4
+    # Save param t69 to $s5
+    # Call printf
+    li $v0, 11
+    li $a0, 115
+    syscall
+    li $v0, 11
+    li $a0, 117
+    syscall
+    li $v0, 11
+    li $a0, 109
+    syscall
+    li $v0, 11
+    li $a0, 85
+    syscall
+    li $v0, 11
+    li $a0, 112
+    syscall
+    li $v0, 11
+    li $a0, 84
+    syscall
+    li $v0, 11
+    li $a0, 111
+    syscall
+    li $v0, 11
+    li $a0, 40
+    syscall
+    li $v0, 11
+    li $a0, 49
+    syscall
+    li $v0, 11
+    li $a0, 48
+    syscall
+    li $v0, 11
+    li $a0, 41
+    syscall
+    li $v0, 11
+    li $a0, 58
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    # Print integer
+    li $v0, 1
+    move $a0, $s5
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    # Call square
+    li $a0, 2
+    jal func_square
+    move $s6, $v0
+    move $s7, $s6
+    # Save param t71 to $s7
+    # Call factorial
+    li $a0, 3
+    jal func_factorial
+    move $s0, $v0
+    move $s1, $s0
+    # Save param t72 to $s1
+    # Call multiply
+    move $a0, $s7
+    move $a1, $s1
+    jal func_multiply
+    move $s2, $v0
+    move $s3, $s2
+    # Save param t73 to $s3
+    # Call divide
+    li $a0, 100
+    li $a1, 5
+    jal func_divide
+    move $s4, $v0
+    move $s5, $s4
+    # Save param t74 to $s5
+    # Call fibonacci
+    li $a0, 5
+    jal func_fibonacci
+    move $s6, $v0
+    move $s7, $s6
+    # Save param t75 to $s7
+    # Call subtract
+    move $a0, $s5
+    move $a1, $s7
+    jal func_subtract
+    move $s0, $v0
+    move $s1, $s0
+    # Save param t76 to $s1
+    # Call add
+    move $a0, $s3
+    move $a1, $s1
+    jal func_add
+    move $s2, $v0
+    move $t0, $s2
+    sw $t0, 0($sp)
+    la $s3, str_21
+    # Save string param str_21 to $s3
+    # Reloading result from stack
+    lw $t0, 0($sp)
+    move $s4, $t0
+    # Save param result to $s4
+    # Call printf
+    li $v0, 11
+    li $a0, 67
+    syscall
+    li $v0, 11
+    li $a0, 111
+    syscall
+    li $v0, 11
+    li $a0, 109
+    syscall
+    li $v0, 11
+    li $a0, 112
+    syscall
+    li $v0, 11
+    li $a0, 108
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 120
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 120
+    syscall
+    li $v0, 11
+    li $a0, 112
+    syscall
+    li $v0, 11
+    li $a0, 114
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 115
+    syscall
+    li $v0, 11
+    li $a0, 115
+    syscall
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 111
+    syscall
+    li $v0, 11
+    li $a0, 110
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 114
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 115
+    syscall
+    li $v0, 11
+    li $a0, 117
+    syscall
+    li $v0, 11
+    li $a0, 108
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 58
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    # Print integer
+    li $v0, 1
+    move $a0, $s4
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    la $s5, str_22
+    # Save string param str_22 to $s5
+    # Call min
+    li $a0, 10
+    li $a1, 20
+    jal func_min
+    move $s6, $v0
+    move $s7, $s6
+    # Save param t79 to $s7
+    # Call max
+    li $a0, 5
+    li $a1, 15
+    jal func_max
+    move $s0, $v0
+    move $s1, $s0
+    # Save param t80 to $s1
+    # Call max
+    move $a0, $s7
+    move $a1, $s1
+    jal func_max
+    move $s2, $v0
+    move $s3, $s2
+    # Save param t81 to $s3
+    # Call printf
+    li $v0, 11
+    li $a0, 109
+    syscall
+    li $v0, 11
+    li $a0, 97
+    syscall
+    li $v0, 11
+    li $a0, 120
+    syscall
+    li $v0, 11
+    li $a0, 40
+    syscall
+    li $v0, 11
+    li $a0, 109
+    syscall
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 110
+    syscall
+    li $v0, 11
+    li $a0, 40
+    syscall
+    li $v0, 11
+    li $a0, 49
+    syscall
+    li $v0, 11
+    li $a0, 48
+    syscall
+    li $v0, 11
+    li $a0, 44
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 50
+    syscall
+    li $v0, 11
+    li $a0, 48
+    syscall
+    li $v0, 11
+    li $a0, 41
+    syscall
+    li $v0, 11
+    li $a0, 44
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 109
+    syscall
+    li $v0, 11
+    li $a0, 97
+    syscall
+    li $v0, 11
+    li $a0, 120
+    syscall
+    li $v0, 11
+    li $a0, 40
+    syscall
+    li $v0, 11
+    li $a0, 53
+    syscall
+    li $v0, 11
+    li $a0, 44
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 49
+    syscall
+    li $v0, 11
+    li $a0, 53
+    syscall
+    li $v0, 11
+    li $a0, 41
+    syscall
+    li $v0, 11
+    li $a0, 41
+    syscall
+    li $v0, 11
+    li $a0, 58
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    # Print integer
+    li $v0, 1
+    move $a0, $s3
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    li $v0, 0
+    # Restore stack and exit program
+    addi $sp, $sp, 256
+    li $v0, 10
+    syscall
+
+MIPS file generated: output.s
+
+==================================================
+COMPILATION SUCCESSFUL
+==================================================

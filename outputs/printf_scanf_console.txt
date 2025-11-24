@@ -1,0 +1,3058 @@
+C/C++ Syntax Analyzer with AST
+==============================
+
+Token: #include <stdio.h>   Type: PREPROCESSOR   
+Token: void                 Type: KEYWORD        
+Token: testcase1            Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: int                  Type: KEYWORD        
+Token: i                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: 42                   Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: float                Type: KEYWORD        
+Token: f                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: 3                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: char                 Type: KEYWORD        
+Token: c                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: 'A'                  Type: CHARACTER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "\nTESTCASE 1: printf basic types\n" Type: STRING_LITERAL 
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "Integer: %d\n"      Type: STRING_LITERAL 
+Token: ,                    Type: COMMA          
+Token: i                    Type: IDENTIFIER     
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "Float: %f\n"        Type: STRING_LITERAL 
+Token: ,                    Type: COMMA          
+Token: f                    Type: IDENTIFIER     
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "Character: %c\n"    Type: STRING_LITERAL 
+Token: ,                    Type: COMMA          
+Token: c                    Type: IDENTIFIER     
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: void                 Type: KEYWORD        
+Token: testcase2            Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: int                  Type: KEYWORD        
+Token: a                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: 10                   Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: int                  Type: KEYWORD        
+Token: b                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: 20                   Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: int                  Type: KEYWORD        
+Token: sum                  Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: a                    Type: IDENTIFIER     
+Token: +                    Type: ARITHMETIC_OP  
+Token: b                    Type: IDENTIFIER     
+Token: ;                    Type: SEMICOLON      
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "\nTESTCASE 2: printf multiple values\n" Type: STRING_LITERAL 
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "%d + %d = %d\n"     Type: STRING_LITERAL 
+Token: ,                    Type: COMMA          
+Token: a                    Type: IDENTIFIER     
+Token: ,                    Type: COMMA          
+Token: b                    Type: IDENTIFIER     
+Token: ,                    Type: COMMA          
+Token: sum                  Type: IDENTIFIER     
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: void                 Type: KEYWORD        
+Token: testcase3            Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: int                  Type: KEYWORD        
+Token: num                  Type: IDENTIFIER     
+Token: ;                    Type: SEMICOLON      
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "\nTESTCASE 3: scanf with integer\n" Type: STRING_LITERAL 
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "Enter an integer: " Type: STRING_LITERAL 
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: scanf                Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "%d"                 Type: STRING_LITERAL 
+Token: ,                    Type: COMMA          
+Token: &                    Type: BITWISE_OP     
+Token: num                  Type: IDENTIFIER     
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "You entered: %d\n"  Type: STRING_LITERAL 
+Token: ,                    Type: COMMA          
+Token: num                  Type: IDENTIFIER     
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: void                 Type: KEYWORD        
+Token: testcase4            Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: int                  Type: KEYWORD        
+Token: a                    Type: IDENTIFIER     
+Token: ,                    Type: COMMA          
+Token: b                    Type: IDENTIFIER     
+Token: ,                    Type: COMMA          
+Token: c                    Type: IDENTIFIER     
+Token: ;                    Type: SEMICOLON      
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "\nTESTCASE 4: scanf multiple integers\n" Type: STRING_LITERAL 
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "Enter three integers: " Type: STRING_LITERAL 
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: scanf                Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "%d %d %d"           Type: STRING_LITERAL 
+Token: ,                    Type: COMMA          
+Token: &                    Type: BITWISE_OP     
+Token: a                    Type: IDENTIFIER     
+Token: ,                    Type: COMMA          
+Token: &                    Type: BITWISE_OP     
+Token: b                    Type: IDENTIFIER     
+Token: ,                    Type: COMMA          
+Token: &                    Type: BITWISE_OP     
+Token: c                    Type: IDENTIFIER     
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "You entered: %d, %d, %d\n" Type: STRING_LITERAL 
+Token: ,                    Type: COMMA          
+Token: a                    Type: IDENTIFIER     
+Token: ,                    Type: COMMA          
+Token: b                    Type: IDENTIFIER     
+Token: ,                    Type: COMMA          
+Token: c                    Type: IDENTIFIER     
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: void                 Type: KEYWORD        
+Token: testcase5            Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: int                  Type: KEYWORD        
+Token: x                    Type: IDENTIFIER     
+Token: ;                    Type: SEMICOLON      
+Token: int                  Type: KEYWORD        
+Token: *                    Type: ARITHMETIC_OP  
+Token: ptr                  Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: &                    Type: BITWISE_OP     
+Token: x                    Type: IDENTIFIER     
+Token: ;                    Type: SEMICOLON      
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "\nTESTCASE 5: scanf with pointer\n" Type: STRING_LITERAL 
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "Enter value via pointer: " Type: STRING_LITERAL 
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: scanf                Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "%d"                 Type: STRING_LITERAL 
+Token: ,                    Type: COMMA          
+Token: ptr                  Type: IDENTIFIER     
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "Value: %d\n"        Type: STRING_LITERAL 
+Token: ,                    Type: COMMA          
+Token: *                    Type: ARITHMETIC_OP  
+Token: ptr                  Type: IDENTIFIER     
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: void                 Type: KEYWORD        
+Token: testcase6            Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: int                  Type: KEYWORD        
+Token: nums                 Type: IDENTIFIER     
+Token: [                    Type: LBRACKET       
+Token: 3                    Type: INTEGER_CONSTANT
+Token: ]                    Type: RBRACKET       
+Token: ;                    Type: SEMICOLON      
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "\nTESTCASE 6: scanf in loop\n" Type: STRING_LITERAL 
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "Enter 3 numbers:\n" Type: STRING_LITERAL 
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: for                  Type: KEYWORD        
+Token: (                    Type: LPAREN         
+Token: int                  Type: KEYWORD        
+Token: i                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: 0                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: i                    Type: IDENTIFIER     
+Token: <                    Type: RELATIONAL_OP  
+Token: 3                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: i                    Type: IDENTIFIER     
+Token: ++                   Type: POSTFIX_OP     
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "Number %d: "        Type: STRING_LITERAL 
+Token: ,                    Type: COMMA          
+Token: i                    Type: IDENTIFIER     
+Token: +                    Type: ARITHMETIC_OP  
+Token: 1                    Type: INTEGER_CONSTANT
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: scanf                Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "%d"                 Type: STRING_LITERAL 
+Token: ,                    Type: COMMA          
+Token: &                    Type: BITWISE_OP     
+Token: nums                 Type: IDENTIFIER     
+Token: [                    Type: LBRACKET       
+Token: i                    Type: IDENTIFIER     
+Token: ]                    Type: RBRACKET       
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "You entered: "      Type: STRING_LITERAL 
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: for                  Type: KEYWORD        
+Token: (                    Type: LPAREN         
+Token: int                  Type: KEYWORD        
+Token: i                    Type: IDENTIFIER     
+Token: =                    Type: ASSIGN         
+Token: 0                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: i                    Type: IDENTIFIER     
+Token: <                    Type: RELATIONAL_OP  
+Token: 3                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: i                    Type: IDENTIFIER     
+Token: ++                   Type: POSTFIX_OP     
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "%d "                Type: STRING_LITERAL 
+Token: ,                    Type: COMMA          
+Token: nums                 Type: IDENTIFIER     
+Token: [                    Type: LBRACKET       
+Token: i                    Type: IDENTIFIER     
+Token: ]                    Type: RBRACKET       
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "\n"                 Type: STRING_LITERAL 
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+Token: int                  Type: KEYWORD        
+Token: main                 Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: )                    Type: RPAREN         
+Token: {                    Type: LBRACE         
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "=================================\n" Type: STRING_LITERAL 
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "PRINTF/SCANF TEST SUITE\n" Type: STRING_LITERAL 
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "=================================\n" Type: STRING_LITERAL 
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: testcase1            Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: testcase2            Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: printf               Type: IDENTIFIER     
+Token: (                    Type: LPAREN         
+Token: "\nAll printf/scanf tests completed!\n" Type: STRING_LITERAL 
+Token: )                    Type: RPAREN         
+Token: ;                    Type: SEMICOLON      
+Token: return               Type: KEYWORD        
+Token: 0                    Type: INTEGER_CONSTANT
+Token: ;                    Type: SEMICOLON      
+Token: }                    Type: RBRACE         
+
+=== PARSING SUCCESSFUL ===
+
+=== SEMANTIC ANALYSIS ===
+=== SEMANTIC ANALYSIS STARTED ===
+Line 8: WARNING: Implicit type conversion in initialization: 'int' to 'float'
+Line 8: WARNING: Implicit type conversion in initialization: 'int' to 'float'
+Line 9: WARNING: Implicit type conversion in initialization: 'int' to 'char'
+Line 9: WARNING: Implicit type conversion in initialization: 'int' to 'char'
+Line 37: WARNING: Variable 'num' may be uninitialized
+Line 38: WARNING: Variable 'num' may be uninitialized
+Line 49: WARNING: Variable 'a' may be uninitialized
+Line 49: WARNING: Variable 'b' may be uninitialized
+Line 49: WARNING: Variable 'c' may be uninitialized
+Line 50: WARNING: Variable 'a' may be uninitialized
+Line 50: WARNING: Variable 'b' may be uninitialized
+Line 50: WARNING: Variable 'c' may be uninitialized
+=== SEMANTIC ANALYSIS COMPLETED ===
+Found 0 semantic error(s)
+Found 12 warning(s)
+
+=== SYMBOL TABLE (ACTIVE SCOPES) ===
+Scope 0:
+  function 'main' : int (scope: 0, line: 106) [has_return]
+ (scope: 0, line: 106) [has_return]
+  function 'testcase5' : void (scope: 0, line: 64)
+ (scope: 0, line: 64)
+  function 'testcase3' : void (scope: 0, line: 39)
+ (scope: 0, line: 39)
+  function 'testcase4' : void (scope: 0, line: 51)
+ (scope: 0, line: 51)
+  function 'testcase2' : void (scope: 0, line: 27)
+ (scope: 0, line: 27)
+  function 'testcase1' : void (scope: 0, line: 15)
+ (scope: 0, line: 15)
+  function 'testcase6' : void (scope: 0, line: 85)
+ (scope: 0, line: 85)
+  constant 'NULL' : void* (scope: 0, line: 0)
+ (scope: 0, line: 0)
+
+ Semantic analysis passed with no errors.
+
+=== CODE GENERATION ===
+
+=== THREE ADDRESS CODE ===
+testcase1:
+    i = 42
+    f = 3
+    c = 'A'
+    param "\nTESTCASE 1: printf basic types\n"
+    t0 = call printf, 1
+    param "Integer: %d\n"
+    param i
+    t1 = call printf, 2
+    param "Float: %f\n"
+    param f
+    t2 = call printf, 2
+    param "Character: %c\n"
+    param c
+    t3 = call printf, 2
+    return
+testcase2:
+    a = 10
+    b = 20
+    t4 = a + b
+    sum = t4
+    param "\nTESTCASE 2: printf multiple values\n"
+    t5 = call printf, 1
+    param "%d + %d = %d\n"
+    param a
+    param b
+    param sum
+    t6 = call printf, 4
+    return
+testcase3:
+    param "\nTESTCASE 3: scanf with integer\n"
+    t7 = call printf, 1
+    param "Enter an integer: "
+    t8 = call printf, 1
+    param "%d"
+    t9 = &num
+    param t9
+    t10 = call scanf, 2
+    param "You entered: %d\n"
+    t11 = num[0]
+    param t11
+    t12 = call printf, 2
+    return
+testcase4:
+    param "\nTESTCASE 4: scanf multiple integers\n"
+    t13 = call printf, 1
+    param "Enter three integers: "
+    t14 = call printf, 1
+    param "%d %d %d"
+    t15 = &a
+    param t15
+    t16 = &b
+    param t16
+    t17 = &c
+    param t17
+    t18 = call scanf, 4
+    param "You entered: %d, %d, %d\n"
+    t19 = a[0]
+    param t19
+    t20 = b[0]
+    param t20
+    t21 = c[0]
+    param t21
+    t22 = call printf, 4
+    return
+testcase5:
+    t23 = &x
+    ptr = t23
+    param "\nTESTCASE 5: scanf with pointer\n"
+    t24 = call printf, 1
+    param "Enter value via pointer: "
+    t25 = call printf, 1
+    param "%d"
+    param ptr
+    t26 = call scanf, 2
+    param "Value: %d\n"
+    t27 = *ptr
+    param t27
+    t28 = call printf, 2
+    return
+testcase6:
+    param "\nTESTCASE 6: scanf in loop\n"
+    t29 = call printf, 1
+    param "Enter 3 numbers:\n"
+    t30 = call printf, 1
+    i = 0
+L0:
+    t31 = i < 3
+    ifFalse t31 goto L1
+    param "Number %d: "
+    t32 = i + 1
+    param t32
+    t33 = call printf, 2
+    param "%d"
+    t35 = &nums
+    t36 = i * 4
+    t34 = t35 + t36
+    param t34
+    t37 = call scanf, 2
+L2:
+    t38 = i
+    i = i + 1
+    goto L0
+L1:
+    param "You entered: "
+    t39 = call printf, 1
+    i = 0
+L3:
+    t40 = i < 3
+    ifFalse t40 goto L4
+    param "%d "
+    t41 = i * 4
+    t42 = &nums
+    t43 = t42 + t41
+    t44 = *t43
+    param t44
+    t45 = call printf, 2
+L5:
+    t46 = i
+    i = i + 1
+    goto L3
+L4:
+    param "\n"
+    t47 = call printf, 1
+    return
+main:
+    param "=================================\n"
+    t48 = call printf, 1
+    param "PRINTF/SCANF TEST SUITE\n"
+    t49 = call printf, 1
+    param "=================================\n"
+    t50 = call printf, 1
+    call testcase1, 0
+    call testcase2, 0
+    param "\nAll printf/scanf tests completed!\n"
+    t51 = call printf, 1
+    return 0
+
+Total instructions: 137
+
+=== ABSTRACT SYNTAX TREE ===
+TranslationUnit :  (line 1)
+  Preprocessor : #include <stdio.h> (line 1)
+  FunctionDefinition :  (line 15)
+    DeclarationSpecifiers :  (line 6)
+      TypeSpecifier : void (line 6)
+    FunctionDeclarator :  (line 6)
+      DirectDeclarator : testcase1 (line 6)
+    CompoundStatement :  (line 15)
+      BlockItemList :  (line 7)
+        BlockItem :  (line 7)
+          Declaration :  (line 7)
+            DeclarationSpecifiers :  (line 7)
+              TypeSpecifier : int (line 7)
+            InitDeclaratorList :  (line 7)
+              InitDeclarator :  (line 7)
+                DirectDeclarator : i (line 7)
+                Initializer :  (line 7)
+                  Constant : 42 (line 7)
+        BlockItem :  (line 8)
+          Declaration :  (line 8)
+            DeclarationSpecifiers :  (line 8)
+              TypeSpecifier : float (line 8)
+            InitDeclaratorList :  (line 8)
+              InitDeclarator :  (line 8)
+                DirectDeclarator : f (line 8)
+                Initializer :  (line 8)
+                  Constant : 3 (line 8)
+        BlockItem :  (line 9)
+          Declaration :  (line 9)
+            DeclarationSpecifiers :  (line 9)
+              TypeSpecifier : char (line 9)
+            InitDeclaratorList :  (line 9)
+              InitDeclarator :  (line 9)
+                DirectDeclarator : c (line 9)
+                Initializer :  (line 9)
+                  Constant : 'A' (line 9)
+        BlockItem :  (line 11)
+          ExpressionStatement :  (line 11)
+            FunctionCall :  (line 11)
+              Identifier : printf (line 11)
+              ArgumentList :  (line 11)
+                StringLiteral : "\nTESTCASE 1: printf basic types\n" (line 11)
+        BlockItem :  (line 12)
+          ExpressionStatement :  (line 12)
+            FunctionCall :  (line 12)
+              Identifier : printf (line 12)
+              ArgumentList :  (line 12)
+                StringLiteral : "Integer: %d\n" (line 12)
+                Identifier : i (line 12)
+        BlockItem :  (line 13)
+          ExpressionStatement :  (line 13)
+            FunctionCall :  (line 13)
+              Identifier : printf (line 13)
+              ArgumentList :  (line 13)
+                StringLiteral : "Float: %f\n" (line 13)
+                Identifier : f (line 13)
+        BlockItem :  (line 14)
+          ExpressionStatement :  (line 14)
+            FunctionCall :  (line 14)
+              Identifier : printf (line 14)
+              ArgumentList :  (line 14)
+                StringLiteral : "Character: %c\n" (line 14)
+                Identifier : c (line 14)
+  FunctionDefinition :  (line 27)
+    DeclarationSpecifiers :  (line 20)
+      TypeSpecifier : void (line 20)
+    FunctionDeclarator :  (line 20)
+      DirectDeclarator : testcase2 (line 20)
+    CompoundStatement :  (line 27)
+      BlockItemList :  (line 21)
+        BlockItem :  (line 21)
+          Declaration :  (line 21)
+            DeclarationSpecifiers :  (line 21)
+              TypeSpecifier : int (line 21)
+            InitDeclaratorList :  (line 21)
+              InitDeclarator :  (line 21)
+                DirectDeclarator : a (line 21)
+                Initializer :  (line 21)
+                  Constant : 10 (line 21)
+        BlockItem :  (line 22)
+          Declaration :  (line 22)
+            DeclarationSpecifiers :  (line 22)
+              TypeSpecifier : int (line 22)
+            InitDeclaratorList :  (line 22)
+              InitDeclarator :  (line 22)
+                DirectDeclarator : b (line 22)
+                Initializer :  (line 22)
+                  Constant : 20 (line 22)
+        BlockItem :  (line 23)
+          Declaration :  (line 23)
+            DeclarationSpecifiers :  (line 23)
+              TypeSpecifier : int (line 23)
+            InitDeclaratorList :  (line 23)
+              InitDeclarator :  (line 23)
+                DirectDeclarator : sum (line 23)
+                Initializer :  (line 23)
+                  AdditiveExpression : + (line 23)
+                    Identifier : a (line 23)
+                    Identifier : b (line 23)
+        BlockItem :  (line 25)
+          ExpressionStatement :  (line 25)
+            FunctionCall :  (line 25)
+              Identifier : printf (line 25)
+              ArgumentList :  (line 25)
+                StringLiteral : "\nTESTCASE 2: printf multiple values\n" (line 25)
+        BlockItem :  (line 26)
+          ExpressionStatement :  (line 26)
+            FunctionCall :  (line 26)
+              Identifier : printf (line 26)
+              ArgumentList :  (line 26)
+                StringLiteral : "%d + %d = %d\n" (line 26)
+                Identifier : a (line 26)
+                Identifier : b (line 26)
+                Identifier : sum (line 26)
+  FunctionDefinition :  (line 39)
+    DeclarationSpecifiers :  (line 32)
+      TypeSpecifier : void (line 32)
+    FunctionDeclarator :  (line 32)
+      DirectDeclarator : testcase3 (line 32)
+    CompoundStatement :  (line 39)
+      BlockItemList :  (line 33)
+        BlockItem :  (line 33)
+          Declaration :  (line 33)
+            DeclarationSpecifiers :  (line 33)
+              TypeSpecifier : int (line 33)
+            InitDeclaratorList :  (line 33)
+              InitDeclarator :  (line 33)
+                DirectDeclarator : num (line 33)
+        BlockItem :  (line 35)
+          ExpressionStatement :  (line 35)
+            FunctionCall :  (line 35)
+              Identifier : printf (line 35)
+              ArgumentList :  (line 35)
+                StringLiteral : "\nTESTCASE 3: scanf with integer\n" (line 35)
+        BlockItem :  (line 36)
+          ExpressionStatement :  (line 36)
+            FunctionCall :  (line 36)
+              Identifier : printf (line 36)
+              ArgumentList :  (line 36)
+                StringLiteral : "Enter an integer: " (line 36)
+        BlockItem :  (line 37)
+          ExpressionStatement :  (line 37)
+            FunctionCall :  (line 37)
+              Identifier : scanf (line 37)
+              ArgumentList :  (line 37)
+                StringLiteral : "%d" (line 37)
+                UnaryExpression : & (line 37)
+                  Identifier : num (line 37)
+        BlockItem :  (line 38)
+          ExpressionStatement :  (line 38)
+            FunctionCall :  (line 38)
+              Identifier : printf (line 38)
+              ArgumentList :  (line 38)
+                StringLiteral : "You entered: %d\n" (line 38)
+                Identifier : num (line 38)
+  FunctionDefinition :  (line 51)
+    DeclarationSpecifiers :  (line 44)
+      TypeSpecifier : void (line 44)
+    FunctionDeclarator :  (line 44)
+      DirectDeclarator : testcase4 (line 44)
+    CompoundStatement :  (line 51)
+      BlockItemList :  (line 45)
+        BlockItem :  (line 45)
+          Declaration :  (line 45)
+            DeclarationSpecifiers :  (line 45)
+              TypeSpecifier : int (line 45)
+            InitDeclaratorList :  (line 45)
+              InitDeclarator :  (line 45)
+                DirectDeclarator : a (line 45)
+              InitDeclarator :  (line 45)
+                DirectDeclarator : b (line 45)
+              InitDeclarator :  (line 45)
+                DirectDeclarator : c (line 45)
+        BlockItem :  (line 47)
+          ExpressionStatement :  (line 47)
+            FunctionCall :  (line 47)
+              Identifier : printf (line 47)
+              ArgumentList :  (line 47)
+                StringLiteral : "\nTESTCASE 4: scanf multiple integers\n" (line 47)
+        BlockItem :  (line 48)
+          ExpressionStatement :  (line 48)
+            FunctionCall :  (line 48)
+              Identifier : printf (line 48)
+              ArgumentList :  (line 48)
+                StringLiteral : "Enter three integers: " (line 48)
+        BlockItem :  (line 49)
+          ExpressionStatement :  (line 49)
+            FunctionCall :  (line 49)
+              Identifier : scanf (line 49)
+              ArgumentList :  (line 49)
+                StringLiteral : "%d %d %d" (line 49)
+                UnaryExpression : & (line 49)
+                  Identifier : a (line 49)
+                UnaryExpression : & (line 49)
+                  Identifier : b (line 49)
+                UnaryExpression : & (line 49)
+                  Identifier : c (line 49)
+        BlockItem :  (line 50)
+          ExpressionStatement :  (line 50)
+            FunctionCall :  (line 50)
+              Identifier : printf (line 50)
+              ArgumentList :  (line 50)
+                StringLiteral : "You entered: %d, %d, %d\n" (line 50)
+                Identifier : a (line 50)
+                Identifier : b (line 50)
+                Identifier : c (line 50)
+  FunctionDefinition :  (line 64)
+    DeclarationSpecifiers :  (line 56)
+      TypeSpecifier : void (line 56)
+    FunctionDeclarator :  (line 56)
+      DirectDeclarator : testcase5 (line 56)
+    CompoundStatement :  (line 64)
+      BlockItemList :  (line 57)
+        BlockItem :  (line 57)
+          Declaration :  (line 57)
+            DeclarationSpecifiers :  (line 57)
+              TypeSpecifier : int (line 57)
+            InitDeclaratorList :  (line 57)
+              InitDeclarator :  (line 57)
+                DirectDeclarator : x (line 57)
+        BlockItem :  (line 58)
+          Declaration :  (line 58)
+            DeclarationSpecifiers :  (line 58)
+              TypeSpecifier : int (line 58)
+            InitDeclaratorList :  (line 58)
+              InitDeclarator :  (line 58)
+                Declarator :  (line 58)
+                  Pointer :  (line 58)
+                  DirectDeclarator : ptr (line 58)
+                Initializer :  (line 58)
+                  UnaryExpression : & (line 58)
+                    Identifier : x (line 58)
+        BlockItem :  (line 60)
+          ExpressionStatement :  (line 60)
+            FunctionCall :  (line 60)
+              Identifier : printf (line 60)
+              ArgumentList :  (line 60)
+                StringLiteral : "\nTESTCASE 5: scanf with pointer\n" (line 60)
+        BlockItem :  (line 61)
+          ExpressionStatement :  (line 61)
+            FunctionCall :  (line 61)
+              Identifier : printf (line 61)
+              ArgumentList :  (line 61)
+                StringLiteral : "Enter value via pointer: " (line 61)
+        BlockItem :  (line 62)
+          ExpressionStatement :  (line 62)
+            FunctionCall :  (line 62)
+              Identifier : scanf (line 62)
+              ArgumentList :  (line 62)
+                StringLiteral : "%d" (line 62)
+                Identifier : ptr (line 62)
+        BlockItem :  (line 63)
+          ExpressionStatement :  (line 63)
+            FunctionCall :  (line 63)
+              Identifier : printf (line 63)
+              ArgumentList :  (line 63)
+                StringLiteral : "Value: %d\n" (line 63)
+                UnaryExpression : * (line 63)
+                  Identifier : ptr (line 63)
+  FunctionDefinition :  (line 85)
+    DeclarationSpecifiers :  (line 69)
+      TypeSpecifier : void (line 69)
+    FunctionDeclarator :  (line 69)
+      DirectDeclarator : testcase6 (line 69)
+    CompoundStatement :  (line 85)
+      BlockItemList :  (line 70)
+        BlockItem :  (line 70)
+          Declaration :  (line 70)
+            DeclarationSpecifiers :  (line 70)
+              TypeSpecifier : int (line 70)
+            InitDeclaratorList :  (line 70)
+              InitDeclarator :  (line 70)
+                ArrayDeclarator :  (line 70)
+                  DirectDeclarator : nums (line 70)
+                  Constant : 3 (line 70)
+        BlockItem :  (line 72)
+          ExpressionStatement :  (line 72)
+            FunctionCall :  (line 72)
+              Identifier : printf (line 72)
+              ArgumentList :  (line 72)
+                StringLiteral : "\nTESTCASE 6: scanf in loop\n" (line 72)
+        BlockItem :  (line 73)
+          ExpressionStatement :  (line 73)
+            FunctionCall :  (line 73)
+              Identifier : printf (line 73)
+              ArgumentList :  (line 73)
+                StringLiteral : "Enter 3 numbers:\n" (line 73)
+        BlockItem :  (line 78)
+          ForStatement :  (line 78)
+            ForInitStatement :  (line 75)
+              Declaration :  (line 75)
+                DeclarationSpecifiers :  (line 75)
+                  TypeSpecifier : int (line 75)
+                InitDeclaratorList :  (line 75)
+                  InitDeclarator :  (line 75)
+                    DirectDeclarator : i (line 75)
+                    Initializer :  (line 75)
+                      Constant : 0 (line 75)
+            ExpressionStatement :  (line 75)
+              RelationalExpression : < (line 75)
+                Identifier : i (line 75)
+                Constant : 3 (line 75)
+            PostfixExpression : ++ (line 75)
+              Identifier : i (line 75)
+            CompoundStatement :  (line 78)
+              BlockItemList :  (line 76)
+                BlockItem :  (line 76)
+                  ExpressionStatement :  (line 76)
+                    FunctionCall :  (line 76)
+                      Identifier : printf (line 76)
+                      ArgumentList :  (line 76)
+                        StringLiteral : "Number %d: " (line 76)
+                        AdditiveExpression : + (line 76)
+                          Identifier : i (line 76)
+                          Constant : 1 (line 76)
+                BlockItem :  (line 77)
+                  ExpressionStatement :  (line 77)
+                    FunctionCall :  (line 77)
+                      Identifier : scanf (line 77)
+                      ArgumentList :  (line 77)
+                        StringLiteral : "%d" (line 77)
+                        UnaryExpression : & (line 77)
+                          ArraySubscript :  (line 77)
+                            Identifier : nums (line 77)
+                            Identifier : i (line 77)
+        BlockItem :  (line 80)
+          ExpressionStatement :  (line 80)
+            FunctionCall :  (line 80)
+              Identifier : printf (line 80)
+              ArgumentList :  (line 80)
+                StringLiteral : "You entered: " (line 80)
+        BlockItem :  (line 83)
+          ForStatement :  (line 83)
+            ForInitStatement :  (line 81)
+              Declaration :  (line 81)
+                DeclarationSpecifiers :  (line 81)
+                  TypeSpecifier : int (line 81)
+                InitDeclaratorList :  (line 81)
+                  InitDeclarator :  (line 81)
+                    DirectDeclarator : i (line 81)
+                    Initializer :  (line 81)
+                      Constant : 0 (line 81)
+            ExpressionStatement :  (line 81)
+              RelationalExpression : < (line 81)
+                Identifier : i (line 81)
+                Constant : 3 (line 81)
+            PostfixExpression : ++ (line 81)
+              Identifier : i (line 81)
+            CompoundStatement :  (line 83)
+              BlockItemList :  (line 82)
+                BlockItem :  (line 82)
+                  ExpressionStatement :  (line 82)
+                    FunctionCall :  (line 82)
+                      Identifier : printf (line 82)
+                      ArgumentList :  (line 82)
+                        StringLiteral : "%d " (line 82)
+                        ArraySubscript :  (line 82)
+                          Identifier : nums (line 82)
+                          Identifier : i (line 82)
+        BlockItem :  (line 84)
+          ExpressionStatement :  (line 84)
+            FunctionCall :  (line 84)
+              Identifier : printf (line 84)
+              ArgumentList :  (line 84)
+                StringLiteral : "\n" (line 84)
+  FunctionDefinition :  (line 106)
+    DeclarationSpecifiers :  (line 90)
+      TypeSpecifier : int (line 90)
+    FunctionDeclarator :  (line 90)
+      DirectDeclarator : main (line 90)
+    CompoundStatement :  (line 106)
+      BlockItemList :  (line 91)
+        BlockItem :  (line 91)
+          ExpressionStatement :  (line 91)
+            FunctionCall :  (line 91)
+              Identifier : printf (line 91)
+              ArgumentList :  (line 91)
+                StringLiteral : "=================================\n" (line 91)
+        BlockItem :  (line 92)
+          ExpressionStatement :  (line 92)
+            FunctionCall :  (line 92)
+              Identifier : printf (line 92)
+              ArgumentList :  (line 92)
+                StringLiteral : "PRINTF/SCANF TEST SUITE\n" (line 92)
+        BlockItem :  (line 93)
+          ExpressionStatement :  (line 93)
+            FunctionCall :  (line 93)
+              Identifier : printf (line 93)
+              ArgumentList :  (line 93)
+                StringLiteral : "=================================\n" (line 93)
+        BlockItem :  (line 95)
+          ExpressionStatement :  (line 95)
+            FunctionCall :  (line 95)
+              Identifier : testcase1 (line 95)
+        BlockItem :  (line 96)
+          ExpressionStatement :  (line 96)
+            FunctionCall :  (line 96)
+              Identifier : testcase2 (line 96)
+        BlockItem :  (line 104)
+          ExpressionStatement :  (line 104)
+            FunctionCall :  (line 104)
+              Identifier : printf (line 104)
+              ArgumentList :  (line 104)
+                StringLiteral : "\nAll printf/scanf tests completed!\n" (line 104)
+        BlockItem :  (line 105)
+          ReturnStatement :  (line 105)
+            Constant : 0 (line 105)
+
+AST DOT file generated: ast.dot
+TAC file generated: output.tac
+
+=== MIPS ASSEMBLY GENERATION ===
+
+=== MIPS ASSEMBLY CODE ===
+    # ==============================================
+    #   MIPS Assembly Code
+    #   Generated from Three-Address Code
+    # ==============================================
+
+.data
+.align 2
+str_23: .asciiz "=================================\n"
+.align 2
+str_19: .asciiz "Number %d: "
+.align 2
+str_24: .asciiz "PRINTF/SCANF TEST SUITE\n"
+.align 2
+str_16: .asciiz "Value: %d\n"
+.align 2
+str_15: .asciiz "Enter value via pointer: "
+.align 2
+str_14: .asciiz "\nTESTCASE 5: scanf with pointer\n"
+.align 2
+str_0: .asciiz "\nTESTCASE 1: printf basic types\n"
+.align 2
+str_21: .asciiz "%d "
+.align 2
+str_11: .asciiz "Enter three integers: "
+.align 2
+str_1: .asciiz "Integer: %d\n"
+.align 2
+str_25: .asciiz "\nAll printf/scanf tests completed!\n"
+.align 2
+str_18: .asciiz "Enter 3 numbers:\n"
+.align 2
+str_10: .asciiz "\nTESTCASE 4: scanf multiple integers\n"
+.align 2
+str_7: .asciiz "Enter an integer: "
+.align 2
+str_22: .asciiz "\n"
+.align 2
+str_3: .asciiz "Character: %c\n"
+.align 2
+str_8: .asciiz "%d"
+.align 2
+str_17: .asciiz "\nTESTCASE 6: scanf in loop\n"
+.align 2
+str_6: .asciiz "\nTESTCASE 3: scanf with integer\n"
+.align 2
+str_4: .asciiz "\nTESTCASE 2: printf multiple values\n"
+.align 2
+str_20: .asciiz "You entered: "
+.align 2
+str_2: .asciiz "Float: %f\n"
+.align 2
+str_12: .asciiz "%d %d %d"
+.align 2
+str_5: .asciiz "%d + %d = %d\n"
+.align 2
+str_13: .asciiz "You entered: %d, %d, %d\n"
+.align 2
+str_9: .asciiz "You entered: %d\n"
+.align 2
+newline: .asciiz "\n"
+.align 2
+nums: .space 12
+.align 2
+var_x: .space 4
+.align 2
+var_c: .space 4
+.align 2
+var_b: .space 4
+.align 2
+var_a: .space 4
+.align 2
+num: .space 4
+
+.text
+.globl main
+
+
+    # Function: testcase1
+func_testcase1:
+    # Function prologue
+    addi $sp, $sp, -256
+    sw $ra, 252($sp)
+    sw $fp, 248($sp)
+    addi $fp, $sp, 256
+    sw $a0, 244($sp)
+    sw $a1, 240($sp)
+    sw $a2, 236($sp)
+    sw $a3, 232($sp)
+    sw $s0, 228($sp)
+    sw $s1, 224($sp)
+    sw $s2, 220($sp)
+    sw $s3, 216($sp)
+    sw $s4, 212($sp)
+    sw $s5, 208($sp)
+    sw $s6, 204($sp)
+    sw $s7, 200($sp)
+    li $t0, 42
+    sw $t0, 0($sp)
+    li $t0, 3
+    sw $t0, 4($sp)
+    li $t0, 65
+    sw $t0, 8($sp)
+    la $s0, str_0
+    # Save string param str_0 to $s0
+    # Call printf
+    li $v0, 11
+    li $a0, 10
+    syscall
+    li $v0, 11
+    li $a0, 84
+    syscall
+    li $v0, 11
+    li $a0, 69
+    syscall
+    li $v0, 11
+    li $a0, 83
+    syscall
+    li $v0, 11
+    li $a0, 84
+    syscall
+    li $v0, 11
+    li $a0, 67
+    syscall
+    li $v0, 11
+    li $a0, 65
+    syscall
+    li $v0, 11
+    li $a0, 83
+    syscall
+    li $v0, 11
+    li $a0, 69
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 49
+    syscall
+    li $v0, 11
+    li $a0, 58
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 112
+    syscall
+    li $v0, 11
+    li $a0, 114
+    syscall
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 110
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 102
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 98
+    syscall
+    li $v0, 11
+    li $a0, 97
+    syscall
+    li $v0, 11
+    li $a0, 115
+    syscall
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 99
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 121
+    syscall
+    li $v0, 11
+    li $a0, 112
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 115
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    la $s1, str_1
+    # Save string param str_1 to $s1
+    # Reloading i from stack
+    lw $t0, 0($sp)
+    move $s2, $t0
+    # Save param i to $s2
+    # Call printf
+    li $v0, 11
+    li $a0, 73
+    syscall
+    li $v0, 11
+    li $a0, 110
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 103
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 114
+    syscall
+    li $v0, 11
+    li $a0, 58
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    # Print integer
+    li $v0, 1
+    move $a0, $s2
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    la $s3, str_2
+    # Save string param str_2 to $s3
+    # Reloading f from stack
+    lw $t0, 4($sp)
+    move $s4, $t0
+    # Save param f to $s4
+    # Call printf
+    li $v0, 11
+    li $a0, 70
+    syscall
+    li $v0, 11
+    li $a0, 108
+    syscall
+    li $v0, 11
+    li $a0, 111
+    syscall
+    li $v0, 11
+    li $a0, 97
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 58
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    # Print float
+    # Print float
+    li $v0, 2
+    mtc1 $s4, $f12
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    la $s5, str_3
+    # Save string param str_3 to $s5
+    la $s6, c
+    # Save array address c to $s6
+    # Call printf
+    li $v0, 11
+    li $a0, 67
+    syscall
+    li $v0, 11
+    li $a0, 104
+    syscall
+    li $v0, 11
+    li $a0, 97
+    syscall
+    li $v0, 11
+    li $a0, 114
+    syscall
+    li $v0, 11
+    li $a0, 97
+    syscall
+    li $v0, 11
+    li $a0, 99
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 114
+    syscall
+    li $v0, 11
+    li $a0, 58
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    # Print character
+    li $v0, 11
+    move $a0, $s6
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    # Function epilogue
+    lw $s0, 228($sp)
+    lw $s1, 224($sp)
+    lw $s2, 220($sp)
+    lw $s3, 216($sp)
+    lw $s4, 212($sp)
+    lw $s5, 208($sp)
+    lw $s6, 204($sp)
+    lw $s7, 200($sp)
+    lw $fp, 248($sp)
+    lw $ra, 252($sp)
+    addi $sp, $sp, 256
+    jr $ra
+
+    # Function: testcase2
+func_testcase2:
+    # Function prologue
+    addi $sp, $sp, -256
+    sw $ra, 252($sp)
+    sw $fp, 248($sp)
+    addi $fp, $sp, 256
+    sw $a0, 244($sp)
+    sw $a1, 240($sp)
+    sw $a2, 236($sp)
+    sw $a3, 232($sp)
+    sw $s0, 228($sp)
+    sw $s1, 224($sp)
+    sw $s2, 220($sp)
+    sw $s3, 216($sp)
+    sw $s4, 212($sp)
+    sw $s5, 208($sp)
+    sw $s6, 204($sp)
+    sw $s7, 200($sp)
+    li $t0, 10
+    sw $t0, 0($sp)
+    li $t0, 20
+    sw $t0, 4($sp)
+    # Reloading a from stack
+    lw $t1, 0($sp)
+    # Reloading b from stack
+    lw $t2, 4($sp)
+    add $t0, $t1, $t2
+    move $t3, $t0
+    sw $t3, 8($sp)
+    la $s7, str_4
+    # Save string param str_4 to $s7
+    # Call printf
+    li $v0, 11
+    li $a0, 10
+    syscall
+    li $v0, 11
+    li $a0, 84
+    syscall
+    li $v0, 11
+    li $a0, 69
+    syscall
+    li $v0, 11
+    li $a0, 83
+    syscall
+    li $v0, 11
+    li $a0, 84
+    syscall
+    li $v0, 11
+    li $a0, 67
+    syscall
+    li $v0, 11
+    li $a0, 65
+    syscall
+    li $v0, 11
+    li $a0, 83
+    syscall
+    li $v0, 11
+    li $a0, 69
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 50
+    syscall
+    li $v0, 11
+    li $a0, 58
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 112
+    syscall
+    li $v0, 11
+    li $a0, 114
+    syscall
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 110
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 102
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 109
+    syscall
+    li $v0, 11
+    li $a0, 117
+    syscall
+    li $v0, 11
+    li $a0, 108
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 112
+    syscall
+    li $v0, 11
+    li $a0, 108
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 118
+    syscall
+    li $v0, 11
+    li $a0, 97
+    syscall
+    li $v0, 11
+    li $a0, 108
+    syscall
+    li $v0, 11
+    li $a0, 117
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 115
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    la $s0, str_5
+    # Save string param str_5 to $s0
+    la $s1, a
+    # Save array address a to $s1
+    la $s2, b
+    # Save array address b to $s2
+    # Reloading sum from stack
+    lw $t0, 8($sp)
+    move $s3, $t0
+    # Save param sum to $s3
+    # Call printf
+    # Print integer
+    li $v0, 1
+    move $a0, $s1
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 43
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    # Print integer
+    li $v0, 1
+    move $a0, $s2
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    # Print integer
+    li $v0, 1
+    move $a0, $s3
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    # Function epilogue
+    lw $s0, 228($sp)
+    lw $s1, 224($sp)
+    lw $s2, 220($sp)
+    lw $s3, 216($sp)
+    lw $s4, 212($sp)
+    lw $s5, 208($sp)
+    lw $s6, 204($sp)
+    lw $s7, 200($sp)
+    lw $fp, 248($sp)
+    lw $ra, 252($sp)
+    addi $sp, $sp, 256
+    jr $ra
+
+    # Function: testcase3
+func_testcase3:
+    # Function prologue
+    addi $sp, $sp, -256
+    sw $ra, 252($sp)
+    sw $fp, 248($sp)
+    addi $fp, $sp, 256
+    sw $a0, 244($sp)
+    sw $a1, 240($sp)
+    sw $a2, 236($sp)
+    sw $a3, 232($sp)
+    sw $s0, 228($sp)
+    sw $s1, 224($sp)
+    sw $s2, 220($sp)
+    sw $s3, 216($sp)
+    sw $s4, 212($sp)
+    sw $s5, 208($sp)
+    sw $s6, 204($sp)
+    sw $s7, 200($sp)
+    la $s4, str_6
+    # Save string param str_6 to $s4
+    # Call printf
+    li $v0, 11
+    li $a0, 10
+    syscall
+    li $v0, 11
+    li $a0, 84
+    syscall
+    li $v0, 11
+    li $a0, 69
+    syscall
+    li $v0, 11
+    li $a0, 83
+    syscall
+    li $v0, 11
+    li $a0, 84
+    syscall
+    li $v0, 11
+    li $a0, 67
+    syscall
+    li $v0, 11
+    li $a0, 65
+    syscall
+    li $v0, 11
+    li $a0, 83
+    syscall
+    li $v0, 11
+    li $a0, 69
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 51
+    syscall
+    li $v0, 11
+    li $a0, 58
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 115
+    syscall
+    li $v0, 11
+    li $a0, 99
+    syscall
+    li $v0, 11
+    li $a0, 97
+    syscall
+    li $v0, 11
+    li $a0, 110
+    syscall
+    li $v0, 11
+    li $a0, 102
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 119
+    syscall
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 104
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 110
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 103
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 114
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    la $s5, str_7
+    # Save string param str_7 to $s5
+    # Call printf
+    li $v0, 11
+    li $a0, 69
+    syscall
+    li $v0, 11
+    li $a0, 110
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 114
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 97
+    syscall
+    li $v0, 11
+    li $a0, 110
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 110
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 103
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 114
+    syscall
+    li $v0, 11
+    li $a0, 58
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    la $s6, str_8
+    # Save string param str_8 to $s6
+    la $t0, num
+    move $s7, $t0
+    # Save param t9 to $s7
+    # Call scanf
+    # Read integer from user
+    li $v0, 5
+    syscall
+    sw $v0, 0($s7)
+    la $s0, str_9
+    # Save string param str_9 to $s0
+    li $t0, 0
+    la $t1, num
+    add $t2, $t1, $t0
+    lw $t0, 0($t2)
+    move $s1, $t0
+    # Save param t11 to $s1
+    # Call printf
+    li $v0, 11
+    li $a0, 89
+    syscall
+    li $v0, 11
+    li $a0, 111
+    syscall
+    li $v0, 11
+    li $a0, 117
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 110
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 114
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 100
+    syscall
+    li $v0, 11
+    li $a0, 58
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    # Print integer
+    li $v0, 1
+    move $a0, $s1
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    # Function epilogue
+    lw $s0, 228($sp)
+    lw $s1, 224($sp)
+    lw $s2, 220($sp)
+    lw $s3, 216($sp)
+    lw $s4, 212($sp)
+    lw $s5, 208($sp)
+    lw $s6, 204($sp)
+    lw $s7, 200($sp)
+    lw $fp, 248($sp)
+    lw $ra, 252($sp)
+    addi $sp, $sp, 256
+    jr $ra
+
+    # Function: testcase4
+func_testcase4:
+    # Function prologue
+    addi $sp, $sp, -256
+    sw $ra, 252($sp)
+    sw $fp, 248($sp)
+    addi $fp, $sp, 256
+    sw $a0, 244($sp)
+    sw $a1, 240($sp)
+    sw $a2, 236($sp)
+    sw $a3, 232($sp)
+    sw $s0, 228($sp)
+    sw $s1, 224($sp)
+    sw $s2, 220($sp)
+    sw $s3, 216($sp)
+    sw $s4, 212($sp)
+    sw $s5, 208($sp)
+    sw $s6, 204($sp)
+    sw $s7, 200($sp)
+    la $s2, str_10
+    # Save string param str_10 to $s2
+    # Call printf
+    li $v0, 11
+    li $a0, 10
+    syscall
+    li $v0, 11
+    li $a0, 84
+    syscall
+    li $v0, 11
+    li $a0, 69
+    syscall
+    li $v0, 11
+    li $a0, 83
+    syscall
+    li $v0, 11
+    li $a0, 84
+    syscall
+    li $v0, 11
+    li $a0, 67
+    syscall
+    li $v0, 11
+    li $a0, 65
+    syscall
+    li $v0, 11
+    li $a0, 83
+    syscall
+    li $v0, 11
+    li $a0, 69
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 52
+    syscall
+    li $v0, 11
+    li $a0, 58
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 115
+    syscall
+    li $v0, 11
+    li $a0, 99
+    syscall
+    li $v0, 11
+    li $a0, 97
+    syscall
+    li $v0, 11
+    li $a0, 110
+    syscall
+    li $v0, 11
+    li $a0, 102
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 109
+    syscall
+    li $v0, 11
+    li $a0, 117
+    syscall
+    li $v0, 11
+    li $a0, 108
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 112
+    syscall
+    li $v0, 11
+    li $a0, 108
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 110
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 103
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 114
+    syscall
+    li $v0, 11
+    li $a0, 115
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    la $s3, str_11
+    # Save string param str_11 to $s3
+    # Call printf
+    li $v0, 11
+    li $a0, 69
+    syscall
+    li $v0, 11
+    li $a0, 110
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 114
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 104
+    syscall
+    li $v0, 11
+    li $a0, 114
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 110
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 103
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 114
+    syscall
+    li $v0, 11
+    li $a0, 115
+    syscall
+    li $v0, 11
+    li $a0, 58
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    la $s4, str_12
+    # Save string param str_12 to $s4
+    la $t0, var_a
+    move $s5, $t0
+    # Save param t15 to $s5
+    la $t0, var_b
+    move $s6, $t0
+    # Save param t16 to $s6
+    la $t0, var_c
+    move $s7, $t0
+    # Save param t17 to $s7
+    # Call scanf
+    # Read integer from user
+    li $v0, 5
+    syscall
+    sw $v0, 0($s5)
+    # Read integer from user
+    li $v0, 5
+    syscall
+    sw $v0, 0($s6)
+    # Read integer from user
+    li $v0, 5
+    syscall
+    sw $v0, 0($s7)
+    la $s0, str_13
+    # Save string param str_13 to $s0
+    li $t0, 0
+    la $t1, var_a
+    add $t2, $t1, $t0
+    lw $t0, 0($t2)
+    move $s1, $t0
+    # Save param t19 to $s1
+    li $t0, 0
+    la $t1, var_b
+    add $t2, $t1, $t0
+    lw $t0, 0($t2)
+    move $s2, $t0
+    # Save param t20 to $s2
+    li $t0, 0
+    la $t1, var_c
+    add $t2, $t1, $t0
+    lw $t0, 0($t2)
+    move $s3, $t0
+    # Save param t21 to $s3
+    # Call printf
+    li $v0, 11
+    li $a0, 89
+    syscall
+    li $v0, 11
+    li $a0, 111
+    syscall
+    li $v0, 11
+    li $a0, 117
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 110
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 114
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 100
+    syscall
+    li $v0, 11
+    li $a0, 58
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    # Print integer
+    li $v0, 1
+    move $a0, $s1
+    syscall
+    li $v0, 11
+    li $a0, 44
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    # Print integer
+    li $v0, 1
+    move $a0, $s2
+    syscall
+    li $v0, 11
+    li $a0, 44
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    # Print integer
+    li $v0, 1
+    move $a0, $s3
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    # Function epilogue
+    lw $s0, 228($sp)
+    lw $s1, 224($sp)
+    lw $s2, 220($sp)
+    lw $s3, 216($sp)
+    lw $s4, 212($sp)
+    lw $s5, 208($sp)
+    lw $s6, 204($sp)
+    lw $s7, 200($sp)
+    lw $fp, 248($sp)
+    lw $ra, 252($sp)
+    addi $sp, $sp, 256
+    jr $ra
+
+    # Function: testcase5
+func_testcase5:
+    # Function prologue
+    addi $sp, $sp, -256
+    sw $ra, 252($sp)
+    sw $fp, 248($sp)
+    addi $fp, $sp, 256
+    sw $a0, 244($sp)
+    sw $a1, 240($sp)
+    sw $a2, 236($sp)
+    sw $a3, 232($sp)
+    sw $s0, 228($sp)
+    sw $s1, 224($sp)
+    sw $s2, 220($sp)
+    sw $s3, 216($sp)
+    sw $s4, 212($sp)
+    sw $s5, 208($sp)
+    sw $s6, 204($sp)
+    sw $s7, 200($sp)
+    la $t0, var_x
+    move $t1, $t0
+    sw $t1, 0($sp)
+    la $s4, str_14
+    # Save string param str_14 to $s4
+    # Call printf
+    li $v0, 11
+    li $a0, 10
+    syscall
+    li $v0, 11
+    li $a0, 84
+    syscall
+    li $v0, 11
+    li $a0, 69
+    syscall
+    li $v0, 11
+    li $a0, 83
+    syscall
+    li $v0, 11
+    li $a0, 84
+    syscall
+    li $v0, 11
+    li $a0, 67
+    syscall
+    li $v0, 11
+    li $a0, 65
+    syscall
+    li $v0, 11
+    li $a0, 83
+    syscall
+    li $v0, 11
+    li $a0, 69
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 53
+    syscall
+    li $v0, 11
+    li $a0, 58
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 115
+    syscall
+    li $v0, 11
+    li $a0, 99
+    syscall
+    li $v0, 11
+    li $a0, 97
+    syscall
+    li $v0, 11
+    li $a0, 110
+    syscall
+    li $v0, 11
+    li $a0, 102
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 119
+    syscall
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 104
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 112
+    syscall
+    li $v0, 11
+    li $a0, 111
+    syscall
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 110
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 114
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    la $s5, str_15
+    # Save string param str_15 to $s5
+    # Call printf
+    li $v0, 11
+    li $a0, 69
+    syscall
+    li $v0, 11
+    li $a0, 110
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 114
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 118
+    syscall
+    li $v0, 11
+    li $a0, 97
+    syscall
+    li $v0, 11
+    li $a0, 108
+    syscall
+    li $v0, 11
+    li $a0, 117
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 118
+    syscall
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 97
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 112
+    syscall
+    li $v0, 11
+    li $a0, 111
+    syscall
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 110
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 114
+    syscall
+    li $v0, 11
+    li $a0, 58
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    la $s6, str_8
+    # Save string param str_8 to $s6
+    # Reloading ptr from stack
+    lw $t0, 0($sp)
+    move $s7, $t0
+    # Save param ptr to $s7
+    # Call scanf
+    # Read integer from user
+    li $v0, 5
+    syscall
+    sw $v0, 0($s7)
+    la $s0, str_16
+    # Save string param str_16 to $s0
+    # Reloading ptr from stack
+    lw $t0, 0($sp)
+    lw $t1, 0($t0)
+    move $s1, $t1
+    # Save param t27 to $s1
+    # Call printf
+    li $v0, 11
+    li $a0, 86
+    syscall
+    li $v0, 11
+    li $a0, 97
+    syscall
+    li $v0, 11
+    li $a0, 108
+    syscall
+    li $v0, 11
+    li $a0, 117
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 58
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    # Print integer
+    li $v0, 1
+    move $a0, $s1
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    # Function epilogue
+    lw $s0, 228($sp)
+    lw $s1, 224($sp)
+    lw $s2, 220($sp)
+    lw $s3, 216($sp)
+    lw $s4, 212($sp)
+    lw $s5, 208($sp)
+    lw $s6, 204($sp)
+    lw $s7, 200($sp)
+    lw $fp, 248($sp)
+    lw $ra, 252($sp)
+    addi $sp, $sp, 256
+    jr $ra
+
+    # Function: testcase6
+func_testcase6:
+    # Function prologue
+    addi $sp, $sp, -256
+    sw $ra, 252($sp)
+    sw $fp, 248($sp)
+    addi $fp, $sp, 256
+    sw $a0, 244($sp)
+    sw $a1, 240($sp)
+    sw $a2, 236($sp)
+    sw $a3, 232($sp)
+    sw $s0, 228($sp)
+    sw $s1, 224($sp)
+    sw $s2, 220($sp)
+    sw $s3, 216($sp)
+    sw $s4, 212($sp)
+    sw $s5, 208($sp)
+    sw $s6, 204($sp)
+    sw $s7, 200($sp)
+    la $s2, str_17
+    # Save string param str_17 to $s2
+    # Call printf
+    li $v0, 11
+    li $a0, 10
+    syscall
+    li $v0, 11
+    li $a0, 84
+    syscall
+    li $v0, 11
+    li $a0, 69
+    syscall
+    li $v0, 11
+    li $a0, 83
+    syscall
+    li $v0, 11
+    li $a0, 84
+    syscall
+    li $v0, 11
+    li $a0, 67
+    syscall
+    li $v0, 11
+    li $a0, 65
+    syscall
+    li $v0, 11
+    li $a0, 83
+    syscall
+    li $v0, 11
+    li $a0, 69
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 54
+    syscall
+    li $v0, 11
+    li $a0, 58
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 115
+    syscall
+    li $v0, 11
+    li $a0, 99
+    syscall
+    li $v0, 11
+    li $a0, 97
+    syscall
+    li $v0, 11
+    li $a0, 110
+    syscall
+    li $v0, 11
+    li $a0, 102
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 110
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 108
+    syscall
+    li $v0, 11
+    li $a0, 111
+    syscall
+    li $v0, 11
+    li $a0, 111
+    syscall
+    li $v0, 11
+    li $a0, 112
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    la $s3, str_18
+    # Save string param str_18 to $s3
+    # Call printf
+    li $v0, 11
+    li $a0, 69
+    syscall
+    li $v0, 11
+    li $a0, 110
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 114
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 51
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 110
+    syscall
+    li $v0, 11
+    li $a0, 117
+    syscall
+    li $v0, 11
+    li $a0, 109
+    syscall
+    li $v0, 11
+    li $a0, 98
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 114
+    syscall
+    li $v0, 11
+    li $a0, 115
+    syscall
+    li $v0, 11
+    li $a0, 58
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    li $t0, 0
+    sw $t0, 0($sp)
+L0:
+    # Reloading i from stack
+    lw $t1, 0($sp)
+    li $t2, 3
+    slt $t0, $t1, $t2
+    beq $t0, $zero, L1
+    la $s4, str_19
+    # Save string param str_19 to $s4
+    li $t2, 1
+    add $t0, $t1, $t2
+    move $s5, $t0
+    # Save param t32 to $s5
+    # Call printf
+    li $v0, 11
+    li $a0, 78
+    syscall
+    li $v0, 11
+    li $a0, 117
+    syscall
+    li $v0, 11
+    li $a0, 109
+    syscall
+    li $v0, 11
+    li $a0, 98
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 114
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    # Print integer
+    li $v0, 1
+    move $a0, $s5
+    syscall
+    li $v0, 11
+    li $a0, 58
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    la $s6, str_8
+    # Save string param str_8 to $s6
+    la $t0, nums
+    # Reloading i from stack
+    lw $t2, 0($sp)
+    li $t3, 4
+    mul $t1, $t2, $t3
+    add $t3, $t0, $t1
+    move $s7, $t3
+    # Save param t34 to $s7
+    # Call scanf
+    # Read integer from user
+    li $v0, 5
+    syscall
+    sw $v0, 0($s7)
+L2:
+    # Reloading i from stack
+    lw $t1, 0($sp)
+    move $t0, $t1
+    li $t2, 1
+    add $t1, $t1, $t2
+    sw $t1, 0($sp)
+    j L0
+L1:
+    la $s0, str_20
+    # Save string param str_20 to $s0
+    # Call printf
+    li $v0, 11
+    li $a0, 89
+    syscall
+    li $v0, 11
+    li $a0, 111
+    syscall
+    li $v0, 11
+    li $a0, 117
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 110
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 114
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 100
+    syscall
+    li $v0, 11
+    li $a0, 58
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    # Reloading i from stack
+    lw $t0, 0($sp)
+    li $t0, 0
+    sw $t0, 0($sp)
+L3:
+    # Reloading i from stack
+    lw $t1, 0($sp)
+    li $t2, 3
+    slt $t0, $t1, $t2
+    beq $t0, $zero, L4
+    la $s1, str_21
+    # Save string param str_21 to $s1
+    li $t2, 4
+    mul $t0, $t1, $t2
+    la $t2, nums
+    add $t3, $t2, $t0
+    lw $t0, 0($t3)
+    move $s2, $t0
+    # Save param t44 to $s2
+    # Call printf
+    # Print integer
+    li $v0, 1
+    move $a0, $s2
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+L5:
+    # Reloading i from stack
+    lw $t1, 0($sp)
+    move $t0, $t1
+    li $t2, 1
+    add $t1, $t1, $t2
+    sw $t1, 0($sp)
+    j L3
+L4:
+    la $s3, str_22
+    # Save string param str_22 to $s3
+    # Call printf
+    li $v0, 11
+    li $a0, 10
+    syscall
+    # Function epilogue
+    lw $s0, 228($sp)
+    lw $s1, 224($sp)
+    lw $s2, 220($sp)
+    lw $s3, 216($sp)
+    lw $s4, 212($sp)
+    lw $s5, 208($sp)
+    lw $s6, 204($sp)
+    lw $s7, 200($sp)
+    lw $fp, 248($sp)
+    lw $ra, 252($sp)
+    addi $sp, $sp, 256
+    jr $ra
+
+    # Function: main
+main:
+    # Reserve stack space for register spills
+    addi $sp, $sp, -256
+    la $s4, str_23
+    # Save string param str_23 to $s4
+    # Call printf
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    la $s5, str_24
+    # Save string param str_24 to $s5
+    # Call printf
+    li $v0, 11
+    li $a0, 80
+    syscall
+    li $v0, 11
+    li $a0, 82
+    syscall
+    li $v0, 11
+    li $a0, 73
+    syscall
+    li $v0, 11
+    li $a0, 78
+    syscall
+    li $v0, 11
+    li $a0, 84
+    syscall
+    li $v0, 11
+    li $a0, 70
+    syscall
+    li $v0, 11
+    li $a0, 47
+    syscall
+    li $v0, 11
+    li $a0, 83
+    syscall
+    li $v0, 11
+    li $a0, 67
+    syscall
+    li $v0, 11
+    li $a0, 65
+    syscall
+    li $v0, 11
+    li $a0, 78
+    syscall
+    li $v0, 11
+    li $a0, 70
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 84
+    syscall
+    li $v0, 11
+    li $a0, 69
+    syscall
+    li $v0, 11
+    li $a0, 83
+    syscall
+    li $v0, 11
+    li $a0, 84
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 83
+    syscall
+    li $v0, 11
+    li $a0, 85
+    syscall
+    li $v0, 11
+    li $a0, 73
+    syscall
+    li $v0, 11
+    li $a0, 84
+    syscall
+    li $v0, 11
+    li $a0, 69
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    la $s6, str_23
+    # Save string param str_23 to $s6
+    # Call printf
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 61
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    # Call testcase1
+    jal func_testcase1
+    # Call testcase2
+    jal func_testcase2
+    la $s7, str_25
+    # Save string param str_25 to $s7
+    # Call printf
+    li $v0, 11
+    li $a0, 10
+    syscall
+    li $v0, 11
+    li $a0, 65
+    syscall
+    li $v0, 11
+    li $a0, 108
+    syscall
+    li $v0, 11
+    li $a0, 108
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 112
+    syscall
+    li $v0, 11
+    li $a0, 114
+    syscall
+    li $v0, 11
+    li $a0, 105
+    syscall
+    li $v0, 11
+    li $a0, 110
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 102
+    syscall
+    li $v0, 11
+    li $a0, 47
+    syscall
+    li $v0, 11
+    li $a0, 115
+    syscall
+    li $v0, 11
+    li $a0, 99
+    syscall
+    li $v0, 11
+    li $a0, 97
+    syscall
+    li $v0, 11
+    li $a0, 110
+    syscall
+    li $v0, 11
+    li $a0, 102
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 115
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 115
+    syscall
+    li $v0, 11
+    li $a0, 32
+    syscall
+    li $v0, 11
+    li $a0, 99
+    syscall
+    li $v0, 11
+    li $a0, 111
+    syscall
+    li $v0, 11
+    li $a0, 109
+    syscall
+    li $v0, 11
+    li $a0, 112
+    syscall
+    li $v0, 11
+    li $a0, 108
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 116
+    syscall
+    li $v0, 11
+    li $a0, 101
+    syscall
+    li $v0, 11
+    li $a0, 100
+    syscall
+    li $v0, 11
+    li $a0, 33
+    syscall
+    li $v0, 11
+    li $a0, 10
+    syscall
+    li $v0, 0
+    # Restore stack and exit program
+    addi $sp, $sp, 256
+    li $v0, 10
+    syscall
+
+MIPS file generated: output.s
+
+==================================================
+COMPILATION SUCCESSFUL
+==================================================
