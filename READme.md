@@ -34,7 +34,6 @@ This compiler implements a complete compilation pipeline from C/C++ source code 
 #### Control Flow
 - **Conditional Statements**
   - if-else statements with nested support
-  - Ternary operator (? :)
   - switch-case with default and fall-through
   
 - **Loops**
