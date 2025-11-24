@@ -326,6 +326,10 @@ void SemanticAnalyzer::traverse(ASTNode* node) {
         check_unary_operation(node);
         
     }
+    else if (node->name == "PostfixExpression") {
+        check_postfix_operation(node);
+        
+    }
     else if (node->name == "IfStatement" && node->children.size() > 0) {
         check_if_condition(node->children[0]);
     }
@@ -2614,6 +2618,27 @@ void SemanticAnalyzer::check_unary_operation(ASTNode* node) {
     }
 }
 
+void SemanticAnalyzer::check_postfix_operation(ASTNode* node) {
+    if (!node || node->children.empty()) return;
+
+    std::string operand_type = get_expression_type(node->children[0]);
+    std::string op = node->lexeme;
+
+    if (op == "++" || op == "--") {
+        if (!is_numeric_type(operand_type) && !is_pointer_type(operand_type)) {
+            reportError("Increment/decrement requires numeric or pointer type", node);
+        }
+        // Mark variable as initialized after increment/decrement
+        if (node->children[0]->name == "Identifier") {
+            std::string var_name = node->children[0]->lexeme;
+            Symbol* sym = symbol_table->find_symbol(var_name);
+            if (sym) {
+                sym->is_initialized = true;
+            }
+        }
+    }
+}
+
 void SemanticAnalyzer::check_division_by_zero(ASTNode* node) {
     if (!node || node->children.size() < 2) return;
     
@@ -2902,6 +2927,12 @@ if (expr->name == "MemberAccess" && expr->children.size() >= 2) {
         return operand_type;
     }
 
+    // PostfixExpression (++, --)
+    if (expr->name == "PostfixExpression" && !expr->children.empty()) {
+        // For postfix ++/--, return the operand's type
+        return get_expression_type(expr->children[0]);
+    }
+
     // Binary operations
     if (!expr->children.empty()) {
         std::string left_type = get_expression_type(expr->children[0]);
@@ -2910,16 +2941,30 @@ if (expr->name == "MemberAccess" && expr->children.size() >= 2) {
         if (expr->name == "AdditiveExpression" || expr->name == "MultiplicativeExpression") {
             // Handle pointer arithmetic: ptr + int = ptr, ptr - int = ptr
             if (expr->name == "AdditiveExpression") {
-                bool left_is_pointer = is_pointer_type(left_type);
-                bool right_is_pointer = is_pointer_type(right_type);
+                // Arrays decay to pointers in expression context
+                std::string left_decayed = left_type;
+                std::string right_decayed = right_type;
+                
+                // Convert array types to pointer types (e.g., "int[5]" -> "int*")
+                if (left_type.find('[') != std::string::npos) {
+                    size_t bracket_pos = left_type.find('[');
+                    left_decayed = left_type.substr(0, bracket_pos) + "*";
+                }
+                if (right_type.find('[') != std::string::npos) {
+                    size_t bracket_pos = right_type.find('[');
+                    right_decayed = right_type.substr(0, bracket_pos) + "*";
+                }
+                
+                bool left_is_pointer = is_pointer_type(left_decayed);
+                bool right_is_pointer = is_pointer_type(right_decayed);
                 
                 if (left_is_pointer && !right_is_pointer) {
                     // ptr + int or ptr - int = ptr
-                    return left_type;
+                    return left_decayed;
                 } else if (!left_is_pointer && right_is_pointer) {
                     // int + ptr = ptr (only for addition)
                     if (expr->lexeme == "+") {
-                        return right_type;
+                        return right_decayed;
                     }
                 } else if (left_is_pointer && right_is_pointer) {
                     // ptr - ptr = int (ptrdiff_t)

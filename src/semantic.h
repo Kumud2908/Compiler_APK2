@@ -139,6 +139,7 @@ std::string build_function_pointer_return_type(ASTNode* func_declarator, const s
     // Operations
     void check_binary_operation(ASTNode* node);
     void check_unary_operation(ASTNode* node);
+    void check_postfix_operation(ASTNode* node);
     void check_division_by_zero(ASTNode* node);
     void check_modulo_operation(ASTNode* node);
     
