@@ -1,0 +1,173 @@
+===========================================
+COMPREHENSIVE COMPILER TEST SUITE
+===========================================
+
+Starting tests...
+
+----------------------------------------
+Testing: arrays_comprehensive.cpp
+----------------------------------------
+Semantic Errors: 0
+[1;33m⚠ PARTIAL[0m - No errors but compilation incomplete
+
+----------------------------------------
+Testing: arrays_multidimensional.cpp
+----------------------------------------
+Semantic Errors: 0
+[1;33m⚠ PARTIAL[0m - No errors but compilation incomplete
+
+----------------------------------------
+Testing: functions_calls_comprehensive.cpp
+----------------------------------------
+Semantic Errors: 0
+[1;33m⚠ PARTIAL[0m - No errors but compilation incomplete
+
+----------------------------------------
+Testing: functions_comprehensive.cpp
+----------------------------------------
+Semantic Errors: 0
+[1;33m⚠ PARTIAL[0m - No errors but compilation incomplete
+
+----------------------------------------
+Testing: functions_pointer_comprehensive.cpp
+----------------------------------------
+Semantic Errors: 0
+[1;33m⚠ PARTIAL[0m - No errors but compilation incomplete
+
+----------------------------------------
+Testing: functions_pointer.cpp
+----------------------------------------
+Semantic Errors: 0
+[1;33m⚠ PARTIAL[0m - No errors but compilation incomplete
+
+----------------------------------------
+Testing: goto_comprehensive.cpp
+----------------------------------------
+Semantic Errors: 0
+[1;33m⚠ PARTIAL[0m - No errors but compilation incomplete
+
+----------------------------------------
+Testing: loops_comprehensive.cpp
+----------------------------------------
+Semantic Errors: 0
+[1;33m⚠ PARTIAL[0m - No errors but compilation incomplete
+
+----------------------------------------
+Testing: loops_dowhile.cpp
+----------------------------------------
+Semantic Errors: 0
+[1;33m⚠ PARTIAL[0m - No errors but compilation incomplete
+
+----------------------------------------
+Testing: loops_until.cpp
+----------------------------------------
+Semantic Errors: 0
+[1;33m⚠ PARTIAL[0m - No errors but compilation incomplete
+
+----------------------------------------
+Testing: nested_loops.cpp
+----------------------------------------
+Semantic Errors: 0
+[1;33m⚠ PARTIAL[0m - No errors but compilation incomplete
+
+----------------------------------------
+Testing: operators_comprehensive.cpp
+----------------------------------------
+Semantic Errors: 0
+[1;33m⚠ PARTIAL[0m - No errors but compilation incomplete
+
+----------------------------------------
+Testing: pointer_increment.cpp
+----------------------------------------
+Semantic Errors: 0
+[1;33m⚠ PARTIAL[0m - No errors but compilation incomplete
+
+----------------------------------------
+Testing: pointers_comprehensive.cpp
+----------------------------------------
+Semantic Errors: 0
+[1;33m⚠ PARTIAL[0m - No errors but compilation incomplete
+
+----------------------------------------
+Testing: pointers_final.cpp
+----------------------------------------
+Semantic Errors: 0
+[1;33m⚠ PARTIAL[0m - No errors but compilation incomplete
+
+----------------------------------------
+Testing: pointers_simple.cpp
+----------------------------------------
+Semantic Errors: 0
+[1;33m⚠ PARTIAL[0m - No errors but compilation incomplete
+
+----------------------------------------
+Testing: printf_scanf.cpp
+----------------------------------------
+Semantic Errors: 0
+[1;33m⚠ PARTIAL[0m - No errors but compilation incomplete
+
+----------------------------------------
+Testing: recursion.cpp
+----------------------------------------
+Semantic Errors: 0
+[1;33m⚠ PARTIAL[0m - No errors but compilation incomplete
+
+----------------------------------------
+Testing: scanf_comprehensive.cpp
+----------------------------------------
+Semantic Errors: 0
+[1;33m⚠ PARTIAL[0m - No errors but compilation incomplete
+
+----------------------------------------
+Testing: static_keyword.cpp
+----------------------------------------
+Semantic Errors: 0
+[1;33m⚠ PARTIAL[0m - No errors but compilation incomplete
+
+----------------------------------------
+Testing: struct_comprehensive.cpp
+----------------------------------------
+Semantic Errors: 0
+[1;33m⚠ PARTIAL[0m - No errors but compilation incomplete
+
+----------------------------------------
+Testing: typedef_comprehensive.cpp
+----------------------------------------
+Semantic Errors: 0
+[1;33m⚠ PARTIAL[0m - No errors but compilation incomplete
+
+----------------------------------------
+Testing: typedef.cpp
+----------------------------------------
+Semantic Errors: 0
+[1;33m⚠ PARTIAL[0m - No errors but compilation incomplete
+
+----------------------------------------
+Testing: types_comprehensive.cpp
+----------------------------------------
+Semantic Errors: 0
+[1;33m⚠ PARTIAL[0m - No errors but compilation incomplete
+
+----------------------------------------
+Testing: union.cpp
+----------------------------------------
+Semantic Errors: 0
+[1;33m⚠ PARTIAL[0m - No errors but compilation incomplete
+
+----------------------------------------
+Testing: variableArguments.c
+----------------------------------------
+Semantic Errors: 0
+[1;33m⚠ PARTIAL[0m - No errors but compilation incomplete
+
+===========================================
+TEST SUMMARY
+===========================================
+Total Tests:   26
+[0;32mPassed:        0[0m
+[1;33mPartial:       26[0m
+[0;31mFailed:        0[0m
+
+Success Rate:  0%
+===========================================
+[0;32mAll critical tests passed![0m
