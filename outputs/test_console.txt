@@ -1,8 +1,0 @@
-C/C++ Syntax Analyzer with AST
-==============================
-
-SYNTAX ERROR at line 2: syntax error
-Near token: ''
-
-=== PARSING FAILED ===
-Total syntax errors: 1
